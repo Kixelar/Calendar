@@ -20,7 +20,8 @@ class Store extends ChangeNotifier {
 
   /// True once the user finished onboarding (with Google or "continue without account").
   bool get onboarded => _p.getBool('onboarded') ?? false;
-  String? get email => g.email;
+  // Saved at sign-in: a silent restore on start has no account object to read it from.
+  String? get email => g.email ?? _p.getString('email');
   Cal? cal(String id) => cals.where((c) => c.id == id).firstOrNull;
 
   Future<void> start() async {
@@ -40,6 +41,7 @@ class Store extends ChangeNotifier {
   Future<void> signIn() async {
     await g.signIn();
     signedIn = true;
+    if (g.email != null) await _p.setString('email', g.email!);
     await loadCalendars();
   }
 

@@ -8,7 +8,7 @@ lib/
   theme.dart             Design tokens from the mockup (colours Tok, text styles T)
   google.dart            Google sign-in + Calendar API (GoogleCalendar), models Cal / Ev, marker Shape
   store.dart             App state (ChangeNotifier): account, chosen calendars, events cached per year
-  ui.dart                Shared widgets mirroring the mockup's CSS classes (Lbl, Section, RowItem, Toggle, Btn, Hero2, EventRow, Marker)
+  ui.dart                Shared widgets mirroring the mockup's CSS classes (Lbl, Section, RowItem, Toggle, Btn, Hero2, EventRow, Marker, Marquee)
   l10n/app_en.arb        English strings (template)
   l10n/app_pl.arb        Polish strings
   screens/onboarding.dart  01.1 Welcome, 01.2 Connect, 01.3 Choose (also used as the calendar picker later)
@@ -29,6 +29,11 @@ test/screens_test.dart   Logic tests + PNG renders of screens with a fake Google
 `google_sign_in` 7.x: `authenticate()` signs in, `authorizationClient.authorizeScopes()` grants the Calendar scope.
 The plugin hands out no refresh token, so every API call first asks the platform for a current access token
 (`_authorize`). Needs the web client ID at build time (`GOOGLE_SERVER_CLIENT_ID`, docs/GOOGLE.md).
+
+On app start `restore()` asks only for authorization (no user object): Android returns a token silently for the
+account that granted access before. It does **not** start with `attemptLightweightAuthentication`, because on Android
+that shows an account bottom sheet whenever One Tap auto-select is unavailable (it did on every launch). Lightweight
+sign-in is only the fallback. The account email is saved in `SharedPreferences` at sign-in for display.
 
 ## Localisation
 Flutter `gen-l10n` (`l10n.yaml`, ARB files). Dates use `intl` with the device locale. Weekday short names

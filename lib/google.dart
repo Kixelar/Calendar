@@ -40,9 +40,12 @@ class GoogleCalendar {
     _inited = true;
   }
 
-  /// Silent sign-in on app start; true when the account and calendar access are still there.
+  /// Restores calendar access on app start; true when it is still granted.
   Future<bool> restore() async {
     await _init();
+    // Calendar calls need only an authorization token, which Android hands out without UI once granted.
+    // Lightweight sign-in would pop an account sheet whenever One Tap auto-select is unavailable, so it is the fallback.
+    if (await _authorize(interactive: false)) return true;
     user = await GoogleSignIn.instance.attemptLightweightAuthentication();
     return user != null && await _authorize(interactive: false);
   }
@@ -62,7 +65,8 @@ class GoogleCalendar {
 
   // Asking the platform each time gives a fresh access token (the plugin hands out no refresh token).
   Future<bool> _authorize({required bool interactive}) async {
-    final c = user!.authorizationClient;
+    // Without a signed-in user (silent restore) Android uses the account that granted access before.
+    final c = user?.authorizationClient ?? GoogleSignIn.instance.authorizationClient;
     final auth = await c.authorizationForScopes(_scopes) ?? (interactive ? await c.authorizeScopes(_scopes) : null);
     if (auth == null) return false;
     _api = gcal.CalendarApi(auth.authClient(scopes: _scopes));
