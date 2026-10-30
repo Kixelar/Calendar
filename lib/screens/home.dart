@@ -193,7 +193,7 @@ class _HomeState extends State<Home> {
         xl: true,
         big: '${focus.day}',
         title: DateFormat.EEEE(loc(c)).format(focus),
-        caption: DateFormat('LLLL y', loc(c)).format(focus),
+        caption: DateFormat('LLLL y', loc(c)).format(focus).toUpperCase(),
         onMove: (d) => go(DateTime(focus.year, focus.month, focus.day + d), 3),
       ),
       if (all.isNotEmpty) Section(left: l.allDay, children: [for (final e in all) EventRow(e, store, now: now)]),
@@ -248,7 +248,7 @@ class _HomeState extends State<Home> {
       Hero2(
         big: '${isoWeek(mon)}',
         title: l.weekN(isoWeek(mon)),
-        caption: '${f.format(days.first)} – ${f.format(days.last)} · ${l.eventsN(count)}',
+        caption: '${f.format(days.first)}–${f.format(days.last)} · ${l.eventsN(count)}',
         onMove: (d) => go(DateTime(focus.year, focus.month, focus.day + 7 * d), 2),
       ),
       const SizedBox(height: 24),

@@ -32,7 +32,7 @@
   "day": "Dzień",
   "yearHint": "Kropka to dzień",
   "weekN": "Tydzień {n}",
-  "eventsN": "{n, plural, =1{1 wydarzenie} few{{n} wydarzenia} other{{n} wydarzeń}}",
+  "eventsN": "{n, plural, =1{1 wydarzenie} few{{n} wydarzenia} other{{n} wydarzeń}}",
   "moreN": "Jeszcze {n}",
   "inMin": "Za {n} min",
   "today": "Dziś",

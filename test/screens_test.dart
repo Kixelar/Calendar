@@ -53,10 +53,15 @@ class _FakeGoogle extends GoogleCalendar {
 
 Future<void> _fonts() async {
   const dir = 'C:/src/flutter/bin/cache/artifacts/material_fonts';
+  // flutter test does not load the app's own fonts (pubspec.yaml): add them from the files.
   final fonts = {
     'Roboto': ['$dir/Roboto-Regular.ttf'],
     'MaterialIcons': ['$dir/MaterialIcons-Regular.otf'],
-    'monospace': ['C:/Windows/Fonts/consola.ttf'],
+    'Ndot': ['assets/fonts/Ndot57-Regular.otf'],
+    'NType82': ['assets/fonts/NType82-Regular.otf'],
+    'Lettera Mono': ['assets/fonts/LetteraMonoLL-Regular.otf'],
+    'Space Grotesk': ['assets/fonts/SpaceGrotesk-Regular.otf'],
+    'Space Mono': ['assets/fonts/SpaceMono-Regular.otf'],
   };
   for (final f in fonts.entries) {
     final l = FontLoader(f.key);

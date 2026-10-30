@@ -17,20 +17,21 @@ class Tok {
   static Tok of(BuildContext c) => Theme.of(c).brightness == Brightness.dark ? dark : light;
 }
 
-// shortcut: system fonts stand in for Ndot / NType82 / Lettera Mono from the mockup; swap once the owner picks fonts.
-const _dot = 'monospace', _mono = 'monospace';
+// Fonts from pubspec.yaml. Ndot and NType82 have no ą ć ę ł ń ś ź ż or "–", so those glyphs come from the fallback (as in the mockup).
+const _dot = 'Ndot', _sans = 'NType82', _mono = 'Lettera Mono';
+const _fallback = {_dot: ['Space Mono'], _sans: ['Space Grotesk']};
 
-TextStyle _s(String? f, double size, double lh, Color c, [double track = 0]) =>
-    TextStyle(fontFamily: f, fontSize: size, height: lh / size, letterSpacing: size * track, color: c);
+TextStyle _s(String f, double size, double lh, Color c, [double track = 0]) => TextStyle(
+    fontFamily: f, fontFamilyFallback: _fallback[f], fontSize: size, height: lh / size, letterSpacing: size * track, color: c);
 
 class T {
   static TextStyle displayXl(Color c) => _s(_dot, 56, 56, c);
   static TextStyle displayLg(Color c) => _s(_dot, 40, 40, c);
   static TextStyle displayMd(Color c) => _s(_dot, 20, 24, c);
-  static TextStyle headlineLg(Color c) => _s(null, 32, 35, c);
-  static TextStyle headlineMd(Color c) => _s(null, 24, 30, c);
-  static TextStyle body(Color c) => _s(null, 16, 22, c);
-  static TextStyle bodySm(Color c) => _s(null, 14, 20, c);
+  static TextStyle headlineLg(Color c) => _s(_sans, 32, 35, c);
+  static TextStyle headlineMd(Color c) => _s(_sans, 24, 30, c);
+  static TextStyle body(Color c) => _s(_sans, 16, 22, c);
+  static TextStyle bodySm(Color c) => _s(_sans, 14, 20, c);
   static TextStyle labelMd(Color c) => _s(_mono, 14, 20, c, 0.06); // uppercase at call site
   static TextStyle labelSm(Color c) => _s(_mono, 11, 12, c, 0.08); // uppercase at call site
   static TextStyle caption(Color c) => _s(_mono, 12, 16, c);
@@ -42,6 +43,8 @@ ThemeData buildTheme(Brightness b) {
     brightness: b,
     scaffoldBackgroundColor: t.bg,
     colorScheme: ColorScheme.fromSeed(seedColor: t.display, brightness: b, surface: t.bg, primary: t.display),
+    fontFamily: _sans,
+    fontFamilyFallback: _fallback[_sans],
     textTheme: TextTheme(bodyMedium: T.body(t.primary)),
     splashFactory: NoSplash.splashFactory,
   );

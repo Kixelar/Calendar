@@ -36,7 +36,7 @@
   "yearHint": "A dot is a day",
   "weekN": "Week {n}",
   "@weekN": {"placeholders": {"n": {"type": "int"}}},
-  "eventsN": "{n, plural, =1{1 event} other{{n} events}}",
+  "eventsN": "{n, plural, =1{1 event} other{{n} events}}",
   "@eventsN": {"placeholders": {"n": {"type": "int"}}},
   "moreN": "{n} more",
   "@moreN": {"placeholders": {"n": {"type": "int"}}},

@@ -293,7 +293,7 @@ abstract class AppLocalizations {
   /// No description provided for @eventsN.
   ///
   /// In en, this message translates to:
-  /// **'{n, plural, =1{1 event} other{{n} events}}'**
+  /// **'{n, plural, =1{1 event} other{{n} events}}'**
   String eventsN(int n);
 
   /// No description provided for @moreN.

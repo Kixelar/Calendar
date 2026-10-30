@@ -191,7 +191,9 @@ class IconBtn extends StatelessWidget {
         onPressed: onTap,
         tooltip: label,
         icon: Icon(icon, size: 24, color: Tok.of(context).primary),
-        constraints: const BoxConstraints.tightFor(width: 44, height: 44),
+        padding: EdgeInsets.zero,
+        // Material 3 pads icon buttons to 48px; the mockup's .ib is 44px.
+        style: IconButton.styleFrom(minimumSize: const Size(44, 44), fixedSize: const Size(44, 44), tapTargetSize: MaterialTapTargetSize.shrinkWrap),
       );
 }
 
@@ -236,15 +238,20 @@ class Hero2 extends StatelessWidget {
           Expanded(
             child: Column(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.start, spacing: 4, children: [
               Semantics(header: true, child: Lbl(title, color: t.display)),
-              Text(caption.toUpperCase(), style: T.caption(t.secondary)),
+              Text(caption, style: T.caption(t.secondary), maxLines: 2, overflow: TextOverflow.ellipsis),
             ]),
           ),
-          Transform.translate(
-            offset: const Offset(10, 0),
-            child: Row(children: [
+          // margin-right: -10px from the mockup: the arrows' touch area runs into the gutter, leaving room for the caption.
+          SizedBox(
+            width: 78,
+            child: OverflowBox(
+              maxWidth: 88,
+              alignment: Alignment.centerLeft,
+              child: Row(children: [
               IconBtn(Icons.chevron_left, onTap: () => onMove(-1), label: l10n(context).previous),
               IconBtn(Icons.chevron_right, onTap: () => onMove(1), label: l10n(context).following),
-            ]),
+              ]),
+            ),
           ),
         ]),
       ),
@@ -270,7 +277,10 @@ class EventRow extends StatelessWidget {
     return RowItem(border: border, children: [
       SizedBox(
         width: 48,
-        child: e.allDay ? null : Text(hm(context, e.start), style: T.labelMd(past ? t.secondary : t.display)),
+        // Like the mockup's span, the time never wraps; it may run a hair past the 48px column.
+        child: e.allDay
+            ? null
+            : Text(hm(context, e.start), softWrap: false, overflow: TextOverflow.visible, style: T.labelMd(past ? t.secondary : t.display)),
       ),
       Marker(cal?.shape ?? Shape.dot),
       Expanded(

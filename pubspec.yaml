@@ -26,3 +26,15 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   generate: true
+  # Mockup fonts. Ndot and NType82 lack Polish letters: those glyphs fall back to Space Mono / Space Grotesk (lib/theme.dart).
+  fonts:
+    - family: Ndot
+      fonts: [{asset: assets/fonts/Ndot57-Regular.otf}]
+    - family: NType82
+      fonts: [{asset: assets/fonts/NType82-Regular.otf}]
+    - family: Lettera Mono
+      fonts: [{asset: assets/fonts/LetteraMonoLL-Regular.otf}]
+    - family: Space Grotesk
+      fonts: [{asset: assets/fonts/SpaceGrotesk-Regular.otf}]
+    - family: Space Mono
+      fonts: [{asset: assets/fonts/SpaceMono-Regular.otf}]
