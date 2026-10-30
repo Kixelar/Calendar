@@ -8,6 +8,7 @@ import 'package:calendar/main.dart';
 import 'package:calendar/screens/home.dart';
 import 'package:calendar/screens/onboarding.dart';
 import 'package:calendar/store.dart';
+import 'package:calendar/ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -38,7 +39,7 @@ class _FakeGoogle extends GoogleCalendar {
     final evs = [
       Ev('Urodziny Oli', 'f', at(0, 0), at(1, 0), allDay: true),
       Ev('Standup zespołu', 'w', at(0, 8.5), at(0, 9), location: 'Zoom'),
-      Ev('Warsztaty UX', 'w', at(0, 10), at(0, 12), location: 'Sala 2'),
+      Ev('Warsztaty UX', 'w', at(0, 10), at(0, 12), location: 'Sala konferencyjna, 3 piętro'),
       Ev('Demo sprintu', 'w', DateTime.now().add(const Duration(minutes: 12)), DateTime.now().add(const Duration(minutes: 72)),
           location: 'Sala 4B'),
       Ev('Trening', 'p', at(0, 22), at(0, 23), location: 'Siłownia'),
@@ -89,6 +90,35 @@ void main() {
     expect(isoWeek(DateTime(2027, 1, 1)), 53); // Friday: belongs to the last week of 2026
     expect(isoWeek(DateTime(2026, 1, 1)), 1);
     expect(isoWeek(DateTime(2024, 12, 30)), 1);
+  });
+
+  testWidgets('marquee waits, scrolls to the end, then starts over', (t) async {
+    await t.pumpWidget(const Directionality(
+      textDirection: TextDirection.ltr,
+      child: Center(child: SizedBox(width: 60, child: Marquee('A VERY LONG CALENDAR NAME', style: TextStyle(fontSize: 11)))),
+    ));
+    await t.pump(); // post-frame start
+    double x() => t.widget<Transform>(find.byType(Transform)).transform.getTranslation().x;
+    await t.pump(const Duration(milliseconds: 1000));
+    expect(x(), 0); // still in the first pause
+    await t.pump(const Duration(milliseconds: 1000));
+    expect(x(), lessThan(0)); // scrolling
+    final end = -(25 * 11 - 60.0); // Ahem test font: every glyph is fontSize wide
+    await t.pump(Duration(milliseconds: ((-end) / 30 * 1000).round()));
+    expect(x(), closeTo(end, 0.5)); // reached the end and holds
+    await t.pump(const Duration(milliseconds: 1600));
+    expect(x(), greaterThan(end)); // started over
+    await t.pumpWidget(const SizedBox()); // dispose the repeating controller
+  });
+
+  testWidgets('marquee stays still when the text fits', (t) async {
+    await t.pumpWidget(const Directionality(
+      textDirection: TextDirection.ltr,
+      child: Center(child: SizedBox(width: 200, child: Marquee('SHORT', style: TextStyle(fontSize: 11)))),
+    ));
+    await t.pump();
+    expect(find.byType(Transform), findsNothing);
+    expect(t.hasRunningAnimations, isFalse);
   });
 
   group('screens', () {

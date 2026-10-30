@@ -12,6 +12,11 @@ Copied 1:1 from the mockup's CSS into `lib/theme.dart` (`Tok` colours for dark a
 - Calendars are told apart by **marker shape**, not colour: dot, square, half, diamond (own calendars in order),
   ring (holidays), dashed ring (shared with you). See `Shape` in `lib/google.dart` and `Marker` in `lib/ui.dart`.
 
+## Additions beyond the mockup (owner's requests)
+- All-day events: sun icon (`Icons.wb_sunny_outlined`, secondary colour) in the 48px time column instead of a blank.
+- Right-hand label in event rows (location or calendar name, max 110px): if it does not fit it scrolls like a
+  ticker at 30 px/s, 1.5 s pause at both ends, then jumps back (`Marquee` in `lib/ui.dart`).
+
 ## Fonts
 Files supplied by the owner, bundled in `assets/fonts/` and declared in `pubspec.yaml`, as the mockup's CSS asks:
 - **Ndot** (`Ndot57-Regular.otf`): dot-matrix numerals (display styles).

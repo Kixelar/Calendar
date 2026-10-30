@@ -279,7 +279,10 @@ class EventRow extends StatelessWidget {
         width: 48,
         // Like the mockup's span, the time never wraps; it may run a hair past the 48px column.
         child: e.allDay
-            ? null
+            ? Align(
+                alignment: Alignment.centerLeft,
+                child: Icon(Icons.wb_sunny_outlined, size: 18, color: t.secondary, semanticLabel: l10n(context).allDay),
+              )
             : Text(hm(context, e.start), softWrap: false, overflow: TextOverflow.visible, style: T.labelMd(past ? t.secondary : t.display)),
       ),
       Marker(cal?.shape ?? Shape.dot),
@@ -289,9 +292,82 @@ class EventRow extends StatelessWidget {
       if (!e.allDay && e.start.isAfter(n) && soon <= 60)
         Lbl(l10n(context).inMin(soon), color: red ? t.accentText : t.primary)
       else if ((e.location ?? cal?.name) case final s? when s.isNotEmpty)
-        ConstrainedBox(constraints: const BoxConstraints(maxWidth: 110), child: Lbl(s)),
+        ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 110),
+          child: Marquee(s.toUpperCase(), style: T.labelSm(t.secondary)),
+        ),
     ]);
   }
+}
+
+/// One-line text that, when too long, scrolls to its end, pauses, jumps back and repeats.
+/// Plain ellipsis when the system asks to reduce motion.
+class Marquee extends StatefulWidget {
+  const Marquee(this.text, {super.key, required this.style});
+  final String text;
+  final TextStyle style;
+  @override
+  State<Marquee> createState() => _MarqueeState();
+}
+
+class _MarqueeState extends State<Marquee> with SingleTickerProviderStateMixin {
+  static const _pause = 1.5, _speed = 30.0; // seconds at each end, pixels per second
+  late final _c = AnimationController(vsync: this);
+  double _over = 0;
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  // Started after the frame: changing the controller during build would rebuild listeners mid-build.
+  void _run(double over) {
+    if (over == _over) return;
+    _over = over;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (over <= 0) {
+        _c.stop();
+        return;
+      }
+      _c.duration = Duration(milliseconds: ((2 * _pause + over / _speed) * 1000).round());
+      _c.repeat();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) => LayoutBuilder(builder: (context, box) {
+        final tp = TextPainter(
+          text: TextSpan(text: widget.text, style: widget.style),
+          textDirection: Directionality.of(context),
+          textScaler: MediaQuery.textScalerOf(context),
+          maxLines: 1,
+        )..layout();
+        final over = tp.width - box.maxWidth;
+        final still = over <= 0 || MediaQuery.disableAnimationsOf(context);
+        _run(still ? 0 : over);
+        if (still) return Text(widget.text, style: widget.style, maxLines: 1, overflow: TextOverflow.ellipsis);
+        final scroll = over / _speed, total = 2 * _pause + scroll;
+        return SizedBox(
+          width: box.maxWidth,
+          height: tp.height,
+          child: ClipRect(
+            child: AnimatedBuilder(
+              animation: _c,
+              builder: (_, child) {
+                final s = (_c.value * total - _pause).clamp(0, scroll);
+                return Transform.translate(offset: Offset(-over * s / scroll, 0), child: child);
+              },
+              child: OverflowBox(
+                maxWidth: double.infinity,
+                alignment: Alignment.centerLeft,
+                child: Text(widget.text, style: widget.style, maxLines: 1, softWrap: false),
+              ),
+            ),
+          ),
+        );
+      });
 }
 
 /// Splits a day's events into all-day and timed lists.

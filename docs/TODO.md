@@ -6,7 +6,8 @@ Screen numbers refer to docs/design/mockup.html.
 - [x] 01.1 Welcome, 01.2 Connect Google, 01.3 Choose calendars
 - [x] 02.1 Year, 02.2 Month, 02.3 Week, 02.4 Day
 - [x] Google Cloud project + `config.json` (owner, docs/GOOGLE.md)
-- [ ] Test sign-in and event loading on a phone (owner)
+- [x] Test sign-in and event loading on a phone (owner)
+- [ ] Confirm the app no longer asks to sign in on every launch (owner)
 - [x] Fonts (owner supplied, docs/DESIGN.md)
 - [ ] 01.4 Sync progress screen
 - [ ] 02.5 Search (top bar search icon is hidden until then)

@@ -13,8 +13,10 @@
 - Mockup fonts bundled (Ndot, NType82, Lettera Mono + Polish fallbacks).
 - Own signing key; Google web client ID in `config.json`.
 
+- Google sign-in and event sync confirmed working on the owner's phone (2026-10-30).
+
 ## Waiting for the owner
-- **Test Google sign-in on the phone** with the latest APK: not yet verified on a real device or account.
+- **Check on the phone** that reopening the app no longer shows the account picker (silent restore, see docs/ARCHITECTURE.md).
 
 ## Next
 See docs/TODO.md. Proposed order: event details and create/edit (03.x), then 01.4 sync screen, search, calendars

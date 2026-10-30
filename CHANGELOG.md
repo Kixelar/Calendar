@@ -10,5 +10,8 @@
 - App's own signing key for debug and release builds.
 - Mockup fonts: Ndot (numerals), NType82 (text), Lettera Mono (labels), with Space Mono / Space Grotesk for Polish letters.
 - Google OAuth web client ID, so "Sign in with Google" works.
+- All-day events show a sun icon in the time column.
+- Calendar or location labels that do not fit scroll like a ticker: to the end, short pause, start over (still when the system reduces motion).
 ### Fixed
 - Times no longer wrap in lists; header icon buttons are 44px like the mockup; week caption fits.
+- Reopening the app no longer asks to pick the Google account: calendar access is restored silently.
