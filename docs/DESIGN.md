@@ -12,10 +12,20 @@ Copied 1:1 from the mockup's CSS into `lib/theme.dart` (`Tok` colours for dark a
 - Calendars are told apart by **marker shape**, not colour: dot, square, half, diamond (own calendars in order),
   ring (holidays), dashed ring (shared with you). See `Shape` in `lib/google.dart` and `Marker` in `lib/ui.dart`.
 
-## Fonts (open question)
-The mockup uses Nothing's fonts: **Ndot 57** (dot-matrix numerals), **NType82** (sans) and **Lettera Mono** (labels).
-They are not bundled (licensing unclear, files not in the mockup). For now the app uses the system sans and
-`monospace`. Waiting for the owner's decision on which fonts to ship.
+## Fonts
+Files supplied by the owner, bundled in `assets/fonts/` and declared in `pubspec.yaml`, as the mockup's CSS asks:
+- **Ndot** (`Ndot57-Regular.otf`): dot-matrix numerals (display styles).
+- **NType82** (`NType82-Regular.otf`): headlines and body text.
+- **Lettera Mono** (`LetteraMonoLL-Regular.otf`): labels, buttons, times, captions (uppercase + tracking at call sites).
+- Ndot and NType82 have no Polish letters (ą ć ę ł ń ś ź ż) nor "–"; Flutter takes those glyphs from
+  **Space Mono** (for Ndot) and **Space Grotesk** (for NType82) via `fontFamilyFallback`, same as the mockup's fallback.
+
+Note: the mockup's HTML did not contain the font files, so in a browser it showed Space Grotesk instead of NType82.
+The app now shows the real NType82, which looks different from what the browser preview showed.
+
+Other files from the owner's set (Inter, Ndot55/57 Caps, NType82 Headline/Mono, Lettera Light/Medium/italics)
+are not used by the mockup and are not bundled. Lettera Mono LL and the Nothing fonts are commercial/proprietary:
+check the licence before a public release.
 
 ## How to compare with the mockup
 `$env:CAL_SHOTS='<folder>'; flutter test test/screens_test.dart` renders the implemented screens to PNG

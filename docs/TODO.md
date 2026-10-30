@@ -5,8 +5,9 @@ Screen numbers refer to docs/design/mockup.html.
 ## Stage 1: Google + views
 - [x] 01.1 Welcome, 01.2 Connect Google, 01.3 Choose calendars
 - [x] 02.1 Year, 02.2 Month, 02.3 Week, 02.4 Day
-- [ ] Google Cloud project + `config.json` (owner, docs/GOOGLE.md), then test sign-in on a phone
-- [ ] Fonts decision (owner, docs/DESIGN.md)
+- [x] Google Cloud project + `config.json` (owner, docs/GOOGLE.md)
+- [ ] Test sign-in and event loading on a phone (owner)
+- [x] Fonts (owner supplied, docs/DESIGN.md)
 - [ ] 01.4 Sync progress screen
 - [ ] 02.5 Search (top bar search icon is hidden until then)
 - [ ] Offline cache of events (now in memory only, refetched on start)

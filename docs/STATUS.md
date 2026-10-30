@@ -10,10 +10,11 @@
 - Views 02.1 year (dot per day), 02.2 month, 02.3 week, 02.4 day (all-day section, schedule, now line), read from Google Calendar.
 - Tests: event-to-day indexing, ISO week numbers, PNG renders of all implemented screens.
 
-## Blocked on the owner
-- **Google Cloud project** (docs/GOOGLE.md). Without the web client ID in `config.json`, sign-in cannot work. Sign-in has
-  therefore not been tested on a real device yet.
-- **Fonts**: which fonts to ship instead of Ndot / NType82 / Lettera Mono (docs/DESIGN.md).
+- Mockup fonts bundled (Ndot, NType82, Lettera Mono + Polish fallbacks).
+- Own signing key; Google web client ID in `config.json`.
+
+## Waiting for the owner
+- **Test Google sign-in on the phone** with the latest APK: not yet verified on a real device or account.
 
 ## Next
 See docs/TODO.md. Proposed order: event details and create/edit (03.x), then 01.4 sync screen, search, calendars

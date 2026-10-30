@@ -9,5 +9,7 @@
 - **Google Calendar API, not Android's system calendar (`CalendarContract`)**: considered the system provider (no Google Cloud, no verification, works with any account) and rejected it; the owner wants the Google API, which also allows creating and sharing calendars (04.2, 04.4). (owner)
 - **Scope** `https://www.googleapis.com/auth/calendar`: covers reading/editing events, the calendar list and replying to invitations, which the 01.2 screen promises.
 - **Events cached per year in memory**: one request per calendar per year feeds all four views (year view needs the whole year anyway).
-- **Fonts**: system fonts as stand-ins until the owner decides (Nothing's fonts are not bundled).
+- **Fonts**: the mockup's Ndot 57, NType82 and Lettera Mono, files supplied by the owner; Space Mono / Space Grotesk fill in missing Polish glyphs (docs/DESIGN.md). (owner)
+- **Signing**: the app's own keystore in `<keystore folder>/`, used for debug and release, so one SHA-1 is registered with Google.
+- **Google OAuth**: project set up by the owner; web client ID committed in `config.json` (public by design).
 - **Left out of the mockup for now** (no function yet, so no dead buttons): search and settings icons, FAB, CalDAV/Outlook button, terms caption.

@@ -8,3 +8,7 @@
 - Google Calendar sign-in and reading events of the chosen calendars.
 - Year (dot per day), month, week and day views.
 - App's own signing key for debug and release builds.
+- Mockup fonts: Ndot (numerals), NType82 (text), Lettera Mono (labels), with Space Mono / Space Grotesk for Polish letters.
+- Google OAuth web client ID, so "Sign in with Google" works.
+### Fixed
+- Times no longer wrap in lists; header icon buttons are 44px like the mockup; week caption fits.
