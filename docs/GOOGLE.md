@@ -15,10 +15,10 @@ The app talks to the Google Calendar API directly from the phone (no backend). A
 ## 3. OAuth clients (*Clients → Create client*)
 1. **Android** client:
    - package name: `com.kixelar.calendar`
-   - SHA-1 of the signing key. Builds are signed with the debug key for now:
-     `1E:E5:1B:CA:39:AD:AA:CF:91:82:FE:E9:D5:78:B5:A5:B7:5F:3F:F2`
-     (check with `keytool -list -v -keystore %USERPROFILE%\.android\debug.keystore -storepass android -alias androiddebugkey`).
-     When a release key is added, create a second Android client with its SHA-1.
+   - SHA-1 of the app's own signing key (`<your keystore>`, used for both debug and release builds):
+     `<SHA-1 of your key>`
+     (check with `keytool -list -v -keystore ..\<your keystore> -alias calendar`, password in `<your password note>`).
+     A build without `android/key.properties` falls back to the machine's debug key, whose SHA-1 differs: sign-in then fails.
 2. **Web application** client (no redirect URIs needed). Its **client ID** is what the app needs.
 
 ## 4. Give the client ID to the build

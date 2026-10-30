@@ -7,3 +7,4 @@
 - Onboarding: welcome, connect Google Calendar, choose calendars.
 - Google Calendar sign-in and reading events of the chosen calendars.
 - Year (dot per day), month, week and day views.
+- App's own signing key for debug and release builds.

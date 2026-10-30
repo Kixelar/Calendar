@@ -26,4 +26,5 @@ Screen numbers refer to docs/design/mockup.html.
 - [ ] 07.1/07.2 Home screen widgets (dark, light) — native Kotlin
 - [ ] 07.3 Event notifications
 - [ ] Glyph interface on Nothing phones (Glyph Developer Kit)
-- [ ] Release signing key, app icon
+- [x] Release signing key
+- [ ] App icon

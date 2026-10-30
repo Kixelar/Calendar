@@ -22,4 +22,5 @@ management (04.x), settings (05.x), empty/delete/conflict states (06.x), widgets
 ## Traps
 - Gradle/Java does not run in Claude's sandbox: build APKs in the owner's terminal (docs/WORKFLOW.md).
 - `google_sign_in` 7.x gives no refresh token: always get the token through `GoogleCalendar._authorize` before an API call.
-- Builds are signed with the debug key; its SHA-1 is registered in the Android OAuth client. A new key needs a new client.
+- Builds are signed with the app's own key in `<keystore folder>/` (docs/WORKFLOW.md); its SHA-1 goes into the Android
+  OAuth client. The first APK (2026-10-30, debug key) must be uninstalled before installing newer ones.

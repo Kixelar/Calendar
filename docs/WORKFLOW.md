@@ -23,8 +23,15 @@ flutter build apk --release --split-per-abi --build-number=$code --dart-define-f
 ```
 
 APKs land in `build/app/outputs/flutter-apk/` (`app-arm64-v8a-release.apk` for modern phones).
-Release builds are signed with the **debug key** until a release keystore is created (then: `android/key.properties`,
-never committed, plus a new Android OAuth client with the release SHA-1, see docs/GOOGLE.md).
+
+## Signing key
+- Keystore `<your keystore>` (outside the repo, next to the project folder), alias `calendar`,
+  password in `<your password note>`. **The owner must back up this folder outside the computer**:
+  without it installed apps can never be updated, and the Google OAuth Android client is tied to its SHA-1.
+- `android/key.properties` (git-ignored) points Gradle at it: `storeFile`, `storePassword`, `keyAlias`, `keyPassword`.
+  Debug and release builds both use it, so one SHA-1 is registered with Google. Without the file Gradle uses the debug key.
+- SHA-1 `<SHA-1 of your key>`,
+  SHA-256 `<SHA-256 of your key>`.
 
 ## Checks before a commit
 ```powershell
