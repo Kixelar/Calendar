@@ -46,3 +46,10 @@ app.*.map.json
 
 # Widget Preview related
 .widget_preview/
+
+# Secrets: signing keys, Google config (docs/WORKFLOW.md)
+*.jks
+*.keystore
+android/key.properties
+google-services.json
+client_secret*.json
