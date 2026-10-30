@@ -171,4 +171,116 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get following => 'Next';
+
+  @override
+  String get newEvent => 'New event';
+
+  @override
+  String get eventName => 'Event name';
+
+  @override
+  String get save => 'Save';
+
+  @override
+  String get closeNoSave => 'Close without saving';
+
+  @override
+  String get start => 'Start';
+
+  @override
+  String get end => 'End';
+
+  @override
+  String get calendar => 'Calendar';
+
+  @override
+  String get place => 'Location';
+
+  @override
+  String get notes => 'Notes';
+
+  @override
+  String get add => 'Add';
+
+  @override
+  String get reminder => 'Reminder';
+
+  @override
+  String get none => 'None';
+
+  @override
+  String minBefore(int n) {
+    return '$n min before';
+  }
+
+  @override
+  String hoursBefore(int n) {
+    return '$n h before';
+  }
+
+  @override
+  String daysBefore(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n days before',
+      one: '1 day before',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get guests => 'Guests';
+
+  @override
+  String get youOrganize => 'You organize';
+
+  @override
+  String get rsvpYes => 'Yes';
+
+  @override
+  String get rsvpMaybe => 'Maybe';
+
+  @override
+  String get rsvpNo => 'No';
+
+  @override
+  String get rsvpWaiting => 'Waiting';
+
+  @override
+  String get edit => 'Edit';
+
+  @override
+  String get delete => 'Delete';
+
+  @override
+  String get cancel => 'Cancel';
+
+  @override
+  String get deleteTitle => 'Delete event?';
+
+  @override
+  String repeats(String title) {
+    return '$title repeats.';
+  }
+
+  @override
+  String get onlyThis => 'Only this';
+
+  @override
+  String get thisAndFollowing => 'This and following';
+
+  @override
+  String get allOccurrences => 'All';
+
+  @override
+  String get notifyGuests => 'Notify guests';
+
+  @override
+  String get endBeforeStart => 'The end must be after the start.';
+
+  @override
+  String failed(String error) {
+    return 'Failed: $error';
+  }
 }

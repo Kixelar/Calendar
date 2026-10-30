@@ -13,13 +13,15 @@
 - Mockup fonts bundled (Ndot, NType82, Lettera Mono + Polish fallbacks).
 - Own signing key; Google web client ID in `config.json`.
 
-- Google sign-in and event sync confirmed working on the owner's phone (2026-10-30).
+- Google sign-in and event sync confirmed working on the owner's phone (2026-10-30), silent restore on reopen confirmed.
+- 03.1 event details, 03.2 new/edit event (+ button in the view tabs bar), 06.2 delete dialog; writes go to Google.
 
 ## Waiting for the owner
-- **Check on the phone** that reopening the app no longer shows the account picker (silent restore, see docs/ARCHITECTURE.md).
+- **Try creating, editing and deleting events on the phone** (incl. a repeating one: "only this" / "this and following" / "all").
+  Writes to Google are not tested against the real API yet, only the screens and the RRULE logic.
 
 ## Next
-See docs/TODO.md. Proposed order: event details and create/edit (03.x), then 01.4 sync screen, search, calendars
+See docs/TODO.md. Proposed order: rest of 03.x (repeat, reminders, guests, invitations), then 01.4 sync screen, search, calendars
 management (04.x), settings (05.x), empty/delete/conflict states (06.x), widgets and notifications (07.x), Glyph.
 
 ## Traps

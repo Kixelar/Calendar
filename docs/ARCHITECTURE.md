@@ -12,7 +12,8 @@ lib/
   l10n/app_en.arb        English strings (template)
   l10n/app_pl.arb        Polish strings
   screens/onboarding.dart  01.1 Welcome, 01.2 Connect, 01.3 Choose (also used as the calendar picker later)
-  screens/home.dart        02.1 year, 02.2 month, 02.3 week, 02.4 day views + bottom view tabs
+  screens/home.dart        02.1 year, 02.2 month, 02.3 week, 02.4 day views + bottom view tabs and + button
+  screens/event.dart       03.1 event details, 03.2 new/edit event, 06.2 delete dialog, calendar picker
 android/app/src/main/res/values*/strings.xml   Launcher name per device language
 test/screens_test.dart   Logic tests + PNG renders of screens with a fake Google account
 ```
@@ -24,6 +25,17 @@ test/screens_test.dart   Logic tests + PNG renders of screens with a fake Google
    whole year (`events.list`, `singleEvents=true` so recurring events come expanded) and indexes them by day
    (`indexByDay`; multi-day events appear on every day they touch). Until then `on()` returns `null` (spinner).
 3. Pull-to-refresh or toggling a calendar clears the cache.
+
+## Writing events
+- `GoogleCalendar.save`: new events are inserted; existing ones are fetched (`events.get`), changed and sent back
+  with `events.update`, so fields the app does not edit (guests, reminders, conference links) survive. Changing the
+  calendar first calls `events.move`. Editing an occurrence of a repeating event changes only that occurrence.
+- `GoogleCalendar.delete`: "only this" deletes the occurrence, "all" deletes the series, "this and following" rewrites
+  the series' RRULE with `UNTIL` just before the occurrence (`endRuleBefore`, tested), or deletes the series if it is
+  the first occurrence. "Notify guests" maps to `sendUpdates=all|none`.
+- After any write the per-year cache is cleared and refetched.
+- Edit is offered only when the event's calendar is writable and this calendar organizes the event
+  (`organizer.self`); invitations from others can be deleted from your calendar but not edited.
 
 ## Google auth
 `google_sign_in` 7.x: `authenticate()` signs in, `authorizationClient.authorizeScopes()` grants the Calendar scope.

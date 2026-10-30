@@ -5,6 +5,7 @@ import 'dart:ui' as ui;
 
 import 'package:calendar/google.dart';
 import 'package:calendar/main.dart';
+import 'package:calendar/screens/event.dart';
 import 'package:calendar/screens/home.dart';
 import 'package:calendar/screens/onboarding.dart';
 import 'package:calendar/store.dart';
@@ -17,6 +18,15 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 final _out = Platform.environment['CAL_SHOTS'];
+
+/// The mockup's 03.1 example: repeating, with guests, starting in 12 minutes.
+Ev _demo() => Ev('Demo sprintu', 'w', DateTime.now().add(const Duration(minutes: 12)), DateTime.now().add(const Duration(minutes: 72)),
+    id: 'demo_1', recurringId: 'demo', location: 'Sala 4B', reminder: 15, notes: 'Pokaz nowego widoku tygodnia.',
+    guests: const [
+      Guest('Marek Wiśniewski', 'marek@example.com', 'accepted'),
+      Guest('Ola Zielińska', 'ola@example.com', 'tentative'),
+      Guest('Piotr Kamiński', 'piotr@example.com', 'needsAction'),
+    ]);
 
 /// Google account without a network: calendars and events are made up around today.
 class _FakeGoogle extends GoogleCalendar {
@@ -40,8 +50,7 @@ class _FakeGoogle extends GoogleCalendar {
       Ev('Urodziny Oli', 'f', at(0, 0), at(1, 0), allDay: true),
       Ev('Standup zespołu', 'w', at(0, 8.5), at(0, 9), location: 'Zoom'),
       Ev('Warsztaty UX', 'w', at(0, 10), at(0, 12), location: 'Sala konferencyjna, 3 piętro'),
-      Ev('Demo sprintu', 'w', DateTime.now().add(const Duration(minutes: 12)), DateTime.now().add(const Duration(minutes: 72)),
-          location: 'Sala 4B'),
+      _demo(),
       Ev('Trening', 'p', at(0, 22), at(0, 23), location: 'Siłownia'),
       Ev('Brunch z Olą', 'o', at(1, 11), at(1, 13), location: 'U Oli'),
       Ev('Koncert', 'p', at(1, 19), at(1, 22), location: 'Stodoła'),
@@ -92,6 +101,13 @@ void main() {
     expect(isoWeek(DateTime(2024, 12, 30)), 1);
   });
 
+  test('"delete this and following" ends the series just before the occurrence', () {
+    expect(endRuleBefore('RRULE:FREQ=WEEKLY;COUNT=10;BYDAY=FR', DateTime.utc(2026, 10, 30, 13), allDay: false),
+        'RRULE:FREQ=WEEKLY;BYDAY=FR;UNTIL=20261030T125959Z');
+    expect(endRuleBefore('RRULE:FREQ=DAILY;UNTIL=20271231', DateTime(2026, 11, 1), allDay: true), 'RRULE:FREQ=DAILY;UNTIL=20261031');
+    expect(endRuleBefore('EXDATE:20261106T130000Z', DateTime(2026, 11, 1), allDay: false), 'EXDATE:20261106T130000Z');
+  });
+
   testWidgets('marquee waits, scrolls to the end, then starts over', (t) async {
     await t.pumpWidget(const Directionality(
       textDirection: TextDirection.ltr,
@@ -127,7 +143,8 @@ void main() {
       await initializeDateFormatting();
     });
 
-    Future<void> shot(WidgetTester t, String name, {int tab = -1, bool onboarded = true, Brightness b = Brightness.dark, Widget? page}) async {
+    Future<void> shot(WidgetTester t, String name,
+        {int tab = -1, bool onboarded = true, Brightness b = Brightness.dark, Widget Function(Store)? page, String? tapText}) async {
       SharedPreferences.setMockInitialValues({'onboarded': onboarded});
       t.view.physicalSize = const Size(390, 844);
       t.view.devicePixelRatio = 1;
@@ -140,9 +157,16 @@ void main() {
       await t.runAsync(store.start);
       await t.pumpWidget(RepaintBoundary(key: key, child: App(store)));
       await t.pump();
+      // Fixed pumps instead of pumpAndSettle: marquees and the minute ticker under the page never settle.
       if (page != null) {
-        Navigator.of(t.element(find.byType(Scaffold).first)).push(MaterialPageRoute(builder: (_) => page));
-        await t.pumpAndSettle();
+        Navigator.of(t.element(find.byType(Scaffold).first)).push(MaterialPageRoute(builder: (_) => page(store)));
+        await t.pump();
+        await t.pump(const Duration(milliseconds: 600));
+      }
+      if (tapText != null) {
+        await t.tap(find.text(tapText).last);
+        await t.pump();
+        await t.pump(const Duration(milliseconds: 600));
       }
       if (tab >= 0) {
         await t.tap(find.text(['ROK', 'MIESIĄC', 'TYDZIEŃ', 'DZIEŃ'][tab]));
@@ -165,9 +189,13 @@ void main() {
       final store = Store(_FakeGoogle());
       await t.runAsync(store.start);
       await t.runAsync(store.loadCalendars);
-      await shot(t, '01_3_choose', onboarded: false, page: Choose(store, onboarding: true));
+      await shot(t, '01_3_choose', onboarded: false, page: (_) => Choose(store, onboarding: true));
     });
-    testWidgets('connect', (t) => shot(t, '01_2_connect', onboarded: false, page: Connect(Store(_FakeGoogle()))));
+    testWidgets('connect', (t) => shot(t, '01_2_connect', onboarded: false, page: (s) => Connect(s)));
+    testWidgets('event', (t) => shot(t, '03_1_event', page: (s) => EventDetails(_demo(), s)));
+    testWidgets('new event', (t) => shot(t, '03_2_new_event', page: (s) => EventEdit(s)));
+    testWidgets('edit event', (t) => shot(t, '03_2_edit_event', page: (s) => EventEdit(s, ev: _demo())));
+    testWidgets('delete dialog', (t) => shot(t, '06_2_delete', page: (s) => EventDetails(_demo(), s), tapText: 'USUŃ'));
     testWidgets('year', (t) => shot(t, '02_1_year', tab: 0));
     testWidgets('month', (t) => shot(t, '02_2_month'));
     testWidgets('week', (t) => shot(t, '02_3_week', tab: 2));

@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 
 import 'google.dart';
 import 'l10n/app_localizations.dart';
+import 'screens/event.dart';
 import 'store.dart';
 import 'theme.dart';
 
@@ -151,19 +152,28 @@ class Toggle extends StatelessWidget {
   }
 }
 
-/// Pill button (.btn-p primary, .btn-t text).
+/// Pill button styles: .btn-p primary, .btn-s outlined, .btn-d destructive red, .btn-t text only.
+enum BtnKind { primary, secondary, danger, text }
+
+/// Pill button (.btn).
 class Btn extends StatelessWidget {
-  const Btn(this.text, {super.key, required this.onTap, this.primary = true, this.busy = false});
+  const Btn(this.text, {super.key, required this.onTap, this.kind = BtnKind.primary, this.busy = false});
   final String text;
   final VoidCallback? onTap;
-  final bool primary, busy;
+  final BtnKind kind;
+  final bool busy;
   @override
   Widget build(BuildContext context) {
     final t = Tok.of(context);
-    final fg = primary ? t.bg : t.primary;
+    final (bg, fg) = switch (kind) {
+      BtnKind.primary => (t.display, t.bg),
+      BtnKind.secondary => (Colors.transparent, t.display),
+      BtnKind.danger => (t.accent, Colors.white),
+      BtnKind.text => (Colors.transparent, t.primary),
+    };
     return Material(
-      color: primary ? t.display : Colors.transparent,
-      shape: const StadiumBorder(),
+      color: bg,
+      shape: StadiumBorder(side: kind == BtnKind.secondary ? BorderSide(color: t.borderControl) : BorderSide.none),
       child: InkWell(
         customBorder: const StadiumBorder(),
         onTap: busy ? null : onTap,
@@ -199,24 +209,56 @@ class IconBtn extends StatelessWidget {
 
 /// "Back" link at the top of sub screens (.back).
 class BackBar extends StatelessWidget {
-  const BackBar({super.key});
+  const BackBar({super.key, this.label, this.actions = const []});
+  final String? label; // defaults to "Back"
+  final List<Widget> actions;
   @override
   Widget build(BuildContext context) => Padding(
         padding: const EdgeInsets.fromLTRB(14, 12, 14, 0),
         child: SizedBox(
           height: 44,
-          child: Align(
-            alignment: Alignment.centerLeft,
-            child: InkWell(
+          child: Row(children: [
+            InkWell(
               onTap: () => Navigator.pop(context),
               child: Row(mainAxisSize: MainAxisSize.min, spacing: 2, children: [
                 Icon(Icons.chevron_left, size: 20, color: Tok.of(context).secondary),
-                Lbl(l10n(context).back),
+                Lbl(label ?? l10n(context).back),
               ]),
             ),
-          ),
+            const Spacer(),
+            ...actions,
+          ]),
         ),
       );
+}
+
+/// Block of rows with a top hairline, 32px below the previous block (.grp).
+class Group extends StatelessWidget {
+  const Group({super.key, required this.children, this.gap = 32});
+  final List<Widget> children;
+  final double gap; // 0 inside dialogs, where the parent already spaces its blocks
+  @override
+  Widget build(BuildContext context) => Container(
+        margin: EdgeInsets.only(top: gap),
+        decoration: BoxDecoration(border: Border(top: BorderSide(color: Tok.of(context).borderSubtle))),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: children),
+      );
+}
+
+/// Settings-style row: label on the left, value and optional chevron on the right.
+class ValueRow extends StatelessWidget {
+  const ValueRow(this.label, {super.key, this.value, this.trailing, this.onTap});
+  final String label;
+  final String? value;
+  final Widget? trailing;
+  final VoidCallback? onTap;
+  @override
+  Widget build(BuildContext context) => RowItem(onTap: onTap, children: [
+        Expanded(child: Text(label)),
+        if (value != null) ConstrainedBox(constraints: const BoxConstraints(maxWidth: 170), child: Lbl(value!)),
+        ?trailing,
+        if (onTap != null) Icon(Icons.chevron_right, size: 20, color: Tok.of(context).secondary),
+      ]);
 }
 
 /// Big number + label/caption with prev/next arrows (.hero).
@@ -274,13 +316,12 @@ class EventRow extends StatelessWidget {
     final past = !e.allDay && !e.end.isAfter(n);
     final soon = (e.start.difference(n).inSeconds + 59) ~/ 60;
     final cal = store.cal(e.calId);
-    return RowItem(border: border, children: [
+    return RowItem(border: border, onTap: () => openEvent(context, e, store), children: [
       SizedBox(
         width: 48,
         // Like the mockup's span, the time never wraps; it may run a hair past the 48px column.
         child: e.allDay
-            ? Align(
-                alignment: Alignment.centerLeft,
+            ? Center(
                 child: Icon(Icons.wb_sunny_outlined, size: 18, color: t.secondary, semanticLabel: l10n(context).allDay),
               )
             : Text(hm(context, e.start), softWrap: false, overflow: TextOverflow.visible, style: T.labelMd(past ? t.secondary : t.display)),
@@ -369,6 +410,9 @@ class _MarqueeState extends State<Marquee> with SingleTickerProviderStateMixin {
         );
       });
 }
+
+void openEvent(BuildContext c, Ev e, Store store) =>
+    Navigator.push(c, MaterialPageRoute(builder: (_) => EventDetails(e, store)));
 
 /// Splits a day's events into all-day and timed lists.
 (List<Ev>, List<Ev>) splitAllDay(List<Ev> evs) =>

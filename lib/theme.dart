@@ -3,16 +3,16 @@ import 'package:flutter/material.dart';
 /// Design tokens copied from the mockup (docs/design/mockup.html, "Nothing-inspired" tokens).
 class Tok {
   final Color bg, surface, surfaceRaised, borderSubtle, borderControl;
-  final Color display, primary, secondary, disabled, accent, accentText, dotOff;
+  final Color display, primary, secondary, disabled, accent, accentText, dotOff, success, warning;
   const Tok._(this.bg, this.surface, this.surfaceRaised, this.borderSubtle, this.borderControl, this.display, this.primary,
-      this.secondary, this.disabled, this.accent, this.accentText, this.dotOff);
+      this.secondary, this.disabled, this.accent, this.accentText, this.dotOff, this.success, this.warning);
 
   static const dark = Tok._(Color(0xFF000000), Color(0xFF111111), Color(0xFF1A1A1A), Color(0xFF222222), Color(0xFF7A7A7A),
       Color(0xFFFFFFFF), Color(0xFFE8E8E8), Color(0xFF999999), Color(0xFF666666), Color(0xFFD71921), Color(0xFFFF4D55),
-      Color(0xFF333333));
+      Color(0xFF333333), Color(0xFF4A9E5C), Color(0xFFD4A843));
   static const light = Tok._(Color(0xFFF4F4F4), Color(0xFFFFFFFF), Color(0xFFF0F0F0), Color(0xFFE2E2E2), Color(0xFF858585),
       Color(0xFF000000), Color(0xFF1A1A1A), Color(0xFF666666), Color(0xFF999999), Color(0xFFD71921), Color(0xFFD71921),
-      Color(0xFFD0D0D0));
+      Color(0xFFD0D0D0), Color(0xFF2A7A3B), Color(0xFF8A6500));
 
   static Tok of(BuildContext c) => Theme.of(c).brightness == Brightness.dark ? dark : light;
 }

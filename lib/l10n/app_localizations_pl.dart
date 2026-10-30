@@ -174,4 +174,116 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get following => 'Następny';
+
+  @override
+  String get newEvent => 'Nowe wydarzenie';
+
+  @override
+  String get eventName => 'Nazwa wydarzenia';
+
+  @override
+  String get save => 'Zapisz';
+
+  @override
+  String get closeNoSave => 'Zamknij bez zapisu';
+
+  @override
+  String get start => 'Początek';
+
+  @override
+  String get end => 'Koniec';
+
+  @override
+  String get calendar => 'Kalendarz';
+
+  @override
+  String get place => 'Miejsce';
+
+  @override
+  String get notes => 'Notatki';
+
+  @override
+  String get add => 'Dodaj';
+
+  @override
+  String get reminder => 'Przypomnienie';
+
+  @override
+  String get none => 'Brak';
+
+  @override
+  String minBefore(int n) {
+    return '$n min przed';
+  }
+
+  @override
+  String hoursBefore(int n) {
+    return '$n godz. przed';
+  }
+
+  @override
+  String daysBefore(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n dni przed',
+      one: '1 dzień przed',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get guests => 'Goście';
+
+  @override
+  String get youOrganize => 'Organizujesz';
+
+  @override
+  String get rsvpYes => 'Tak';
+
+  @override
+  String get rsvpMaybe => 'Może';
+
+  @override
+  String get rsvpNo => 'Nie';
+
+  @override
+  String get rsvpWaiting => 'Czeka';
+
+  @override
+  String get edit => 'Edytuj';
+
+  @override
+  String get delete => 'Usuń';
+
+  @override
+  String get cancel => 'Anuluj';
+
+  @override
+  String get deleteTitle => 'Usunąć wydarzenie?';
+
+  @override
+  String repeats(String title) {
+    return '$title powtarza się.';
+  }
+
+  @override
+  String get onlyThis => 'Tylko to';
+
+  @override
+  String get thisAndFollowing => 'To i następne';
+
+  @override
+  String get allOccurrences => 'Wszystkie';
+
+  @override
+  String get notifyGuests => 'Powiadom gości';
+
+  @override
+  String get endBeforeStart => 'Koniec musi być po początku.';
+
+  @override
+  String failed(String error) {
+    return 'Nie udało się: $error';
+  }
 }

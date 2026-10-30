@@ -87,7 +87,7 @@ class Welcome extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
             child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, spacing: 8, children: [
               Btn(l.connectGoogle, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => Connect(store)))),
-              Btn(l.continueWithout, primary: false, onTap: store.finishOnboarding),
+              Btn(l.continueWithout, kind: BtnKind.text, onTap: store.finishOnboarding),
             ]),
           ),
         ]),

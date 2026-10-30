@@ -14,9 +14,14 @@ Screen numbers refer to docs/design/mockup.html.
 - [ ] Offline cache of events (now in memory only, refetched on start)
 
 ## Stage 2: events
-- [ ] 03.1 Event details, 03.2 New event (FAB hidden until then), 03.3 Custom repeat
+- [x] 03.1 Event details (time, title, calendar, place, reminder, notes, guests with replies; edit, delete)
+- [x] 03.2 New / edit event: title, all day, start, end, calendar, place, notes
+- [ ] 03.2 rows still missing: time zone, repeat (→ 03.3), reminder choice, guests (→ 03.4)
+- [ ] 03.1 still missing: repeat description in the meta line ("co 2 tygodnie"), share and "more" icons, notifications switch (→ 07.3)
+- [ ] 03.3 Custom repeat
 - [ ] 03.4 Invite guests, 03.5 Received invitation (reply)
-- [ ] 06.1 Empty day, 06.2 Delete event, 06.3 Sync conflict
+- [x] 06.2 Delete event (only this / this and following / all, notify guests)
+- [ ] 06.1 Empty day, 06.3 Sync conflict
 
 ## Stage 3: calendars and settings
 - [ ] 04.1 Calendars, 04.2 Add calendar, 04.3 Holidays, 04.4 Share calendar, 04.5 Shared with you

@@ -367,6 +367,198 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Next'**
   String get following;
+
+  /// No description provided for @newEvent.
+  ///
+  /// In en, this message translates to:
+  /// **'New event'**
+  String get newEvent;
+
+  /// No description provided for @eventName.
+  ///
+  /// In en, this message translates to:
+  /// **'Event name'**
+  String get eventName;
+
+  /// No description provided for @save.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get save;
+
+  /// No description provided for @closeNoSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Close without saving'**
+  String get closeNoSave;
+
+  /// No description provided for @start.
+  ///
+  /// In en, this message translates to:
+  /// **'Start'**
+  String get start;
+
+  /// No description provided for @end.
+  ///
+  /// In en, this message translates to:
+  /// **'End'**
+  String get end;
+
+  /// No description provided for @calendar.
+  ///
+  /// In en, this message translates to:
+  /// **'Calendar'**
+  String get calendar;
+
+  /// No description provided for @place.
+  ///
+  /// In en, this message translates to:
+  /// **'Location'**
+  String get place;
+
+  /// No description provided for @notes.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes'**
+  String get notes;
+
+  /// No description provided for @add.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get add;
+
+  /// No description provided for @reminder.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminder'**
+  String get reminder;
+
+  /// No description provided for @none.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get none;
+
+  /// No description provided for @minBefore.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} min before'**
+  String minBefore(int n);
+
+  /// No description provided for @hoursBefore.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} h before'**
+  String hoursBefore(int n);
+
+  /// No description provided for @daysBefore.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{1 day before} other{{n} days before}}'**
+  String daysBefore(int n);
+
+  /// No description provided for @guests.
+  ///
+  /// In en, this message translates to:
+  /// **'Guests'**
+  String get guests;
+
+  /// No description provided for @youOrganize.
+  ///
+  /// In en, this message translates to:
+  /// **'You organize'**
+  String get youOrganize;
+
+  /// No description provided for @rsvpYes.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes'**
+  String get rsvpYes;
+
+  /// No description provided for @rsvpMaybe.
+  ///
+  /// In en, this message translates to:
+  /// **'Maybe'**
+  String get rsvpMaybe;
+
+  /// No description provided for @rsvpNo.
+  ///
+  /// In en, this message translates to:
+  /// **'No'**
+  String get rsvpNo;
+
+  /// No description provided for @rsvpWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting'**
+  String get rsvpWaiting;
+
+  /// No description provided for @edit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get edit;
+
+  /// No description provided for @delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get delete;
+
+  /// No description provided for @cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancel;
+
+  /// No description provided for @deleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete event?'**
+  String get deleteTitle;
+
+  /// No description provided for @repeats.
+  ///
+  /// In en, this message translates to:
+  /// **'{title} repeats.'**
+  String repeats(String title);
+
+  /// No description provided for @onlyThis.
+  ///
+  /// In en, this message translates to:
+  /// **'Only this'**
+  String get onlyThis;
+
+  /// No description provided for @thisAndFollowing.
+  ///
+  /// In en, this message translates to:
+  /// **'This and following'**
+  String get thisAndFollowing;
+
+  /// No description provided for @allOccurrences.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get allOccurrences;
+
+  /// No description provided for @notifyGuests.
+  ///
+  /// In en, this message translates to:
+  /// **'Notify guests'**
+  String get notifyGuests;
+
+  /// No description provided for @endBeforeStart.
+  ///
+  /// In en, this message translates to:
+  /// **'The end must be after the start.'**
+  String get endBeforeStart;
+
+  /// No description provided for @failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed: {error}'**
+  String failed(String error);
 }
 
 class _AppLocalizationsDelegate

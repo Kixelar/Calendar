@@ -92,6 +92,21 @@ class Store extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Calendars a new event can go to: shown and writable, holidays excluded.
+  List<Cal> get writable => [for (final c in cals) if (c.on && c.writable && !c.holiday) c];
+
+  Future<void> save(Ev e, {String? fromCal}) async {
+    await g.save(e, fromCal: fromCal);
+    _days.clear();
+    notifyListeners();
+  }
+
+  Future<void> delete(Ev e, DeleteScope scope, {required bool notify}) async {
+    await g.delete(e, scope, notify: notify);
+    _days.clear();
+    notifyListeners();
+  }
+
   Future<void> refresh() async {
     _days.clear();
     if (signedIn) await loadCalendars();

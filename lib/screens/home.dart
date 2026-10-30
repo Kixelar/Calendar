@@ -7,6 +7,7 @@ import '../google.dart';
 import '../store.dart';
 import '../theme.dart';
 import '../ui.dart';
+import 'event.dart';
 import 'onboarding.dart';
 
 /// Main screen with the four views from the mockup: 02.1 year, 02.2 month, 02.3 week, 02.4 day.
@@ -90,6 +91,17 @@ class _HomeState extends State<Home> {
                         if (i == tab) Container(width: 5, height: 5, decoration: BoxDecoration(color: t.display, shape: BoxShape.circle)),
                         Lbl(s, color: i == tab ? t.display : t.secondary),
                       ]),
+                    ),
+                  ),
+                const Spacer(),
+                if (store.signedIn && store.writable.isNotEmpty)
+                  Material(
+                    color: t.display,
+                    shape: const CircleBorder(),
+                    child: InkWell(
+                      customBorder: const CircleBorder(),
+                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => EventEdit(store, day: focus))),
+                      child: SizedBox.square(dimension: 48, child: Icon(Icons.add, color: t.bg, semanticLabel: l.newEvent)),
                     ),
                   ),
               ]),
@@ -302,7 +314,9 @@ class _HomeState extends State<Home> {
     final info = ['${hm(c, e.start)}–${hm(c, e.end)}', if (e.location?.isNotEmpty ?? false) e.location!].join(' · ');
     return Padding(
       padding: const EdgeInsets.only(top: 24),
-      child: Container(
+      child: GestureDetector(
+        onTap: () => openEvent(c, e, store),
+        child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(color: t.surface, border: Border.all(color: t.borderControl), borderRadius: BorderRadius.circular(8)),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, spacing: 4, children: [
@@ -317,6 +331,7 @@ class _HomeState extends State<Home> {
             Expanded(child: Text(info.toUpperCase(), style: T.caption(t.secondary), maxLines: 1, overflow: TextOverflow.ellipsis)),
           ]),
         ]),
+        ),
       ),
     );
   }

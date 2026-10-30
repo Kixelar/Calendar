@@ -13,19 +13,42 @@ enum Shape { dot, square, half, diamond, ring, dash }
 
 class Cal {
   final String id, name;
-  final bool shared, holiday;
+  final bool shared, holiday, writable;
   final Shape shape;
+  final int? defaultReminder; // minutes before, applies to events that use the calendar's default reminders
   bool on;
-  Cal(this.id, this.name, {required this.shared, required this.holiday, required this.shape, required this.on});
+  Cal(this.id, this.name,
+      {required this.shared, required this.holiday, required this.shape, required this.on, this.writable = true, this.defaultReminder});
+}
+
+/// Invitation reply as Google stores it: accepted, tentative, declined, needsAction.
+class Guest {
+  final String name, email, status;
+  final bool self;
+  const Guest(this.name, this.email, this.status, {this.self = false});
 }
 
 class Ev {
-  final String title, calId;
-  final String? location;
+  final String id, title, calId;
+  final String? location, notes;
+  final String? recurringId; // set on an occurrence of a repeating event: the series' id
   final DateTime start, end; // local time; for all-day events end is exclusive midnight
   final bool allDay;
-  const Ev(this.title, this.calId, this.start, this.end, {this.allDay = false, this.location});
+  final bool organizer; // this calendar organizes the event (false for invitations from others)
+  final List<Guest> guests;
+  final int? reminder; // minutes before; null = none
+  const Ev(this.title, this.calId, this.start, this.end,
+      {this.id = '',
+      this.allDay = false,
+      this.location,
+      this.notes,
+      this.recurringId,
+      this.organizer = true,
+      this.guests = const [],
+      this.reminder});
 }
+
+enum DeleteScope { one, following, all }
 
 class GoogleCalendar {
   GoogleSignInAccount? user;
@@ -93,6 +116,8 @@ class GoogleCalendar {
           return Cal(e.id!, e.summaryOverride ?? e.summary ?? e.id!,
               shared: shared,
               holiday: holiday,
+              writable: e.accessRole == 'owner' || e.accessRole == 'writer',
+              defaultReminder: e.defaultReminders?.where((r) => r.method == 'popup').firstOrNull?.minutes,
               shape: holiday ? Shape.ring : shared ? Shape.dash : own[i++ % own.length],
               on: enabled?.contains(e.id) ?? e.selected == true);
         }(),
@@ -110,12 +135,23 @@ class GoogleCalendar {
             timeMin: from.toUtc(), timeMax: to.toUtc(), singleEvents: true, maxResults: 2500, pageToken: page);
         for (final e in r.items ?? const <gcal.Event>[]) {
           if (e.status == 'cancelled' || e.start == null) continue;
-          final allDay = e.start!.dateTime == null;
-          DateTime? at(gcal.EventDateTime? t) =>
-              t?.dateTime?.toLocal() ?? (t?.date == null ? null : DateTime(t!.date!.year, t.date!.month, t.date!.day));
-          final s = at(e.start);
+          final s = _at(e.start);
           if (s == null) continue;
-          out.add(Ev(e.summary ?? '', cal.id, s, at(e.end) ?? s, allDay: allDay, location: e.location));
+          final rem = e.reminders;
+          out.add(Ev(e.summary ?? '', cal.id, s, _at(e.end) ?? s,
+              id: e.id ?? '',
+              allDay: e.start!.dateTime == null,
+              location: e.location,
+              notes: e.description,
+              recurringId: e.recurringEventId,
+              organizer: e.organizer?.self ?? true,
+              guests: [
+                for (final a in e.attendees ?? const <gcal.EventAttendee>[])
+                  if (a.resource != true) Guest(a.displayName ?? a.email ?? '', a.email ?? '', a.responseStatus ?? 'needsAction', self: a.self ?? false),
+              ],
+              reminder: rem?.useDefault ?? true
+                  ? cal.defaultReminder
+                  : rem?.overrides?.where((o) => o.method == 'popup').firstOrNull?.minutes));
         }
         page = r.nextPageToken;
       } while (page != null);
@@ -123,4 +159,60 @@ class GoogleCalendar {
     out.sort((a, b) => a.start.compareTo(b.start));
     return out;
   }
+
+  /// Creates [e] (empty id) or updates it; [fromCal] is its calendar before the edit when the user moved it.
+  Future<void> save(Ev e, {String? fromCal}) async {
+    await _authorize(interactive: false);
+    final api = _api!;
+    if (e.id.isNotEmpty && fromCal != null && fromCal != e.calId) await api.events.move(fromCal, e.id, e.calId);
+    // Updating the fetched resource keeps guests, reminders and everything this screen does not edit.
+    final ev = e.id.isEmpty ? gcal.Event() : await api.events.get(e.calId, e.id);
+    final endDay = DateTime(e.end.year, e.end.month, e.end.day); // all-day end is exclusive, as Google expects
+    ev
+      ..summary = e.title
+      ..location = e.location
+      ..description = e.notes
+      ..start = e.allDay ? gcal.EventDateTime(date: DateTime(e.start.year, e.start.month, e.start.day)) : gcal.EventDateTime(dateTime: e.start)
+      ..end = e.allDay ? gcal.EventDateTime(date: endDay) : gcal.EventDateTime(dateTime: e.end);
+    if (e.id.isEmpty) {
+      await api.events.insert(ev, e.calId);
+    } else {
+      await api.events.update(ev, e.calId, e.id, sendUpdates: e.guests.isEmpty ? 'none' : 'all');
+    }
+  }
+
+  /// Deletes one occurrence, the series from this occurrence on, or the whole series (06.2).
+  Future<void> delete(Ev e, DeleteScope scope, {required bool notify}) async {
+    await _authorize(interactive: false);
+    final api = _api!, send = notify ? 'all' : 'none';
+    final series = e.recurringId;
+    if (series == null || scope == DeleteScope.one) return api.events.delete(e.calId, e.id, sendUpdates: send);
+    final parent = await api.events.get(e.calId, series);
+    final first = _at(parent.start);
+    if (scope == DeleteScope.all || first == null || !e.start.isAfter(first)) {
+      return api.events.delete(e.calId, series, sendUpdates: send);
+    }
+    parent.recurrence = [for (final r in parent.recurrence ?? const <String>[]) endRuleBefore(r, e.start, allDay: e.allDay)];
+    await api.events.update(parent, e.calId, series, sendUpdates: send);
+  }
+}
+
+DateTime? _at(gcal.EventDateTime? t) =>
+    t?.dateTime?.toLocal() ?? (t?.date == null ? null : DateTime(t!.date!.year, t.date!.month, t.date!.day));
+
+/// Ends an RRULE so its last occurrence is before [occurrence] ("delete this and following").
+/// Other recurrence lines (EXDATE, RDATE) pass through unchanged.
+String endRuleBefore(String line, DateTime occurrence, {required bool allDay}) {
+  if (!line.startsWith('RRULE:')) return line;
+  final parts = line.substring(6).split(';').where((p) => !p.startsWith('UNTIL=') && !p.startsWith('COUNT='));
+  String two(int n) => n.toString().padLeft(2, '0');
+  final String until;
+  if (allDay) {
+    final d = DateTime(occurrence.year, occurrence.month, occurrence.day - 1);
+    until = '${d.year}${two(d.month)}${two(d.day)}';
+  } else {
+    final u = occurrence.subtract(const Duration(seconds: 1)).toUtc();
+    until = '${u.year}${two(u.month)}${two(u.day)}T${two(u.hour)}${two(u.minute)}${two(u.second)}Z';
+  }
+  return 'RRULE:${[...parts, 'UNTIL=$until'].join(';')}';
 }

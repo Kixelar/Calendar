@@ -12,4 +12,7 @@
 - **Fonts**: the mockup's Ndot 57, NType82 and Lettera Mono, files supplied by the owner; Space Mono / Space Grotesk fill in missing Polish glyphs (docs/DESIGN.md). (owner)
 - **Signing**: the app's own keystore in `<keystore folder>/`, used for debug and release, so one SHA-1 is registered with Google.
 - **Google OAuth**: project set up by the owner; web client ID committed in `config.json` (public by design).
+- **03.2 first version** has no time zone, repeat, reminder or guests rows (each needs its own screen, 03.3/03.4, or a picker the mockup does not show); new events get the calendar's default reminders from Google.
+- **Place and notes** in 03.2 are edited in a small dialog styled like the mockup's `.dlg` (the mockup shows only the rows).
+- **All-day icon**: sun, centred in the time column. (owner asked for an icon, then for centring)
 - **Left out of the mockup for now** (no function yet, so no dead buttons): search and settings icons, FAB, CalDAV/Outlook button, terms caption.
