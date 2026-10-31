@@ -31,13 +31,19 @@ Screen numbers refer to docs/design/mockup.html.
 - [ ] 04.3 "Show" filters (days off / religious / name days / special days): Google holiday calendars do not mark these kinds, name days do not exist there (owner decision)
 - [ ] 04.4 "Invited" state for people who have not accepted: the ACL API does not report it
 - [ ] 04.5 "Ask for edit rights": needs sending an e-mail (url_launcher), left out
-- [ ] 05.1–05.8 Settings, appearance, notifications & Glyph, accounts, data & privacy, help, about (top bar settings icon hidden until then)
+- [x] 05.1–05.8 Settings, appearance, notifications, accounts, data & privacy, help, about
+- [ ] 05.3 Glyph section (light on reminder, pattern, countdown): needs the Nothing Glyph Developer Kit (owner decision)
+- [ ] 05.4 "On this device" account and "Wi-Fi only": no local calendars / no background sync yet
+- [ ] 05.4 background sync when the app is closed (WorkManager); now: on open, on resume and on a timer while open
+- [ ] 05.5 import / export .ics, daily backup, app lock, anonymous statistics (owner decision; the app collects none)
+- [ ] 05.6 contact rows ("Write to support", "Report a bug"): need a support address (owner)
+- [ ] 05.8 terms and privacy policy rows, update check
 - [ ] Terms and privacy policy texts (welcome screen caption from the mockup is left out until they exist)
 - [ ] "Other account — CalDAV, Outlook" (01.2 secondary button, left out for now)
 
 ## Stage 4: Android extras
 - [ ] 07.1/07.2 Home screen widgets (dark, light) — native Kotlin
-- [ ] 07.3 Event notifications
+- [x] 07.3 Event notifications (scheduled for the next 7 days at every sync; Glyph countdown waits for the SDK)
 - [ ] Glyph interface on Nothing phones (Glyph Developer Kit)
 - [x] Release signing key
 - [ ] App icon

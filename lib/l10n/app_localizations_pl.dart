@@ -749,4 +749,251 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get reject => 'Odrzuć';
+
+  @override
+  String get settings => 'Ustawienia';
+
+  @override
+  String get upToDate => 'Aktualne';
+
+  @override
+  String get offline => 'Offline';
+
+  @override
+  String get appearance => 'Wygląd';
+
+  @override
+  String get notificationsGlyph => 'Powiadomienia';
+
+  @override
+  String get accountsSync => 'Konta i synchronizacja';
+
+  @override
+  String get calendarsSharing => 'Kalendarze i udostępnianie';
+
+  @override
+  String get dataPrivacy => 'Dane i prywatność';
+
+  @override
+  String get help => 'Pomoc';
+
+  @override
+  String get about => 'Informacje';
+
+  @override
+  String get themeDark => 'Ciemny';
+
+  @override
+  String get themeLight => 'Jasny';
+
+  @override
+  String get themeSystem => 'Systemowy';
+
+  @override
+  String get theme => 'Motyw';
+
+  @override
+  String get firstDay => 'Pierwszy dzień tygodnia';
+
+  @override
+  String get timeFormat => 'Format czasu';
+
+  @override
+  String get weekNumbers => 'Numery tygodni';
+
+  @override
+  String get showWeekends => 'Pokazuj weekendy';
+
+  @override
+  String get declinedInvites => 'Odrzucone zaproszenia';
+
+  @override
+  String get style => 'Styl';
+
+  @override
+  String get dotDigits => 'Cyfry kropkowe';
+
+  @override
+  String get dimPast => 'Przygaszaj minione';
+
+  @override
+  String get accounts => 'Konta';
+
+  @override
+  String get lastSync => 'Ostatnia synchronizacja';
+
+  @override
+  String calendarsN(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n kalendarzy',
+      few: '$n kalendarze',
+      one: '1 kalendarz',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get syncNow => 'Synchronizuj teraz';
+
+  @override
+  String get active => 'Aktywne';
+
+  @override
+  String get addAccount => 'Dodaj konto';
+
+  @override
+  String get automatic => 'Automatycznie';
+
+  @override
+  String get frequency => 'Częstotliwość';
+
+  @override
+  String everyMinutes(int n) {
+    return 'Co $n min';
+  }
+
+  @override
+  String get disconnectGoogle => 'Odłącz konto Google';
+
+  @override
+  String get disconnectBody =>
+      'Kalendarze i ustawienia znikną z tego telefonu. W Google nic się nie zmieni.';
+
+  @override
+  String get disconnect => 'Odłącz';
+
+  @override
+  String get privacy => 'Prywatność';
+
+  @override
+  String get hideOnLockScreen => 'Ukryj szczegóły na blokadzie';
+
+  @override
+  String get device => 'Urządzenie';
+
+  @override
+  String get clearData => 'Wyczyść dane na urządzeniu';
+
+  @override
+  String get clearDataBody =>
+      'Kalendarze, pamięć podręczna i ustawienia znikną z tego telefonu, a konto zostanie wylogowane.';
+
+  @override
+  String get googleUntouched => 'Wydarzenia w Google zostają nietknięte.';
+
+  @override
+  String get searchHelp => 'Szukaj w pomocy';
+
+  @override
+  String get faq => 'Częste pytania';
+
+  @override
+  String get contact => 'Kontakt';
+
+  @override
+  String get aboutApp => 'Informacje o aplikacji';
+
+  @override
+  String readTime(String topic) {
+    return '$topic · 1 min czytania';
+  }
+
+  @override
+  String get tip => 'Wskazówka';
+
+  @override
+  String openScreen(String name) {
+    return 'Otwórz: $name';
+  }
+
+  @override
+  String get devVersion => 'Wersja deweloperska';
+
+  @override
+  String get stableVersion => 'Wersja stabilna';
+
+  @override
+  String get build => 'Kompilacja';
+
+  @override
+  String get system => 'System';
+
+  @override
+  String get legal => 'Prawne';
+
+  @override
+  String get licenses => 'Licencje open source';
+
+  @override
+  String get typefaces => 'Kroje pisma';
+
+  @override
+  String get notifications => 'Powiadomienia';
+
+  @override
+  String get reminders => 'Przypomnienia';
+
+  @override
+  String get defaultLabel => 'Domyślne';
+
+  @override
+  String get allDayEvents => 'Całodniowe';
+
+  @override
+  String dayBeforeAt(String time) {
+    return '$time dzień przed';
+  }
+
+  @override
+  String get dailySummary => 'Podsumowanie dnia';
+
+  @override
+  String everyDayAt(String time) {
+    return 'Codziennie $time';
+  }
+
+  @override
+  String get invitations => 'Zaproszenia';
+
+  @override
+  String get newInvitations => 'Nowe zaproszenia';
+
+  @override
+  String get sharedChanges => 'Zmiany w udostępnionych';
+
+  @override
+  String summaryTitle(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Dziś: $n wydarzeń',
+      few: 'Dziś: $n wydarzenia',
+      one: 'Dziś: 1 wydarzenie',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String invitesYou(String name, String title) {
+    return '$name zaprasza: $title';
+  }
+
+  @override
+  String changesIn(String name) {
+    return 'Zmiany: $name';
+  }
+
+  @override
+  String get sharedCalendars => 'Udostępnione kalendarze';
+
+  @override
+  String get snooze => 'Odłóż 5 min';
+
+  @override
+  String get details => 'Szczegóły';
+
+  @override
+  String get off2 => 'Wyłączone';
 }

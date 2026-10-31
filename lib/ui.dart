@@ -6,12 +6,16 @@ import 'l10n/app_localizations.dart';
 import 'screens/event.dart';
 import 'store.dart';
 import 'theme.dart';
+import 'view.dart';
 
 /// Shared building blocks matching the mockup's CSS classes (.lbl, .row, .sec, .btn, .sw, .mk, .hero...).
 
 AppLocalizations l10n(BuildContext c) => AppLocalizations.of(c)!;
 String loc(BuildContext c) => Localizations.localeOf(c).toString();
-String hm(BuildContext c, DateTime t) => DateFormat.Hm(loc(c)).format(t);
+String hm(BuildContext c, DateTime t) => (Look.use24h ? DateFormat.Hm(loc(c)) : DateFormat('h:mm a', loc(c))).format(t);
+
+/// Width of the time column in event rows: 12-hour times ("10:30 PM") need more room.
+double get timeWidth => Look.use24h ? 48 : 72;
 
 /// Uppercase small mono label (.lbl).
 class Lbl extends StatelessWidget {
@@ -320,12 +324,12 @@ class EventRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = Tok.of(context);
     final n = now ?? DateTime.now();
-    final past = !e.allDay && !e.end.isAfter(n);
+    final past = Look.dimPast && !e.allDay && !e.end.isAfter(n);
     final soon = (e.start.difference(n).inSeconds + 59) ~/ 60;
     final cal = store.cal(e.calId);
     return RowItem(border: border, onTap: () => openEvent(context, e, store), children: [
       SizedBox(
-        width: 48,
+        width: timeWidth,
         // Like the mockup's span, the time never wraps; it may run a hair past the 48px column.
         child: e.allDay
             ? Center(

@@ -15,6 +15,12 @@
 - 04.3 holidays: holiday calendars by country (+ add country), holidays per year, the next three holidays.
 - 04.4 share a calendar: people with access and their level (busy only / view / edit / remove), add a person, access by link with copy.
 - 04.5 shared with you: owner, your access, choose the marker shape, show in views, share yours back, remove.
+- 05.1 settings with account status; 05.2 appearance: theme (dark / light / system), first day of the week, 24/12 h, week numbers, show weekends, declined invitations, dot digits, dim past events.
+- 05.3 notifications: default reminder, all-day reminder the day before, daily summary; new invitations and changes in shared calendars.
+- 05.4 accounts: last sync, sync now, automatic sync every 5–60 min (while the app is open), disconnect Google.
+- 05.5 data and privacy: hide notification details on the lock screen, clear data on this device.
+- 05.6 / 05.7 help with four how-to articles; 05.8 about: version, build, Android, time zone, licences, typefaces.
+- 07.3 notifications: event reminders with "Snooze 5 min" and "Details", invitations with Yes / Maybe / No, daily summary, changes in shared calendars.
 - 06.1 empty day: "Nothing planned." with an add button; weekends and holidays read as days off. Holiday events are labelled "Holiday".
 - 06.3 conflicting changes: if the event changed in Google while you edited it, choose this phone's version, Google's, or keep both.
 ### Fixed

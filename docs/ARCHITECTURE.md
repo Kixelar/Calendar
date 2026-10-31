@@ -17,6 +17,10 @@ lib/
   screens/invite.dart      03.4 invite guests (suggestions = guests of loaded events, Store.people)
   screens/search.dart      02.5 search (Google `q` full-text search, two years back and ahead, first 50 per calendar)
   screens/calendars.dart   04.1 calendars, 04.2 add, 04.3 holidays (Google holiday calendars by country), 04.4 share (ACL), 04.5 shared with you
+  screens/settings.dart    05.1 settings, 05.2 appearance, 05.4 accounts, 05.5 data, 05.6/05.7 help (texts in lib/help.dart), 05.8 about
+  screens/notifications.dart  05.3 notification settings
+  notify.dart              07.3 notifications: plan() (pure, tested) + Notifier (flutter_local_notifications)
+  view.dart                `Look`: 05.2 view settings as globals for widgets without a Store (time format, fonts, week layout)
   screens/event.dart       03.1 event details, 03.2 new/edit event, 06.2 delete dialog, calendar picker
 android/app/src/main/res/values*/strings.xml   Launcher name per device language
 test/screens_test.dart   Logic tests + PNG renders of screens with a fake Google account
@@ -57,6 +61,17 @@ The `google` preference marks a signed-in install (older installs: a saved calen
   `GoogleCalendar.respond` patches your attendee status and notifies the organizer.
 - Edit is offered only when the event's calendar is writable and this calendar organizes the event
   (`organizer.self`); invitations from others can be deleted from your calendar but not edited.
+
+## Notifications (07.3)
+After each fresh sync of the current year `Store._afterSync` calls `plan()` for the next 7 days and replaces all scheduled
+notifications (exact alarms, `USE_EXACT_ALARM`): event reminders (Google's reminder; the app's default when the calendar
+has none; nothing when "none" was chosen), all-day events the day before, a daily summary. New invitations and others'
+changes in shared calendars are shown at once (the first sync only remembers what exists). "Snooze 5 min" runs in a
+background isolate (`notificationTapBackground`); other actions open the app and Home handles them (`_fromNotification`).
+Notifications are only refreshed while the app runs (no background sync yet).
+
+## Settings
+05.x settings live in SharedPreferences (`Store.set`). `App` copies the view ones to `Look` on every change.
 
 ## Google auth
 `google_sign_in` 7.x: `authenticate()` signs in, `authorizationClient.authorizeScopes()` grants the Calendar scope.

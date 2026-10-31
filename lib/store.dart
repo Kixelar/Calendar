@@ -3,10 +3,14 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'dart:ui' show Locale, PlatformDispatcher;
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'google.dart';
+import 'l10n/app_localizations.dart';
+import 'notify.dart';
+import 'view.dart';
 
 DateTime dayOf(DateTime t) => DateTime(t.year, t.month, t.day);
 
@@ -20,6 +24,7 @@ class Store extends ChangeNotifier {
   Directory? _dir;
 
   bool ready = false, signedIn = false;
+  Notifier? notifier; // null in tests
   List<Cal> cals = [];
   String? error;
   final _days = <int, Map<DateTime, List<Ev>>>{};
@@ -29,8 +34,120 @@ class Store extends ChangeNotifier {
   bool get onboarded => _p.getBool('onboarded') ?? false;
   // Saved at sign-in: a silent restore on start has no account object to read it from.
   String? get email => g.email ?? _p.getString('email');
+  String? get name => g.user?.displayName ?? _p.getString('name');
   Cal? cal(String id) => cals.where((c) => c.id == id).firstOrNull;
   SharedPreferences get prefs => _p;
+
+  // 05.2 / 05.4 settings, kept in SharedPreferences.
+  String get theme => _p.getString('theme') ?? 'system'; // dark, light, system
+  int get weekStart => _p.getInt('weekStart') ?? DateTime.monday;
+  bool get use24h => _p.getBool('use24h') ?? true;
+  bool get weekNumbers => _p.getBool('weekNumbers') ?? false;
+  bool get weekends => _p.getBool('weekends') ?? true;
+  bool get showDeclined => _p.getBool('showDeclined') ?? false;
+  bool get dotDigits => _p.getBool('dotDigits') ?? true;
+  bool get dimPast => _p.getBool('dimPast') ?? true;
+  bool get autoSync => _p.getBool('autoSync') ?? true;
+  int get syncMinutes => _p.getInt('syncMinutes') ?? 15;
+  DateTime? get lastSync => switch (_p.getInt('lastSync')) { final ms? => DateTime.fromMillisecondsSinceEpoch(ms), _ => null };
+
+  bool get hideOnLock => _p.getBool('hideOnLock') ?? true;
+  NotifyPrefs get notifyPrefs => NotifyPrefs(
+        defaultReminder: _p.getInt('defaultReminder') ?? 10,
+        allDayAt: _p.getInt('allDayAt') ?? 9 * 60,
+        summary: _p.getBool('summary') ?? true,
+        summaryAt: _p.getInt('summaryAt') ?? 7 * 60 + 30,
+        invites: _p.getBool('notifyInvites') ?? true,
+        sharedChanges: _p.getBool('notifyShared') ?? true,
+        hideOnLock: hideOnLock,
+      );
+
+  // Notifications are built outside any widget, so they take the phone's language directly.
+  String get _lang => PlatformDispatcher.instance.locale.languageCode == 'pl' ? 'pl' : 'en';
+  AppLocalizations get _l => lookupAppLocalizations(Locale(_lang));
+
+  /// Events of the next 8 days from what is loaded, for scheduling reminders.
+  List<Ev> get _soon {
+    final now = DateTime.now();
+    return [
+      for (var d = 0; d < 8; d++) ...?_days[DateTime(now.year, now.month, now.day + d).year]?[DateTime(now.year, now.month, now.day + d)],
+    ];
+  }
+
+  Future<void> reschedule() async => notifier?.reschedule(plan(_soon, DateTime.now(), notifyPrefs, _l, _lang), _l, notifyPrefs);
+
+  /// After a fresh sync: reminders, plus notifications for new invitations and others' changes in shared calendars.
+  Future<void> _afterSync(List<Ev> evs, DateTime? previous) async {
+    final n = notifier;
+    if (n == null) return;
+    await reschedule();
+    final now = DateTime.now(), p = notifyPrefs;
+    String key(Ev e) => '${e.id}|${e.start.millisecondsSinceEpoch}';
+    final open = [for (final e in evs) if (e.isInvitation && e.me!.status == 'needsAction' && e.end.isAfter(now)) e];
+    final seen = _p.getStringList('seenInvites');
+    // The first sync only remembers what is there, so installing the app does not flood the shade.
+    if (seen != null && p.invites) {
+      for (final e in open.where((e) => !seen.contains(key(e)))) {
+        await n.invitation(e, _l, _lang, p);
+      }
+    }
+    await _p.setStringList('seenInvites', [for (final e in open) key(e)]);
+    if (previous != null && p.sharedChanges) {
+      final changed = <String, int>{};
+      for (final e in evs) {
+        if ((cal(e.calId)?.shared ?? false) && (e.updated?.isAfter(previous) ?? false)) changed[e.calId] = (changed[e.calId] ?? 0) + 1;
+      }
+      for (final c in changed.entries) {
+        await n.sharedChanged(cal(c.key)!, c.value, _l, p);
+      }
+    }
+  }
+
+  /// Saves one setting (bool, int or String) and redraws everything.
+  Future<void> set(String key, Object value) async {
+    switch (value) {
+      case bool v:
+        await _p.setBool(key, v);
+      case int v:
+        await _p.setInt(key, v);
+      case String v:
+        await _p.setString(key, v);
+    }
+    if (key == 'showDeclined') _days.clear();
+    notifyListeners();
+    await reschedule(); // reminder settings, or which events count
+  }
+
+  /// Copies the view settings to [Look] for widgets without a Store (called by App on every change).
+  void applyLook() {
+    if (!ready) return;
+    Look.use24h = use24h;
+    Look.dotDigits = dotDigits;
+    Look.dimPast = dimPast;
+    Look.weekNumbers = weekNumbers;
+    Look.weekends = weekends;
+    Look.weekStart = weekStart;
+  }
+
+  /// Events in the loaded current year, for the 05.4 sync card.
+  int get eventCount => {for (final d in (_days[DateTime.now().year] ?? const {}).values) ...d}.length;
+
+  /// 05.4 "Disconnect Google" and 05.5 "Clear data on this device": drops the cache and settings here;
+  /// nothing changes in Google. Back to the welcome screen.
+  Future<void> forget() async {
+    try {
+      await g.signOut();
+    } catch (_) {} // already signed out or offline: local data goes anyway
+    for (final f in _dir!.listSync().whereType<File>().where((f) => f.path.endsWith('.json'))) {
+      f.deleteSync();
+    }
+    await _p.clear();
+    cals = [];
+    _days.clear();
+    signedIn = false;
+    error = null;
+    notifyListeners();
+  }
 
   File _file(String name) => File('${_dir!.path}/$name.json');
 
@@ -93,6 +210,7 @@ class Store extends ChangeNotifier {
     signedIn = true;
     await _p.setBool('google', true);
     if (g.email != null) await _p.setString('email', g.email!);
+    if (g.user?.displayName case final n?) await _p.setString('name', n);
     await loadCalendars();
   }
 
@@ -131,7 +249,7 @@ class Store extends ChangeNotifier {
 
   List<Ev> _visible(Iterable<Ev> evs) {
     final on = {for (final c in cals) if (c.on) c.id};
-    return [for (final e in evs) if (on.contains(e.calId)) e];
+    return [for (final e in evs) if (on.contains(e.calId) && (showDeclined || e.me?.status != 'declined')) e];
   }
 
   /// Stores a freshly fetched year in memory and on disk (also used by the 01.4 sync screen).
@@ -160,8 +278,14 @@ class Store extends ChangeNotifier {
     }
     if (signedIn) {
       try {
-        putYear(year, await g.events([for (final c in cals) if (c.on) c], DateTime(year), DateTime(year + 1)));
+        final evs = await g.events([for (final c in cals) if (c.on) c], DateTime(year), DateTime(year + 1));
+        putYear(year, evs);
         error = null;
+        if (year == DateTime.now().year) {
+          final previous = lastSync;
+          await _p.setInt('lastSync', DateTime.now().millisecondsSinceEpoch);
+          await _afterSync(evs, previous);
+        }
       } catch (e) {
         error = '$e';
         _days[year] ??= {};
@@ -182,6 +306,15 @@ class Store extends ChangeNotifier {
       return await const MethodChannel('calendar/device').invokeMethod<String>('timeZone') ?? 'UTC';
     } on MissingPluginException {
       return 'UTC';
+    }
+  }
+
+  /// App version, build number and Android release (MainActivity.kt); empty in tests.
+  Future<Map<String, String>> deviceInfo() async {
+    try {
+      return (await const MethodChannel('calendar/device').invokeMapMethod<String, String>('info')) ?? const {};
+    } on MissingPluginException {
+      return const {};
     }
   }
 

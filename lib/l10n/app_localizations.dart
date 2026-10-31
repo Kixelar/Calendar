@@ -1303,6 +1303,432 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Remove'**
   String get reject;
+
+  /// No description provided for @settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get settings;
+
+  /// No description provided for @upToDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Up to date'**
+  String get upToDate;
+
+  /// No description provided for @offline.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline'**
+  String get offline;
+
+  /// No description provided for @appearance.
+  ///
+  /// In en, this message translates to:
+  /// **'Appearance'**
+  String get appearance;
+
+  /// No description provided for @notificationsGlyph.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get notificationsGlyph;
+
+  /// No description provided for @accountsSync.
+  ///
+  /// In en, this message translates to:
+  /// **'Accounts and sync'**
+  String get accountsSync;
+
+  /// No description provided for @calendarsSharing.
+  ///
+  /// In en, this message translates to:
+  /// **'Calendars and sharing'**
+  String get calendarsSharing;
+
+  /// No description provided for @dataPrivacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Data and privacy'**
+  String get dataPrivacy;
+
+  /// No description provided for @help.
+  ///
+  /// In en, this message translates to:
+  /// **'Help'**
+  String get help;
+
+  /// No description provided for @about.
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get about;
+
+  /// No description provided for @themeDark.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark'**
+  String get themeDark;
+
+  /// No description provided for @themeLight.
+  ///
+  /// In en, this message translates to:
+  /// **'Light'**
+  String get themeLight;
+
+  /// No description provided for @themeSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'System'**
+  String get themeSystem;
+
+  /// No description provided for @theme.
+  ///
+  /// In en, this message translates to:
+  /// **'Theme'**
+  String get theme;
+
+  /// No description provided for @firstDay.
+  ///
+  /// In en, this message translates to:
+  /// **'First day of the week'**
+  String get firstDay;
+
+  /// No description provided for @timeFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'Time format'**
+  String get timeFormat;
+
+  /// No description provided for @weekNumbers.
+  ///
+  /// In en, this message translates to:
+  /// **'Week numbers'**
+  String get weekNumbers;
+
+  /// No description provided for @showWeekends.
+  ///
+  /// In en, this message translates to:
+  /// **'Show weekends'**
+  String get showWeekends;
+
+  /// No description provided for @declinedInvites.
+  ///
+  /// In en, this message translates to:
+  /// **'Declined invitations'**
+  String get declinedInvites;
+
+  /// No description provided for @style.
+  ///
+  /// In en, this message translates to:
+  /// **'Style'**
+  String get style;
+
+  /// No description provided for @dotDigits.
+  ///
+  /// In en, this message translates to:
+  /// **'Dot digits'**
+  String get dotDigits;
+
+  /// No description provided for @dimPast.
+  ///
+  /// In en, this message translates to:
+  /// **'Dim past events'**
+  String get dimPast;
+
+  /// No description provided for @accounts.
+  ///
+  /// In en, this message translates to:
+  /// **'Accounts'**
+  String get accounts;
+
+  /// No description provided for @lastSync.
+  ///
+  /// In en, this message translates to:
+  /// **'Last sync'**
+  String get lastSync;
+
+  /// No description provided for @calendarsN.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{1 calendar} other{{n} calendars}}'**
+  String calendarsN(int n);
+
+  /// No description provided for @syncNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync now'**
+  String get syncNow;
+
+  /// No description provided for @active.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get active;
+
+  /// No description provided for @addAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Add account'**
+  String get addAccount;
+
+  /// No description provided for @automatic.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatically'**
+  String get automatic;
+
+  /// No description provided for @frequency.
+  ///
+  /// In en, this message translates to:
+  /// **'Frequency'**
+  String get frequency;
+
+  /// No description provided for @everyMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'Every {n} min'**
+  String everyMinutes(int n);
+
+  /// No description provided for @disconnectGoogle.
+  ///
+  /// In en, this message translates to:
+  /// **'Disconnect Google account'**
+  String get disconnectGoogle;
+
+  /// No description provided for @disconnectBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Calendars and settings are removed from this phone. Nothing changes in Google.'**
+  String get disconnectBody;
+
+  /// No description provided for @disconnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Disconnect'**
+  String get disconnect;
+
+  /// No description provided for @privacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy'**
+  String get privacy;
+
+  /// No description provided for @hideOnLockScreen.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide details on the lock screen'**
+  String get hideOnLockScreen;
+
+  /// No description provided for @device.
+  ///
+  /// In en, this message translates to:
+  /// **'Device'**
+  String get device;
+
+  /// No description provided for @clearData.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear data on this device'**
+  String get clearData;
+
+  /// No description provided for @clearDataBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Calendars, cache and settings are removed from this phone and you are signed out.'**
+  String get clearDataBody;
+
+  /// No description provided for @googleUntouched.
+  ///
+  /// In en, this message translates to:
+  /// **'Your events in Google stay untouched.'**
+  String get googleUntouched;
+
+  /// No description provided for @searchHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Search help'**
+  String get searchHelp;
+
+  /// No description provided for @faq.
+  ///
+  /// In en, this message translates to:
+  /// **'Common questions'**
+  String get faq;
+
+  /// No description provided for @contact.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact'**
+  String get contact;
+
+  /// No description provided for @aboutApp.
+  ///
+  /// In en, this message translates to:
+  /// **'About the app'**
+  String get aboutApp;
+
+  /// No description provided for @readTime.
+  ///
+  /// In en, this message translates to:
+  /// **'{topic} · 1 min read'**
+  String readTime(String topic);
+
+  /// No description provided for @tip.
+  ///
+  /// In en, this message translates to:
+  /// **'Tip'**
+  String get tip;
+
+  /// No description provided for @openScreen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open {name}'**
+  String openScreen(String name);
+
+  /// No description provided for @devVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Development version'**
+  String get devVersion;
+
+  /// No description provided for @stableVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Stable version'**
+  String get stableVersion;
+
+  /// No description provided for @build.
+  ///
+  /// In en, this message translates to:
+  /// **'Build'**
+  String get build;
+
+  /// No description provided for @system.
+  ///
+  /// In en, this message translates to:
+  /// **'System'**
+  String get system;
+
+  /// No description provided for @legal.
+  ///
+  /// In en, this message translates to:
+  /// **'Legal'**
+  String get legal;
+
+  /// No description provided for @licenses.
+  ///
+  /// In en, this message translates to:
+  /// **'Open source licences'**
+  String get licenses;
+
+  /// No description provided for @typefaces.
+  ///
+  /// In en, this message translates to:
+  /// **'Typefaces'**
+  String get typefaces;
+
+  /// No description provided for @notifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get notifications;
+
+  /// No description provided for @reminders.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders'**
+  String get reminders;
+
+  /// No description provided for @defaultLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Default'**
+  String get defaultLabel;
+
+  /// No description provided for @allDayEvents.
+  ///
+  /// In en, this message translates to:
+  /// **'All-day'**
+  String get allDayEvents;
+
+  /// No description provided for @dayBeforeAt.
+  ///
+  /// In en, this message translates to:
+  /// **'{time} the day before'**
+  String dayBeforeAt(String time);
+
+  /// No description provided for @dailySummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily summary'**
+  String get dailySummary;
+
+  /// No description provided for @everyDayAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Every day {time}'**
+  String everyDayAt(String time);
+
+  /// No description provided for @invitations.
+  ///
+  /// In en, this message translates to:
+  /// **'Invitations'**
+  String get invitations;
+
+  /// No description provided for @newInvitations.
+  ///
+  /// In en, this message translates to:
+  /// **'New invitations'**
+  String get newInvitations;
+
+  /// No description provided for @sharedChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Changes in shared calendars'**
+  String get sharedChanges;
+
+  /// No description provided for @summaryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{Today: 1 event} other{Today: {n} events}}'**
+  String summaryTitle(int n);
+
+  /// No description provided for @invitesYou.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} invites you: {title}'**
+  String invitesYou(String name, String title);
+
+  /// No description provided for @changesIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Changes: {name}'**
+  String changesIn(String name);
+
+  /// No description provided for @sharedCalendars.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared calendars'**
+  String get sharedCalendars;
+
+  /// No description provided for @snooze.
+  ///
+  /// In en, this message translates to:
+  /// **'Snooze 5 min'**
+  String get snooze;
+
+  /// No description provided for @details.
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get details;
+
+  /// No description provided for @off2.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get off2;
 }
 
 class _AppLocalizationsDelegate

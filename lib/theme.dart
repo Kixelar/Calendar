@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'view.dart';
+
 /// Design tokens copied from the mockup (docs/design/mockup.html, "Nothing-inspired" tokens).
 class Tok {
   final Color bg, surface, surfaceRaised, borderSubtle, borderControl;
@@ -18,8 +20,10 @@ class Tok {
 }
 
 // Fonts from pubspec.yaml. Ndot and NType82 have no ą ć ę ł ń ś ź ż or "–", so those glyphs come from the fallback (as in the mockup).
-const _dot = 'Ndot', _sans = 'NType82', _mono = 'Lettera Mono';
-const _fallback = {_dot: ['Space Mono'], _sans: ['Space Grotesk']};
+const _sans = 'NType82', _mono = 'Lettera Mono';
+const _fallback = {'Ndot': ['Space Mono'], _sans: ['Space Grotesk']};
+// "Dot digits" off in 05.2 sets the big numerals in the mono face instead.
+String get _dot => Look.dotDigits ? 'Ndot' : _mono;
 
 TextStyle _s(String f, double size, double lh, Color c, [double track = 0]) => TextStyle(
     fontFamily: f, fontFamilyFallback: _fallback[f], fontSize: size, height: lh / size, letterSpacing: size * track, color: c);

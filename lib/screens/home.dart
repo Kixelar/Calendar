@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -7,9 +8,11 @@ import '../google.dart';
 import '../store.dart';
 import '../theme.dart';
 import '../ui.dart';
+import '../view.dart';
 import 'calendars.dart';
 import 'event.dart';
 import 'search.dart';
+import 'settings.dart';
 
 /// Main screen with the four views from the mockup: 02.1 year, 02.2 month, 02.3 week, 02.4 day.
 class Home extends StatefulWidget {
@@ -19,7 +22,7 @@ class Home extends StatefulWidget {
   State<Home> createState() => _HomeState();
 }
 
-class _HomeState extends State<Home> {
+class _HomeState extends State<Home> with WidgetsBindingObserver {
   int tab = 1;
   DateTime focus = dayOf(DateTime.now());
   late final Timer _tick;
@@ -29,14 +32,56 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     super.initState();
-    // Keeps "now" line, "in N min" and past/future dimming current.
-    _tick = Timer.periodic(const Duration(minutes: 1), (_) => setState(() {}));
+    // Keeps "now" line, "in N min" and past/future dimming current, and runs automatic sync (05.4).
+    _tick = Timer.periodic(const Duration(minutes: 1), (_) {
+      setState(() {});
+      _autoSync();
+    });
+    WidgetsBinding.instance.addObserver(this);
+    store.notifier?.onOpen = _fromNotification;
   }
 
   @override
   void dispose() {
     _tick.cancel();
+    WidgetsBinding.instance.removeObserver(this);
+    store.notifier?.onOpen = null;
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState s) {
+    if (s == AppLifecycleState.resumed) _autoSync();
+  }
+
+  /// Refreshes when automatic sync is on and the last sync is older than the chosen interval.
+  void _autoSync() {
+    final last = store.lastSync;
+    if (!store.signedIn || !store.autoSync) return;
+    if (last == null || DateTime.now().difference(last).inMinutes >= store.syncMinutes) store.refresh();
+  }
+
+  /// A tapped notification (07.3): open the event, or send the invitation reply chosen on it.
+  Future<void> _fromNotification(String payload, String? action) async {
+    if (payload.isEmpty) return;
+    final j = jsonDecode(payload) as Map;
+    final day = DateTime.fromMillisecondsSinceEpoch(j['s'] as int);
+    // The day may still be loading right after launch.
+    Ev? e;
+    for (var i = 0; i < 20 && e == null; i++) {
+      e = store.on(day)?.where((x) => x.id == j['i'] && x.calId == j['c']).firstOrNull;
+      if (e == null) await Future<void>.delayed(const Duration(milliseconds: 300));
+    }
+    if (e == null || !mounted) return;
+    if (const {'accepted', 'tentative', 'declined'}.contains(action)) {
+      try {
+        await store.respond(e, action!);
+      } catch (err) {
+        if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n(context).failed('$err'))));
+      }
+      return;
+    }
+    openEvent(context, e, store);
   }
 
   void go(DateTime d, int t) => setState(() {
@@ -68,6 +113,10 @@ class _HomeState extends State<Home> {
                       final back = [l.year, l.month, l.week, l.day][tab];
                       Navigator.push(context, MaterialPageRoute(builder: (_) => Calendars(store, backLabel: back)));
                     }),
+                  IconBtn(Icons.tune, label: l.settings, onTap: () {
+                    final back = [l.year, l.month, l.week, l.day][tab];
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => Settings(store, backLabel: back)));
+                  }),
                 ]),
               ),
             ),
@@ -137,16 +186,16 @@ class _HomeState extends State<Home> {
         border: hol && !isToday ? Border.all(color: t.borderControl) : null,
       ),
       child: Text('${d.day}',
-          style: T.displayMd(isToday ? t.bg : out ? t.disabled : d.isBefore(today) ? t.secondary : t.display)),
+          style: T.displayMd(isToday ? t.bg : out ? t.disabled : Look.dimPast && d.isBefore(today) ? t.secondary : t.display)),
     );
   }
 
   List<Widget> _month(BuildContext c) {
     final t = Tok.of(c), l = l10n(c), now = DateTime.now(), today = dayOf(now);
     final m = DateTime(focus.year, focus.month);
-    final start = DateTime(m.year, m.month, 2 - m.weekday);
-    final len = DateTime(m.year, m.month + 1, 0).day;
-    final rows = ((m.weekday - 1 + len) / 7).ceil();
+    final last = DateTime(m.year, m.month + 1, 0);
+    final names = l.weekdays.split(','), cols = Look.days;
+    final weeks = [for (var w = Look.weekOf(m); !w.isAfter(last); w = DateTime(w.year, w.month, w.day + 7)) w];
     final todays = store.on(today);
     final rest = todays?.where((e) => e.end.isAfter(now)).toList() ?? const <Ev>[];
     return [
@@ -158,15 +207,21 @@ class _HomeState extends State<Home> {
       ),
       const SizedBox(height: 24),
       Row(children: [
-        for (final w in l.weekdays.split(','))
-          Expanded(child: SizedBox(height: 24, child: Center(child: Text(w, style: T.labelSm(t.secondary))))),
+        if (Look.weekNumbers) const SizedBox(width: 24),
+        for (final wd in cols)
+          Expanded(child: SizedBox(height: 24, child: Center(child: Text(names[wd - 1], style: T.labelSm(t.secondary))))),
       ]),
-      for (var r = 0; r < rows; r++)
+      for (final w in weeks)
         Row(children: [
-          for (var i = 0; i < 7; i++)
+          if (Look.weekNumbers)
+            SizedBox(
+              width: 24,
+              child: Text('${isoWeek(DateTime(w.year, w.month, w.day + Look.col(DateTime.monday)))}', style: T.labelSm(t.disabled)),
+            ),
+          for (final wd in cols)
             Expanded(
               child: Builder(builder: (c) {
-                final d = DateTime(start.year, start.month, start.day + r * 7 + i);
+                final d = DateTime(w.year, w.month, w.day + Look.col(wd));
                 final out = d.month != m.month;
                 final has = !out && (store.on(d) ?? const []).any((e) => !_holiday(e));
                 return InkWell(
@@ -180,7 +235,7 @@ class _HomeState extends State<Home> {
                         height: 4,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: !has ? null : d.isBefore(today) ? t.secondary : t.display,
+                          color: !has ? null : Look.dimPast && d.isBefore(today) ? t.secondary : t.display,
                         ),
                       ),
                     ]),
@@ -248,37 +303,39 @@ class _HomeState extends State<Home> {
 
   List<Widget> _week(BuildContext c) {
     final t = Tok.of(c), l = l10n(c), now = DateTime.now(), today = dayOf(now);
-    final mon = DateTime(focus.year, focus.month, focus.day - focus.weekday + 1);
-    final days = [for (var i = 0; i < 7; i++) DateTime(mon.year, mon.month, mon.day + i)];
+    final first = Look.weekOf(focus), lastDay = DateTime(first.year, first.month, first.day + 6);
+    final days = [for (final wd in Look.days) DateTime(first.year, first.month, first.day + Look.col(wd))];
     final names = l.weekdays.split(',');
     final perDay = [for (final d in days) store.on(d)];
     final count = {for (final e in perDay) ...?e}.length;
-    final thisWeek = days.contains(today);
+    final thisWeek = !today.isBefore(first) && !today.isAfter(lastDay);
+    final upcoming = [for (var i = 0; i < days.length; i++) if (!thisWeek || !days[i].isBefore(today)) i];
     final next = !thisWeek
         ? null
-        : [for (final e in perDay.skip(today.weekday - 1)) ...?e].where((e) => !e.allDay && e.start.isAfter(now)).firstOrNull;
+        : [for (final i in upcoming) ...?perDay[i]].where((e) => !e.allDay && e.start.isAfter(now)).firstOrNull;
     final f = DateFormat('dd.MM', loc(c));
     final tomorrow = DateTime(today.year, today.month, today.day + 1);
-    String dayName(int i) => switch (days[i]) {
-          final d when d == today => '${l.today} · ${names[i]} ${d.day}',
-          final d when d == tomorrow => '${l.tomorrow} · ${names[i]} ${d.day}',
-          final d => '${names[i]} ${d.day}',
+    final week = isoWeek(DateTime(first.year, first.month, first.day + Look.col(DateTime.monday)));
+    String dayName(DateTime d) => switch (d) {
+          _ when d == today => '${l.today} · ${names[d.weekday - 1]} ${d.day}',
+          _ when d == tomorrow => '${l.tomorrow} · ${names[d.weekday - 1]} ${d.day}',
+          _ => '${names[d.weekday - 1]} ${d.day}',
         };
     return [
       Hero2(
-        big: '${isoWeek(mon)}',
-        title: l.weekN(isoWeek(mon)),
-        caption: '${f.format(days.first)}–${f.format(days.last)} · ${l.eventsN(count)}',
+        big: '$week',
+        title: l.weekN(week),
+        caption: '${f.format(first)}–${f.format(lastDay)} · ${l.eventsN(count)}',
         onMove: (d) => go(DateTime(focus.year, focus.month, focus.day + 7 * d), 2),
       ),
       const SizedBox(height: 24),
       Row(children: [
-        for (var i = 0; i < 7; i++)
+        for (var i = 0; i < days.length; i++)
           Expanded(
             child: InkWell(
               onTap: () => go(days[i], 3),
               child: Column(spacing: 6, children: [
-                Text(names[i], style: T.labelSm(days[i] == today ? t.display : t.secondary)),
+                Text(names[days[i].weekday - 1], style: T.labelSm(days[i] == today ? t.display : t.secondary)),
                 _num(c, days[i]),
                 _load(c, perDay[i], days[i].isBefore(today) ? 0.3 : days[i] == today ? 1 : 0.6),
               ]),
@@ -286,10 +343,10 @@ class _HomeState extends State<Home> {
           ),
       ]),
       if (next != null) _nextCard(c, next, now),
-      for (var i = thisWeek ? today.weekday - 1 : 0; i < 7; i++)
+      for (final i in upcoming)
         if ((perDay[i] ?? const []).where((e) => e != next && e.end.isAfter(now)).toList() case final evs when evs.isNotEmpty)
           Section(
-            left: dayName(i),
+            left: dayName(days[i]),
             leftColor: days[i] == today ? t.display : null,
             right: '${evs.length}',
             children: [for (final e in evs) EventRow(e, store, now: now, red: next == null)],
@@ -350,7 +407,7 @@ class _HomeState extends State<Home> {
     Widget month(int m) {
       final first = DateTime(y, m);
       final len = DateTime(y, m + 1, 0).day;
-      final cells = [for (var i = 1; i < first.weekday; i++) null, for (var d = 1; d <= len; d++) DateTime(y, m, d)];
+      final cells = [for (var i = 0; i < Look.col(first.weekday); i++) null, for (var d = 1; d <= len; d++) DateTime(y, m, d)];
       Widget dot(DateTime? d) {
         if (d == null) return const SizedBox(height: 8);
         if (d == today) {

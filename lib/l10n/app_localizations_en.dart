@@ -741,4 +741,249 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get reject => 'Remove';
+
+  @override
+  String get settings => 'Settings';
+
+  @override
+  String get upToDate => 'Up to date';
+
+  @override
+  String get offline => 'Offline';
+
+  @override
+  String get appearance => 'Appearance';
+
+  @override
+  String get notificationsGlyph => 'Notifications';
+
+  @override
+  String get accountsSync => 'Accounts and sync';
+
+  @override
+  String get calendarsSharing => 'Calendars and sharing';
+
+  @override
+  String get dataPrivacy => 'Data and privacy';
+
+  @override
+  String get help => 'Help';
+
+  @override
+  String get about => 'About';
+
+  @override
+  String get themeDark => 'Dark';
+
+  @override
+  String get themeLight => 'Light';
+
+  @override
+  String get themeSystem => 'System';
+
+  @override
+  String get theme => 'Theme';
+
+  @override
+  String get firstDay => 'First day of the week';
+
+  @override
+  String get timeFormat => 'Time format';
+
+  @override
+  String get weekNumbers => 'Week numbers';
+
+  @override
+  String get showWeekends => 'Show weekends';
+
+  @override
+  String get declinedInvites => 'Declined invitations';
+
+  @override
+  String get style => 'Style';
+
+  @override
+  String get dotDigits => 'Dot digits';
+
+  @override
+  String get dimPast => 'Dim past events';
+
+  @override
+  String get accounts => 'Accounts';
+
+  @override
+  String get lastSync => 'Last sync';
+
+  @override
+  String calendarsN(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n calendars',
+      one: '1 calendar',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get syncNow => 'Sync now';
+
+  @override
+  String get active => 'Active';
+
+  @override
+  String get addAccount => 'Add account';
+
+  @override
+  String get automatic => 'Automatically';
+
+  @override
+  String get frequency => 'Frequency';
+
+  @override
+  String everyMinutes(int n) {
+    return 'Every $n min';
+  }
+
+  @override
+  String get disconnectGoogle => 'Disconnect Google account';
+
+  @override
+  String get disconnectBody =>
+      'Calendars and settings are removed from this phone. Nothing changes in Google.';
+
+  @override
+  String get disconnect => 'Disconnect';
+
+  @override
+  String get privacy => 'Privacy';
+
+  @override
+  String get hideOnLockScreen => 'Hide details on the lock screen';
+
+  @override
+  String get device => 'Device';
+
+  @override
+  String get clearData => 'Clear data on this device';
+
+  @override
+  String get clearDataBody =>
+      'Calendars, cache and settings are removed from this phone and you are signed out.';
+
+  @override
+  String get googleUntouched => 'Your events in Google stay untouched.';
+
+  @override
+  String get searchHelp => 'Search help';
+
+  @override
+  String get faq => 'Common questions';
+
+  @override
+  String get contact => 'Contact';
+
+  @override
+  String get aboutApp => 'About the app';
+
+  @override
+  String readTime(String topic) {
+    return '$topic · 1 min read';
+  }
+
+  @override
+  String get tip => 'Tip';
+
+  @override
+  String openScreen(String name) {
+    return 'Open $name';
+  }
+
+  @override
+  String get devVersion => 'Development version';
+
+  @override
+  String get stableVersion => 'Stable version';
+
+  @override
+  String get build => 'Build';
+
+  @override
+  String get system => 'System';
+
+  @override
+  String get legal => 'Legal';
+
+  @override
+  String get licenses => 'Open source licences';
+
+  @override
+  String get typefaces => 'Typefaces';
+
+  @override
+  String get notifications => 'Notifications';
+
+  @override
+  String get reminders => 'Reminders';
+
+  @override
+  String get defaultLabel => 'Default';
+
+  @override
+  String get allDayEvents => 'All-day';
+
+  @override
+  String dayBeforeAt(String time) {
+    return '$time the day before';
+  }
+
+  @override
+  String get dailySummary => 'Daily summary';
+
+  @override
+  String everyDayAt(String time) {
+    return 'Every day $time';
+  }
+
+  @override
+  String get invitations => 'Invitations';
+
+  @override
+  String get newInvitations => 'New invitations';
+
+  @override
+  String get sharedChanges => 'Changes in shared calendars';
+
+  @override
+  String summaryTitle(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Today: $n events',
+      one: 'Today: 1 event',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String invitesYou(String name, String title) {
+    return '$name invites you: $title';
+  }
+
+  @override
+  String changesIn(String name) {
+    return 'Changes: $name';
+  }
+
+  @override
+  String get sharedCalendars => 'Shared calendars';
+
+  @override
+  String get snooze => 'Snooze 5 min';
+
+  @override
+  String get details => 'Details';
+
+  @override
+  String get off2 => 'Off';
 }

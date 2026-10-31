@@ -5,7 +5,9 @@ import 'dart:ui' as ui;
 
 import 'package:calendar/google.dart';
 import 'package:calendar/l10n/app_localizations.dart';
+import 'package:calendar/help.dart';
 import 'package:calendar/main.dart';
+import 'package:calendar/notify.dart';
 import 'package:calendar/rrule.dart';
 import 'package:calendar/screens/calendars.dart';
 import 'package:calendar/screens/event.dart';
@@ -13,7 +15,9 @@ import 'package:calendar/screens/home.dart';
 import 'package:calendar/screens/invite.dart';
 import 'package:calendar/screens/repeat.dart';
 import 'package:calendar/screens/onboarding.dart';
+import 'package:calendar/screens/notifications.dart';
 import 'package:calendar/screens/search.dart';
+import 'package:calendar/screens/settings.dart';
 import 'package:calendar/store.dart';
 import 'package:calendar/ui.dart';
 import 'package:flutter/material.dart';
@@ -204,6 +208,35 @@ void main() {
     expect(Rule.parse('EXDATE:20261106'), isNull);
   });
 
+  test('notification plan: reminders, all-day, daily summary', () async {
+    final pl = await AppLocalizations.delegate.load(const Locale('pl'));
+    await initializeDateFormatting();
+    final now = DateTime(2026, 10, 30, 13, 0);
+    final evs = [
+      Ev('Demo sprintu', 'w', DateTime(2026, 10, 30, 14), DateTime(2026, 10, 30, 15), id: 'a', reminder: 15, location: 'Sala 4B'),
+      Ev('Bez przypomnienia', 'w', DateTime(2026, 10, 30, 16), DateTime(2026, 10, 30, 17), id: 'b', customReminder: true),
+      Ev('Domyślne', 'w', DateTime(2026, 10, 31, 10), DateTime(2026, 10, 31, 11), id: 'c'),
+      Ev('Odrzucone', 'w', DateTime(2026, 10, 31, 12), DateTime(2026, 10, 31, 13), id: 'd', organizer: false,
+          guests: const [Guest('Ja', 'ja@x.pl', 'declined', self: true)]),
+      Ev('Wszystkich Świętych', 'h', DateTime(2026, 11, 1), DateTime(2026, 11, 2), id: 'e', allDay: true),
+      Ev('Minione', 'w', DateTime(2026, 10, 30, 9), DateTime(2026, 10, 30, 10), id: 'f', reminder: 10),
+    ];
+    final p = plan(evs, now, const NotifyPrefs(), pl, 'pl');
+    final byTitle = {for (final n in p) n.title: n};
+    expect(byTitle['Demo sprintu']!.at, DateTime(2026, 10, 30, 13, 45));
+    expect(byTitle['Demo sprintu']!.body, 'Za 15 min · 14:00–15:00 · Sala 4B');
+    expect(byTitle.containsKey('Bez przypomnienia'), isFalse); // "none" chosen in Google
+    expect(byTitle['Domyślne']!.at, DateTime(2026, 10, 31, 9, 50)); // app default: 10 min
+    expect(byTitle.containsKey('Odrzucone'), isFalse);
+    expect(byTitle['Wszystkich Świętych']!.at, DateTime(2026, 10, 31, 9)); // 9:00 the day before
+    expect(byTitle.containsKey('Minione'), isFalse);
+    // Summaries: not for today (7:30 has passed), yes for the 31st with its two timed events (declined one left out).
+    final summaries = [for (final n in p) if (n.summary) n];
+    expect(summaries.map((n) => n.at), [DateTime(2026, 10, 31, 7, 30)]);
+    expect(summaries.single.title, 'Dziś: 1 wydarzenie');
+    expect(plan(evs, now, const NotifyPrefs(summary: false, allDayAt: -1, defaultReminder: -1), pl, 'pl').map((n) => n.title), ['Demo sprintu']);
+  });
+
   testWidgets('marquee waits, scrolls to the end, then starts over', (t) async {
     await t.pumpWidget(const Directionality(
       textDirection: TextDirection.ltr,
@@ -340,6 +373,14 @@ void main() {
     testWidgets('holidays', (t) => shot(t, '04_3_holidays', page: (s) => Holidays(s)));
     testWidgets('share', (t) => shot(t, '04_4_share', page: (s) => Share(s, s.cal('w')!)));
     testWidgets('shared with you', (t) => shot(t, '04_5_shared_with_you', page: (s) => SharedWithYou(s, s.cal('ola.zielinska@gmail.com')!)));
+    testWidgets('settings', (t) => shot(t, '05_1_settings', page: (s) => Settings(s, backLabel: 'Miesiąc')));
+    testWidgets('appearance', (t) => shot(t, '05_2_appearance', page: (s) => Appearance(s)));
+    testWidgets('notifications', (t) => shot(t, '05_3_notifications', page: (s) => Notifications(s)));
+    testWidgets('accounts', (t) => shot(t, '05_4_accounts', page: (s) => Accounts(s)));
+    testWidgets('data', (t) => shot(t, '05_5_data', page: (s) => DataPrivacy(s)));
+    testWidgets('help', (t) => shot(t, '05_6_help', page: (s) => Help(s)));
+    testWidgets('help article', (t) => shot(t, '05_7_article', page: (s) => HelpArticle(s, helpFor('pl').first)));
+    testWidgets('about', (t) => shot(t, '05_8_about', page: (s) => About(s)));
     testWidgets('month light', (t) => shot(t, '02_2_month_light', b: Brightness.light));
   }, skip: _out == null);
 }
