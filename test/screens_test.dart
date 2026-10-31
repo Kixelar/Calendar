@@ -100,17 +100,6 @@ class _FakeGoogle extends GoogleCalendar {
         Access('user:marek@example.com', 'user', 'marek@example.com', 'writer'),
         Access('user:ola@example.com', 'user', 'ola@example.com', 'reader'),
       ];
-
-  @override
-  Future<List<Ev>> search(List<Cal> cals, String query) async {
-    final d = dayOf(DateTime.now());
-    return [
-      Ev('Demo wersji 2.0', 'w', DateTime(d.year, d.month - 1, 18, 11), DateTime(d.year, d.month - 1, 18, 12), location: 'Zoom'),
-      Ev('Demo sprintu', 'w', DateTime(d.year, d.month, d.day - 14, 14), DateTime(d.year, d.month, d.day - 14, 15), location: 'Sala 4B'),
-      _demo(),
-      Ev('Demo sprintu', 'w', DateTime(d.year, d.month, d.day + 14, 14), DateTime(d.year, d.month, d.day + 14, 15), location: 'Sala 4B'),
-    ];
-  }
 }
 
 /// No network: every Google call fails, as on a phone without internet.
@@ -152,6 +141,20 @@ void main() {
     final m = indexByDay(evs, 2026);
     expect(m.keys.toSet(), {DateTime(2026, 12, 30), DateTime(2026, 12, 31), DateTime(2026, 3, 1), DateTime(2026, 3, 5), DateTime(2026, 3, 6)});
     expect(indexByDay(evs, 2027).keys, [DateTime(2027, 1, 1)]);
+  });
+
+  test('search finds parts of titles, places, guests and calendars, offline, without Polish letters', () async {
+    SharedPreferences.setMockInitialValues({'onboarded': true, 'google': true});
+    final online = Store(_FakeGoogle(), Directory.systemTemp.createTempSync());
+    await online.start();
+    online.on(DateTime.now());
+    await Future<void>.delayed(const Duration(milliseconds: 100));
+    Future<List<String>> titles(Store s, String q) async => [for (final e in await s.search(q)) e.title];
+    expect(await titles(online, 'warszt'), ['Warsztaty UX']); // part of a title
+    expect(await titles(online, 'konferencyjna'), ['Warsztaty UX']); // part of the place
+    expect((await titles(online, 'wisniew')).toSet(), {'Demo sprintu', 'Planowanie Q1'}); // guest, no Polish letters
+    expect(await titles(online, 'zielin brunch'), ['Brunch z Olą']); // every word, one from the calendar name
+    expect(await titles(online, 'nic takiego'), isEmpty);
   });
 
   test('ISO week numbers', () {

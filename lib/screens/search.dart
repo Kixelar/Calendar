@@ -8,7 +8,7 @@ import '../store.dart';
 import '../theme.dart';
 import '../ui.dart';
 
-/// 02.5: Google full-text search with calendar / "with guests" filters and recent searches.
+/// 02.5: search in the events on this phone (works offline), with calendar / "with guests" filters.
 class Search extends StatefulWidget {
   const Search(this.store, {super.key, required this.backLabel});
   final Store store;
@@ -18,7 +18,7 @@ class Search extends StatefulWidget {
 }
 
 class _SearchState extends State<Search> {
-  static const _recentKey = 'recentSearches', _recentMax = 6, _guests = '#guests';
+  static const _guests = '#guests';
   final _q = TextEditingController();
   Timer? _debounce;
   List<Ev>? _results;
@@ -27,7 +27,16 @@ class _SearchState extends State<Search> {
   int _seq = 0; // drops answers to older queries that arrive late
 
   Store get store => widget.store;
-  List<String> get _recent => store.prefs.getStringList(_recentKey) ?? const [];
+
+  @override
+  void initState() {
+    super.initState();
+    // Fetch the neighbouring years too (from cache, and from Google when online), so search covers them.
+    final y = DateTime.now().year;
+    for (var i = y - 1; i <= y + 1; i++) {
+      store.on(DateTime(i, 6, 1));
+    }
+  }
 
   @override
   void dispose() {
@@ -38,7 +47,7 @@ class _SearchState extends State<Search> {
 
   void _changed(String _) {
     _debounce?.cancel();
-    _debounce = Timer(const Duration(milliseconds: 400), _run);
+    _debounce = Timer(const Duration(milliseconds: 250), _run);
     setState(() {});
   }
 
@@ -53,9 +62,8 @@ class _SearchState extends State<Search> {
     }
     setState(() => _busy = true);
     try {
-      final r = await store.g.search([for (final c in store.cals) if (c.on) c], q);
+      final r = await store.search(q);
       if (seq != _seq || !mounted) return;
-      await store.prefs.setStringList(_recentKey, [q, ..._recent.where((s) => s != q)].take(_recentMax).toList());
       setState(() {
         _results = r;
         _error = null;
@@ -65,11 +73,6 @@ class _SearchState extends State<Search> {
     } finally {
       if (seq == _seq && mounted) setState(() => _busy = false);
     }
-  }
-
-  void _use(String q) {
-    _q.text = q;
-    _run();
   }
 
   @override
@@ -161,23 +164,6 @@ class _SearchState extends State<Search> {
                 note(l.noResults, t.secondary),
               if (upcoming.isNotEmpty) Section(left: l.upcoming, right: '${upcoming.length}', children: [for (final e in upcoming) row(e, false)]),
               if (past.isNotEmpty) Section(left: l.past, right: '${past.length}', children: [for (final e in past) row(e, true)]),
-              if (_recent.isNotEmpty)
-                Section(
-                  left: l.recentSearches,
-                  trailing: InkWell(
-                    onTap: () async {
-                      await store.prefs.remove(_recentKey);
-                      setState(() {});
-                    },
-                    child: Lbl(l.clear),
-                  ),
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(top: 16),
-                      child: Wrap(spacing: 8, runSpacing: 8, children: [for (final s in _recent) Chip2(s, onTap: () => _use(s))]),
-                    ),
-                  ],
-                ),
             ]),
           ),
         ]),

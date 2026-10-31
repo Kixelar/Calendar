@@ -327,6 +327,30 @@ class Store extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// 02.5: finds events whose title, place, notes, guests, organizer or calendar contain every word of [query]
+  /// (any case, Polish letters optional). Works offline: it reads the loaded and cached years, two back and two ahead.
+  Future<List<Ev>> search(String query) async {
+    final words = fold(query).split(RegExp(r'\s+')).where((w) => w.isNotEmpty).toList();
+    if (words.isEmpty) return const [];
+    final now = DateTime.now(), found = <String, Ev>{};
+    for (var y = now.year - 2; y <= now.year + 2; y++) {
+      final Iterable<Ev> evs = _days[y] != null
+          ? {for (final d in _days[y]!.values) ...d}
+          : switch (await _readAsync('events_$y')) {
+              final List cached when signedIn => _visible([for (final e in cached) Ev.fromJson((e as Map).cast())]),
+              _ => const <Ev>[],
+            };
+      for (final e in evs) {
+        final hay = fold([
+          e.title, e.location, e.notes, e.organizerName, cal(e.calId)?.name,
+          for (final g in e.guests) '${g.name} ${g.email}',
+        ].nonNulls.join(' '));
+        if (words.every(hay.contains)) found['${e.calId}|${e.id}|${e.start.millisecondsSinceEpoch}'] = e;
+      }
+    }
+    return found.values.toList()..sort((a, b) => a.start.compareTo(b.start));
+  }
+
   /// Calendars a new event can go to: shown and writable, holidays excluded.
   List<Cal> get writable => [for (final c in cals) if (c.on && c.writable && !c.holiday) c];
 
@@ -416,6 +440,17 @@ class Store extends ChangeNotifier {
     }
     notifyListeners();
   }
+}
+
+/// Lower case without Polish diacritics, so "zielinska" finds "Zielińska".
+String fold(String s) {
+  const from = 'ąćęłńóśźż', to = 'acelnoszz';
+  final b = StringBuffer();
+  for (final ch in s.toLowerCase().split('')) {
+    final i = from.indexOf(ch);
+    b.write(i < 0 ? ch : to[i]);
+  }
+  return b.toString();
 }
 
 /// Puts each event under every day of [year] it touches (multi-day events appear on each day).

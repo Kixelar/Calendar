@@ -272,25 +272,18 @@ class GoogleCalendar {
   /// Events of [cals] that overlap [from, to), recurring events expanded.
   Future<List<Ev>> events(List<Cal> cals, DateTime from, DateTime to) => _list(cals, from, to);
 
-  /// Google's full-text search (title, description, place, guests) over two years back and ahead (02.5).
-  Future<List<Ev>> search(List<Cal> cals, String query) {
-    final now = DateTime.now();
-    return _list(cals, DateTime(now.year - 2, now.month), DateTime(now.year + 2, now.month), query: query, max: 50);
-  }
-
-  Future<List<Ev>> _list(List<Cal> cals, DateTime from, DateTime to, {String? query, int max = 2500}) async {
+  Future<List<Ev>> _list(List<Cal> cals, DateTime from, DateTime to) async {
     await _authorize(interactive: false);
     final out = <Ev>[];
     await Future.wait(cals.map((cal) async {
       String? page;
       do {
         final r = await _api!.events.list(cal.id,
-            timeMin: from.toUtc(), timeMax: to.toUtc(), singleEvents: true, maxResults: max, pageToken: page, q: query);
+            timeMin: from.toUtc(), timeMax: to.toUtc(), singleEvents: true, maxResults: 2500, pageToken: page);
         for (final e in r.items ?? const <gcal.Event>[]) {
           if (_ev(e, cal) case final ev?) out.add(ev);
         }
-        // A search shows the first page only; a year load needs every page.
-        page = query == null ? r.nextPageToken : null;
+        page = r.nextPageToken;
       } while (page != null);
     }));
     out.sort((a, b) => a.start.compareTo(b.start));
