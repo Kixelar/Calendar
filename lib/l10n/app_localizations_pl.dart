@@ -347,4 +347,205 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get noResults => 'Nic nie znaleziono';
+
+  @override
+  String everyDays(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Co $n dni',
+      one: 'Codziennie',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String everyWeeks(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Co $n tygodni',
+      few: 'Co $n tygodnie',
+      one: 'Co tydzień',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String everyMonths(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Co $n miesięcy',
+      few: 'Co $n miesiące',
+      one: 'Co miesiąc',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String everyYears(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Co $n lat',
+      few: 'Co $n lata',
+      one: 'Co rok',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get weekdaysOn =>
+      'w poniedziałek,we wtorek,w środę,w czwartek,w piątek,w sobotę,w niedzielę';
+
+  @override
+  String get weekdaysAcc =>
+      'poniedziałek,wtorek,środę,czwartek,piątek,sobotę,niedzielę';
+
+  @override
+  String get and => 'i';
+
+  @override
+  String ruleUntil(String date) {
+    return ', do $date';
+  }
+
+  @override
+  String ruleCount(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: ', $n razy',
+      one: ', 1 raz',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get ruleForever => ', bez końca';
+
+  @override
+  String get repeat => 'Powtarzanie';
+
+  @override
+  String get never => 'Nigdy';
+
+  @override
+  String get custom => 'Własne';
+
+  @override
+  String get timeZone => 'Strefa czasowa';
+
+  @override
+  String get invite => 'Zaproś';
+
+  @override
+  String calendarDefault(String value) {
+    return 'Domyślne ($value)';
+  }
+
+  @override
+  String get atStart => 'W chwili rozpoczęcia';
+
+  @override
+  String get every => 'Co';
+
+  @override
+  String get less => 'Mniej';
+
+  @override
+  String get more => 'Więcej';
+
+  @override
+  String get unitDays => 'Dni';
+
+  @override
+  String get unitWeeks => 'Tygodnie';
+
+  @override
+  String get unitMonths => 'Miesiące';
+
+  @override
+  String get unitYears => 'Lata';
+
+  @override
+  String get onDays => 'W dni';
+
+  @override
+  String get ends => 'Kończy się';
+
+  @override
+  String get onDate => 'W dniu';
+
+  @override
+  String get after => 'Po';
+
+  @override
+  String afterTimes(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n razach',
+      one: '1 razie',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get summary => 'Podsumowanie';
+
+  @override
+  String get event => 'Wydarzenie';
+
+  @override
+  String get inviteTitle => 'Zaproś gości';
+
+  @override
+  String get send => 'Wyślij';
+
+  @override
+  String get nameOrEmail => 'Imię lub adres e-mail';
+
+  @override
+  String get selected => 'Wybrani';
+
+  @override
+  String get suggestions => 'Sugestie';
+
+  @override
+  String get guestsCan => 'Goście mogą';
+
+  @override
+  String get canInvite => 'Zapraszać innych';
+
+  @override
+  String get canModify => 'Edytować wydarzenie';
+
+  @override
+  String get canSee => 'Widzieć listę gości';
+
+  @override
+  String get inviteNote =>
+      'Zaproszenie wyślemy e-mailem z Twojego konta Google.';
+
+  @override
+  String get inviteMore => 'Zaproś więcej osób';
+
+  @override
+  String get shareEvent => 'Udostępnij wydarzenie';
+
+  @override
+  String get moreOptions => 'Więcej opcji';
+
+  @override
+  String invitationFrom(String name) {
+    return 'Zaproszenie od: $name';
+  }
+
+  @override
+  String get organizerLabel => 'Organizator';
+
+  @override
+  String get conflict => 'Kolizja';
 }

@@ -4,9 +4,13 @@ import 'dart:io';
 import 'dart:ui' as ui;
 
 import 'package:calendar/google.dart';
+import 'package:calendar/l10n/app_localizations.dart';
 import 'package:calendar/main.dart';
+import 'package:calendar/rrule.dart';
 import 'package:calendar/screens/event.dart';
 import 'package:calendar/screens/home.dart';
+import 'package:calendar/screens/invite.dart';
+import 'package:calendar/screens/repeat.dart';
 import 'package:calendar/screens/onboarding.dart';
 import 'package:calendar/screens/search.dart';
 import 'package:calendar/store.dart';
@@ -28,6 +32,19 @@ Ev _demo() => Ev('Demo sprintu', 'w', DateTime.now().add(const Duration(minutes:
       Guest('Ola Zielińska', 'ola@example.com', 'tentative'),
       Guest('Piotr Kamiński', 'piotr@example.com', 'needsAction'),
     ]);
+
+/// The mockup's 03.5 example: an invitation from Marek that clashes with another event.
+Ev _invitation() {
+  final d = dayOf(DateTime.now());
+  return Ev('Planowanie Q1', 'p', DateTime(d.year, d.month, d.day + 2, 9, 30), DateTime(d.year, d.month, d.day + 2, 11),
+      id: 'inv', organizer: false, organizerName: 'Marek Wiśniewski', location: 'Sala 4B',
+      guests: const [
+        Guest('Marek Wiśniewski', 'marek@example.com', 'accepted'),
+        Guest('Ola Zielińska', 'ola@example.com', 'tentative'),
+        Guest('Piotr Kamiński', 'piotr@example.com', 'needsAction'),
+        Guest('Anna Nowak', 'anna.nowak@gmail.com', 'needsAction', self: true),
+      ]);
+}
 
 /// Google account without a network: calendars and events are made up around today.
 class _FakeGoogle extends GoogleCalendar {
@@ -52,6 +69,8 @@ class _FakeGoogle extends GoogleCalendar {
       Ev('Standup zespołu', 'w', at(0, 8.5), at(0, 9), location: 'Zoom'),
       Ev('Warsztaty UX', 'w', at(0, 10), at(0, 12), location: 'Sala konferencyjna, 3 piętro'),
       _demo(),
+      _invitation(),
+      Ev('Przegląd kodu', 'w', at(2, 10), at(2, 11)),
       Ev('Trening', 'p', at(0, 22), at(0, 23), location: 'Siłownia'),
       Ev('Brunch z Olą', 'o', at(1, 11), at(1, 13), location: 'U Oli'),
       Ev('Koncert', 'p', at(1, 19), at(1, 22), location: 'Stodoła'),
@@ -147,6 +166,25 @@ void main() {
     await Future<void>.delayed(const Duration(milliseconds: 100));
     expect(offline.on(today)!.map((e) => e.title), fetched.map((e) => e.title));
     expect(offline.error, isNotNull);
+  });
+
+  test('repeat rules round-trip and read like the mockup', () async {
+    final pl = await AppLocalizations.delegate.load(const Locale('pl'));
+    final en = await AppLocalizations.delegate.load(const Locale('en'));
+    final r = Rule.parse('RRULE:FREQ=WEEKLY;INTERVAL=2;BYDAY=TU,FR')!;
+    expect(r.describe(pl, 'pl'), 'Co 2 tygodnie we wtorek i piątek, bez końca.');
+    expect(r.describe(en, 'en'), 'Every 2 weeks on Tuesday and Friday, forever.');
+    expect(r.format(), 'RRULE:FREQ=WEEKLY;INTERVAL=2;BYDAY=TU,FR');
+    expect(Rule.parse('RRULE:FREQ=WEEKLY;BYDAY=MO,WE,FR;COUNT=10')!.describe(pl, 'pl'),
+        'Co tydzień w poniedziałek, środę i piątek, 10 razy.');
+    final until = Rule.parse('RRULE:FREQ=DAILY;UNTIL=20261231T225959Z')!;
+    expect(until.until, DateTime(2026, 12, 31));
+    expect(until.format(), 'RRULE:FREQ=DAILY;UNTIL=20261231T235959Z');
+    expect(Rule.parse('RRULE:FREQ=MONTHLY;INTERVAL=3')!.describe(pl, 'pl'), 'Co 3 miesiące, bez końca.');
+    expect(Rule.parse('RRULE:FREQ=YEARLY;COUNT=1')!.describe(pl, 'pl'), 'Co rok, 1 raz.');
+    // Parts the screen does not edit survive a round trip.
+    expect(Rule.parse('RRULE:FREQ=MONTHLY;BYDAY=1MO')!.format(), 'RRULE:FREQ=MONTHLY;BYDAY=1MO');
+    expect(Rule.parse('EXDATE:20261106'), isNull);
   });
 
   testWidgets('marquee waits, scrolls to the end, then starts over', (t) async {
@@ -254,6 +292,16 @@ void main() {
     testWidgets('event', (t) => shot(t, '03_1_event', page: (s) => EventDetails(_demo(), s)));
     testWidgets('new event', (t) => shot(t, '03_2_new_event', page: (s) => EventEdit(s)));
     testWidgets('edit event', (t) => shot(t, '03_2_edit_event', page: (s) => EventEdit(s, ev: _demo())));
+    testWidgets('custom repeat', (t) => shot(t, '03_3_custom_repeat',
+        page: (_) => CustomRepeat(rule: Rule.parse('RRULE:FREQ=WEEKLY;INTERVAL=2;BYDAY=TU,FR')!, start: DateTime.now())));
+    testWidgets('invite', (t) => shot(t, '03_4_invite', page: (s) {
+          s.on(DateTime.now()); // loads people for suggestions
+          return Invite(s,
+              subtitle: 'Demo sprintu · Pt 30 paź',
+              initial: (guests: const [Guest('Magda Lewandowska', 'magda.l@gmail.com', 'needsAction')], invite: true, modify: false, see: true),
+              sendLabel: 'Wyślij');
+        }));
+    testWidgets('invitation', (t) => shot(t, '03_5_invitation', page: (s) => EventDetails(_invitation(), s)));
     testWidgets('delete dialog', (t) => shot(t, '06_2_delete', page: (s) => EventDetails(_demo(), s), tapText: 'USUŃ'));
     testWidgets('year', (t) => shot(t, '02_1_year', tab: 0));
     testWidgets('month', (t) => shot(t, '02_2_month'));

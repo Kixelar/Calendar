@@ -45,36 +45,61 @@ class Ev {
   final String id, title, calId;
   final String? location, notes;
   final String? recurringId; // set on an occurrence of a repeating event: the series' id
+  final List<String>? recurrence; // RRULE/EXDATE lines of a series being created or edited (03.3); null on occurrences
   final DateTime start, end; // local time; for all-day events end is exclusive midnight
   final bool allDay;
   final bool organizer; // this calendar organizes the event (false for invitations from others)
+  final String? organizerName;
   final List<Guest> guests;
   final int? reminder; // minutes before; null = none
+  final bool customReminder; // false: the calendar's default reminders apply
+  final bool guestsInvite, guestsModify, guestsSee; // what guests may do (03.4), Google's defaults
   const Ev(this.title, this.calId, this.start, this.end,
       {this.id = '',
       this.allDay = false,
       this.location,
       this.notes,
       this.recurringId,
+      this.recurrence,
       this.organizer = true,
+      this.organizerName,
       this.guests = const [],
-      this.reminder});
+      this.reminder,
+      this.customReminder = false,
+      this.guestsInvite = true,
+      this.guestsModify = false,
+      this.guestsSee = true});
+
+  /// The signed-in user's own reply when they are a guest, otherwise null.
+  Guest? get me => guests.where((g) => g.self).firstOrNull;
+
+  /// An invitation from someone else that the user can answer (03.5).
+  bool get isInvitation => !organizer && me != null;
 
   /// Offline cache form (store.dart). Times are kept as epoch milliseconds.
   Map<String, Object?> toJson() => {
         'id': id, 't': title, 'c': calId, 's': start.millisecondsSinceEpoch, 'e': end.millisecondsSinceEpoch, 'a': allDay,
-        'l': location, 'n': notes, 'r': recurringId, 'o': organizer, 'g': [for (final g in guests) g.toJson()], 'm': reminder,
+        'l': location, 'n': notes, 'r': recurringId, 'o': organizer, 'on': organizerName, 'g': [for (final g in guests) g.toJson()],
+        'm': reminder, 'cm': customReminder, 'p': [guestsInvite, guestsModify, guestsSee],
       };
-  factory Ev.fromJson(Map<String, Object?> j) => Ev(j['t'] as String, j['c'] as String,
-      DateTime.fromMillisecondsSinceEpoch(j['s'] as int), DateTime.fromMillisecondsSinceEpoch(j['e'] as int),
-      id: j['id'] as String,
-      allDay: j['a'] as bool,
-      location: j['l'] as String?,
-      notes: j['n'] as String?,
-      recurringId: j['r'] as String?,
-      organizer: j['o'] as bool,
-      guests: [for (final g in j['g'] as List) Guest.fromJson(g as List)],
-      reminder: j['m'] as int?);
+  factory Ev.fromJson(Map<String, Object?> j) {
+    final p = (j['p'] as List?) ?? const [true, false, true];
+    return Ev(j['t'] as String, j['c'] as String,
+        DateTime.fromMillisecondsSinceEpoch(j['s'] as int), DateTime.fromMillisecondsSinceEpoch(j['e'] as int),
+        id: j['id'] as String,
+        allDay: j['a'] as bool,
+        location: j['l'] as String?,
+        notes: j['n'] as String?,
+        recurringId: j['r'] as String?,
+        organizer: j['o'] as bool,
+        organizerName: j['on'] as String?,
+        guests: [for (final g in j['g'] as List) Guest.fromJson(g as List)],
+        reminder: j['m'] as int?,
+        customReminder: (j['cm'] as bool?) ?? false,
+        guestsInvite: p[0] as bool,
+        guestsModify: p[1] as bool,
+        guestsSee: p[2] as bool);
+  }
 }
 
 enum DeleteScope { one, following, all }
@@ -193,6 +218,11 @@ class GoogleCalendar {
         notes: e.description,
         recurringId: e.recurringEventId,
         organizer: e.organizer?.self ?? true,
+        organizerName: e.organizer?.displayName ?? e.organizer?.email,
+        customReminder: !(rem?.useDefault ?? true),
+        guestsInvite: e.guestsCanInviteOthers ?? true,
+        guestsModify: e.guestsCanModify ?? false,
+        guestsSee: e.guestsCanSeeOtherGuests ?? true,
         guests: [
           for (final a in e.attendees ?? const <gcal.EventAttendee>[])
             if (a.resource != true) Guest(a.displayName ?? a.email ?? '', a.email ?? '', a.responseStatus ?? 'needsAction', self: a.self ?? false),
@@ -203,24 +233,56 @@ class GoogleCalendar {
   }
 
   /// Creates [e] (empty id) or updates it; [fromCal] is its calendar before the edit when the user moved it.
-  Future<void> save(Ev e, {String? fromCal}) async {
+  /// [timeZone] (IANA, e.g. Europe/Warsaw) is required by Google for repeating timed events.
+  Future<void> save(Ev e, {String? fromCal, required String timeZone}) async {
     await _authorize(interactive: false);
     final api = _api!;
     if (e.id.isNotEmpty && fromCal != null && fromCal != e.calId) await api.events.move(fromCal, e.id, e.calId);
-    // Updating the fetched resource keeps guests, reminders and everything this screen does not edit.
+    // Updating the fetched resource keeps conference links and everything this app does not edit.
     final ev = e.id.isEmpty ? gcal.Event() : await api.events.get(e.calId, e.id);
     final endDay = DateTime(e.end.year, e.end.month, e.end.day); // all-day end is exclusive, as Google expects
+    gcal.EventDateTime at(DateTime t, DateTime day) =>
+        e.allDay ? gcal.EventDateTime(date: day) : gcal.EventDateTime(dateTime: t, timeZone: timeZone);
+    // Existing guests keep their reply; new e-mails are invited.
+    final old = {for (final a in ev.attendees ?? const <gcal.EventAttendee>[]) a.email: a};
     ev
       ..summary = e.title
       ..location = e.location
       ..description = e.notes
-      ..start = e.allDay ? gcal.EventDateTime(date: DateTime(e.start.year, e.start.month, e.start.day)) : gcal.EventDateTime(dateTime: e.start)
-      ..end = e.allDay ? gcal.EventDateTime(date: endDay) : gcal.EventDateTime(dateTime: e.end);
+      ..start = at(e.start, DateTime(e.start.year, e.start.month, e.start.day))
+      ..end = at(e.end, endDay)
+      ..attendees = [for (final g in e.guests) old[g.email] ?? gcal.EventAttendee(email: g.email, displayName: g.name == g.email ? null : g.name)]
+      ..guestsCanInviteOthers = e.guestsInvite
+      ..guestsCanModify = e.guestsModify
+      ..guestsCanSeeOtherGuests = e.guestsSee
+      ..reminders = e.customReminder
+          ? gcal.EventReminders(useDefault: false, overrides: [if (e.reminder != null) gcal.EventReminder(method: 'popup', minutes: e.reminder)])
+          : gcal.EventReminders(useDefault: true);
+    // Occurrences cannot carry a rule; a series or single event can.
+    if (e.recurringId == null && e.recurrence != null) ev.recurrence = e.recurrence!.isEmpty ? null : e.recurrence;
+    final send = e.guests.isEmpty ? 'none' : 'all';
     if (e.id.isEmpty) {
-      await api.events.insert(ev, e.calId);
+      await api.events.insert(ev, e.calId, sendUpdates: send);
     } else {
-      await api.events.update(ev, e.calId, e.id, sendUpdates: e.guests.isEmpty ? 'none' : 'all');
+      await api.events.update(ev, e.calId, e.id, sendUpdates: send);
     }
+  }
+
+  /// Recurrence lines of a series, for the "every 2 weeks" text of an occurrence (03.1).
+  Future<List<String>> recurrence(String calId, String seriesId) async {
+    await _authorize(interactive: false);
+    return (await _api!.events.get(calId, seriesId)).recurrence ?? const [];
+  }
+
+  /// Answers an invitation (03.5): accepted, tentative or declined. The organizer is told.
+  Future<void> respond(Ev e, String status) async {
+    await _authorize(interactive: false);
+    final api = _api!;
+    final ev = await api.events.get(e.calId, e.id);
+    for (final a in ev.attendees ?? const <gcal.EventAttendee>[]) {
+      if (a.self == true) a.responseStatus = status;
+    }
+    await api.events.patch(gcal.Event(attendees: ev.attendees), e.calId, e.id, sendUpdates: 'all');
   }
 
   /// Deletes one occurrence, the series from this occurrence on, or the whole series (06.2).

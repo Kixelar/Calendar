@@ -13,6 +13,8 @@ lib/
   l10n/app_pl.arb        Polish strings
   screens/onboarding.dart  01.1 Welcome, 01.2 Connect, 01.3 Choose (also used as the calendar picker later)
   screens/home.dart        02.1 year, 02.2 month, 02.3 week, 02.4 day views + bottom view tabs and + button
+  screens/repeat.dart      03.3 custom repeat; rules live in lib/rrule.dart (parse, format, Polish/English sentence; tested)
+  screens/invite.dart      03.4 invite guests (suggestions = guests of loaded events, Store.people)
   screens/search.dart      02.5 search (Google `q` full-text search, two years back and ahead, first 50 per calendar)
   screens/event.dart       03.1 event details, 03.2 new/edit event, 06.2 delete dialog, calendar picker
 android/app/src/main/res/values*/strings.xml   Launcher name per device language
@@ -42,6 +44,13 @@ The `google` preference marks a signed-in install (older installs: a saved calen
   the series' RRULE with `UNTIL` just before the occurrence (`endRuleBefore`, tested), or deletes the series if it is
   the first occurrence. "Notify guests" maps to `sendUpdates=all|none`.
 - After any write the per-year cache is cleared and refetched.
+- Repeating events: a new or single event gets `recurrence` (one RRULE line from `Rule.format`); timed events are sent
+  with the device's IANA time zone (MainActivity.kt channel `calendar/device`), which Google requires for series.
+  Occurrences (`recurringId` set) never carry a rule; their rule text is read from the series (`GoogleCalendar.recurrence`).
+- Guests: the attendee list is rebuilt from the screen's list, keeping existing attendees (and their replies) by e-mail;
+  `sendUpdates=all` whenever there are guests. Reminders: `customReminder` false = calendar default, else one popup override.
+- Invitations (`Ev.isInvitation`: someone else organizes and you are a guest) open the 03.5 screen;
+  `GoogleCalendar.respond` patches your attendee status and notifies the organizer.
 - Edit is offered only when the event's calendar is writable and this calendar organizes the event
   (`organizer.self`); invitations from others can be deleted from your calendar but not edited.
 

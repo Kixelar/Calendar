@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -163,10 +164,40 @@ class Store extends ChangeNotifier {
   /// Calendars a new event can go to: shown and writable, holidays excluded.
   List<Cal> get writable => [for (final c in cals) if (c.on && c.writable && !c.holiday) c];
 
+  /// Device time zone as an IANA id (MainActivity.kt); UTC where the channel is missing (tests).
+  Future<String> timeZone() async {
+    try {
+      return await const MethodChannel('calendar/device').invokeMethod<String>('timeZone') ?? 'UTC';
+    } on MissingPluginException {
+      return 'UTC';
+    }
+  }
+
   Future<void> save(Ev e, {String? fromCal}) async {
-    await g.save(e, fromCal: fromCal);
+    await g.save(e, fromCal: fromCal, timeZone: await timeZone());
     _days.clear();
     notifyListeners();
+  }
+
+  Future<void> respond(Ev e, String status) async {
+    await g.respond(e, status);
+    _days.clear();
+    notifyListeners();
+  }
+
+  /// Everyone who appeared as a guest in loaded events, for invite suggestions (03.4).
+  List<Guest> get people {
+    final seen = <String, Guest>{};
+    for (final y in _days.values) {
+      for (final day in y.values) {
+        for (final e in day) {
+          for (final g in e.guests) {
+            if (!g.self && g.email.isNotEmpty) seen.putIfAbsent(g.email, () => g);
+          }
+        }
+      }
+    }
+    return seen.values.toList()..sort((a, b) => a.name.compareTo(b.name));
   }
 
   Future<void> delete(Ev e, DeleteScope scope, {required bool notify}) async {

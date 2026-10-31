@@ -5,6 +5,11 @@
 - 01.4 sync screen after choosing calendars: events counter, progress, status per calendar, "Run in background".
 - Offline cache: calendars and events are saved on the phone, shown at once on start and without internet, then refreshed from Google.
 - 02.5 search: Google full-text search (titles, notes, places, guests), filters by calendar and "with guests", upcoming and past results, recent searches.
+- 03.2 new rows: repeat (never, daily, weekly, monthly, yearly, custom), reminder (calendar default, none, at start, 5 min–1 day), time zone, guests.
+- 03.3 custom repeat: every N days/weeks/months/years, weekdays, ends never / on a date / after N times, summary sentence.
+- 03.4 invite guests: suggestions from people in your events or any e-mail, guest permissions; also from the event screen ("Invite more people", share icon).
+- 03.5 received invitations: organizer, guests, clash with another event, reply Yes / Maybe / No.
+- 03.1 shows how a repeating event repeats ("Every 2 weeks on Tuesday and Friday").
 
 ## 2026.10.30-dev
 ### Added

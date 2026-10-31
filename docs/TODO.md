@@ -16,10 +16,11 @@ Screen numbers refer to docs/design/mockup.html.
 ## Stage 2: events
 - [x] 03.1 Event details (time, title, calendar, place, reminder, notes, guests with replies; edit, delete)
 - [x] 03.2 New / edit event: title, all day, start, end, calendar, place, notes
-- [ ] 03.2 rows still missing: time zone, repeat (→ 03.3), reminder choice, guests (→ 03.4)
-- [ ] 03.1 still missing: repeat description in the meta line ("co 2 tygodnie"), share and "more" icons, notifications switch (→ 07.3)
-- [ ] 03.3 Custom repeat
-- [ ] 03.4 Invite guests, 03.5 Received invitation (reply)
+- [x] 03.2 rows: time zone (read-only, device zone), repeat, reminder, guests
+- [x] 03.1 repeat description, share and "more" icons; notifications switch waits for 07.3
+- [x] 03.3 Custom repeat
+- [x] 03.4 Invite guests, 03.5 Received invitation (reply)
+- [ ] 03.5 "Add to" another calendar and "Propose another time": the Calendar API has no call for either (left out)
 - [x] 06.2 Delete event (only this / this and following / all, notify guests)
 - [ ] 06.1 Empty day, 06.3 Sync conflict
 

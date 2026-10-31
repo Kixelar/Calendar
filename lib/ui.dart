@@ -248,15 +248,16 @@ class Group extends StatelessWidget {
 
 /// Settings-style row: label on the left, value and optional chevron on the right.
 class ValueRow extends StatelessWidget {
-  const ValueRow(this.label, {super.key, this.value, this.trailing, this.onTap});
+  const ValueRow(this.label, {super.key, this.value, this.valueColor, this.trailing, this.onTap});
   final String label;
   final String? value;
+  final Color? valueColor;
   final Widget? trailing;
   final VoidCallback? onTap;
   @override
   Widget build(BuildContext context) => RowItem(onTap: onTap, children: [
         Expanded(child: Text(label)),
-        if (value != null) ConstrainedBox(constraints: const BoxConstraints(maxWidth: 170), child: Lbl(value!)),
+        if (value != null) ConstrainedBox(constraints: const BoxConstraints(maxWidth: 170), child: Lbl(value!, color: valueColor)),
         ?trailing,
         if (onTap != null) Icon(Icons.chevron_right, size: 20, color: Tok.of(context).secondary),
       ]);
@@ -451,3 +452,60 @@ class Chip2 extends StatelessWidget {
     );
   }
 }
+
+/// Person initials in a circle (.av); [filled] for people already chosen (.av-f), [dashed] for "invite more".
+class Avatar extends StatelessWidget {
+  const Avatar(this.name, {super.key, this.filled = false, this.icon});
+  final String name;
+  final bool filled;
+  final IconData? icon; // shown instead of initials
+  @override
+  Widget build(BuildContext context) {
+    final t = Tok.of(context);
+    final words = name.split(RegExp(r'[\s@.]+')).where((w) => w.isNotEmpty).take(2);
+    return Container(
+      width: 36,
+      height: 36,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(shape: BoxShape.circle, color: filled ? t.display : null, border: Border.all(color: filled ? t.display : t.borderControl)),
+      child: icon != null
+          ? Icon(icon, size: 18, color: t.display)
+          : Text(words.map((w) => w[0]).join().toUpperCase(), style: T.labelSm(filled ? t.bg : t.display)),
+    );
+  }
+}
+
+/// Full-screen single choice list (repeat, reminder, calendar). Pops `(value,)` so a null value differs from "back".
+class Pick<V> extends StatelessWidget {
+  const Pick({super.key, required this.title, required this.options, required this.selected, this.leading});
+  final String title;
+  final List<(V, String)> options;
+  final V selected;
+  final Widget Function(V)? leading;
+  @override
+  Widget build(BuildContext context) {
+    final t = Tok.of(context);
+    return Scaffold(
+      body: SafeArea(
+        child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+          const BackBar(),
+          Expanded(
+            child: ListView(padding: const EdgeInsets.fromLTRB(24, 24, 24, 24), children: [
+              Text(title, style: T.headlineLg(t.display)),
+              Group(children: [
+                for (final (v, label) in options)
+                  RowItem(onTap: () => Navigator.pop(context, (v,)), children: [
+                    ?leading?.call(v),
+                    Expanded(child: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis)),
+                    if (v == selected) Icon(Icons.check, size: 20, color: t.display),
+                  ]),
+              ]),
+            ]),
+          ),
+        ]),
+      ),
+    );
+  }
+}
+
+Future<(V,)?> pick<V>(BuildContext c, Pick<V> page) => Navigator.push<(V,)>(c, MaterialPageRoute(builder: (_) => page));

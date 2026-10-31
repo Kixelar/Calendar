@@ -661,6 +661,288 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Nothing found'**
   String get noResults;
+
+  /// No description provided for @everyDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{Every day} other{Every {n} days}}'**
+  String everyDays(int n);
+
+  /// No description provided for @everyWeeks.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{Every week} other{Every {n} weeks}}'**
+  String everyWeeks(int n);
+
+  /// No description provided for @everyMonths.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{Every month} other{Every {n} months}}'**
+  String everyMonths(int n);
+
+  /// No description provided for @everyYears.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{Every year} other{Every {n} years}}'**
+  String everyYears(int n);
+
+  /// No description provided for @weekdaysOn.
+  ///
+  /// In en, this message translates to:
+  /// **'on Monday,on Tuesday,on Wednesday,on Thursday,on Friday,on Saturday,on Sunday'**
+  String get weekdaysOn;
+
+  /// No description provided for @weekdaysAcc.
+  ///
+  /// In en, this message translates to:
+  /// **'Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday'**
+  String get weekdaysAcc;
+
+  /// No description provided for @and.
+  ///
+  /// In en, this message translates to:
+  /// **'and'**
+  String get and;
+
+  /// No description provided for @ruleUntil.
+  ///
+  /// In en, this message translates to:
+  /// **', until {date}'**
+  String ruleUntil(String date);
+
+  /// No description provided for @ruleCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{, once} other{, {n} times}}'**
+  String ruleCount(int n);
+
+  /// No description provided for @ruleForever.
+  ///
+  /// In en, this message translates to:
+  /// **', forever'**
+  String get ruleForever;
+
+  /// No description provided for @repeat.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeat'**
+  String get repeat;
+
+  /// No description provided for @never.
+  ///
+  /// In en, this message translates to:
+  /// **'Never'**
+  String get never;
+
+  /// No description provided for @custom.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get custom;
+
+  /// No description provided for @timeZone.
+  ///
+  /// In en, this message translates to:
+  /// **'Time zone'**
+  String get timeZone;
+
+  /// No description provided for @invite.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite'**
+  String get invite;
+
+  /// No description provided for @calendarDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Default ({value})'**
+  String calendarDefault(String value);
+
+  /// No description provided for @atStart.
+  ///
+  /// In en, this message translates to:
+  /// **'At start'**
+  String get atStart;
+
+  /// No description provided for @every.
+  ///
+  /// In en, this message translates to:
+  /// **'Every'**
+  String get every;
+
+  /// No description provided for @less.
+  ///
+  /// In en, this message translates to:
+  /// **'Less'**
+  String get less;
+
+  /// No description provided for @more.
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get more;
+
+  /// No description provided for @unitDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Days'**
+  String get unitDays;
+
+  /// No description provided for @unitWeeks.
+  ///
+  /// In en, this message translates to:
+  /// **'Weeks'**
+  String get unitWeeks;
+
+  /// No description provided for @unitMonths.
+  ///
+  /// In en, this message translates to:
+  /// **'Months'**
+  String get unitMonths;
+
+  /// No description provided for @unitYears.
+  ///
+  /// In en, this message translates to:
+  /// **'Years'**
+  String get unitYears;
+
+  /// No description provided for @onDays.
+  ///
+  /// In en, this message translates to:
+  /// **'On days'**
+  String get onDays;
+
+  /// No description provided for @ends.
+  ///
+  /// In en, this message translates to:
+  /// **'Ends'**
+  String get ends;
+
+  /// No description provided for @onDate.
+  ///
+  /// In en, this message translates to:
+  /// **'On date'**
+  String get onDate;
+
+  /// No description provided for @after.
+  ///
+  /// In en, this message translates to:
+  /// **'After'**
+  String get after;
+
+  /// No description provided for @afterTimes.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{1 time} other{{n} times}}'**
+  String afterTimes(int n);
+
+  /// No description provided for @summary.
+  ///
+  /// In en, this message translates to:
+  /// **'Summary'**
+  String get summary;
+
+  /// No description provided for @event.
+  ///
+  /// In en, this message translates to:
+  /// **'Event'**
+  String get event;
+
+  /// No description provided for @inviteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite guests'**
+  String get inviteTitle;
+
+  /// No description provided for @send.
+  ///
+  /// In en, this message translates to:
+  /// **'Send'**
+  String get send;
+
+  /// No description provided for @nameOrEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Name or e-mail address'**
+  String get nameOrEmail;
+
+  /// No description provided for @selected.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected'**
+  String get selected;
+
+  /// No description provided for @suggestions.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggestions'**
+  String get suggestions;
+
+  /// No description provided for @guestsCan.
+  ///
+  /// In en, this message translates to:
+  /// **'Guests can'**
+  String get guestsCan;
+
+  /// No description provided for @canInvite.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite others'**
+  String get canInvite;
+
+  /// No description provided for @canModify.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit the event'**
+  String get canModify;
+
+  /// No description provided for @canSee.
+  ///
+  /// In en, this message translates to:
+  /// **'See the guest list'**
+  String get canSee;
+
+  /// No description provided for @inviteNote.
+  ///
+  /// In en, this message translates to:
+  /// **'We will e-mail the invitation from your Google account.'**
+  String get inviteNote;
+
+  /// No description provided for @inviteMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite more people'**
+  String get inviteMore;
+
+  /// No description provided for @shareEvent.
+  ///
+  /// In en, this message translates to:
+  /// **'Share event'**
+  String get shareEvent;
+
+  /// No description provided for @moreOptions.
+  ///
+  /// In en, this message translates to:
+  /// **'More options'**
+  String get moreOptions;
+
+  /// No description provided for @invitationFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'Invitation from {name}'**
+  String invitationFrom(String name);
+
+  /// No description provided for @organizerLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Organizer'**
+  String get organizerLabel;
+
+  /// No description provided for @conflict.
+  ///
+  /// In en, this message translates to:
+  /// **'Conflict'**
+  String get conflict;
 }
 
 class _AppLocalizationsDelegate

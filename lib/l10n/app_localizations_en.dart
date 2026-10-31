@@ -344,4 +344,202 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noResults => 'Nothing found';
+
+  @override
+  String everyDays(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Every $n days',
+      one: 'Every day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String everyWeeks(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Every $n weeks',
+      one: 'Every week',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String everyMonths(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Every $n months',
+      one: 'Every month',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String everyYears(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Every $n years',
+      one: 'Every year',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get weekdaysOn =>
+      'on Monday,on Tuesday,on Wednesday,on Thursday,on Friday,on Saturday,on Sunday';
+
+  @override
+  String get weekdaysAcc =>
+      'Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday';
+
+  @override
+  String get and => 'and';
+
+  @override
+  String ruleUntil(String date) {
+    return ', until $date';
+  }
+
+  @override
+  String ruleCount(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: ', $n times',
+      one: ', once',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get ruleForever => ', forever';
+
+  @override
+  String get repeat => 'Repeat';
+
+  @override
+  String get never => 'Never';
+
+  @override
+  String get custom => 'Custom';
+
+  @override
+  String get timeZone => 'Time zone';
+
+  @override
+  String get invite => 'Invite';
+
+  @override
+  String calendarDefault(String value) {
+    return 'Default ($value)';
+  }
+
+  @override
+  String get atStart => 'At start';
+
+  @override
+  String get every => 'Every';
+
+  @override
+  String get less => 'Less';
+
+  @override
+  String get more => 'More';
+
+  @override
+  String get unitDays => 'Days';
+
+  @override
+  String get unitWeeks => 'Weeks';
+
+  @override
+  String get unitMonths => 'Months';
+
+  @override
+  String get unitYears => 'Years';
+
+  @override
+  String get onDays => 'On days';
+
+  @override
+  String get ends => 'Ends';
+
+  @override
+  String get onDate => 'On date';
+
+  @override
+  String get after => 'After';
+
+  @override
+  String afterTimes(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n times',
+      one: '1 time',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get summary => 'Summary';
+
+  @override
+  String get event => 'Event';
+
+  @override
+  String get inviteTitle => 'Invite guests';
+
+  @override
+  String get send => 'Send';
+
+  @override
+  String get nameOrEmail => 'Name or e-mail address';
+
+  @override
+  String get selected => 'Selected';
+
+  @override
+  String get suggestions => 'Suggestions';
+
+  @override
+  String get guestsCan => 'Guests can';
+
+  @override
+  String get canInvite => 'Invite others';
+
+  @override
+  String get canModify => 'Edit the event';
+
+  @override
+  String get canSee => 'See the guest list';
+
+  @override
+  String get inviteNote =>
+      'We will e-mail the invitation from your Google account.';
+
+  @override
+  String get inviteMore => 'Invite more people';
+
+  @override
+  String get shareEvent => 'Share event';
+
+  @override
+  String get moreOptions => 'More options';
+
+  @override
+  String invitationFrom(String name) {
+    return 'Invitation from $name';
+  }
+
+  @override
+  String get organizerLabel => 'Organizer';
+
+  @override
+  String get conflict => 'Conflict';
 }
