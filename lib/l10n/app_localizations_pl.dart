@@ -1036,4 +1036,19 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get saveRepeating => 'Zapisać zmiany w wydarzeniu cyklicznym?';
+
+  @override
+  String get weekNumbersHint =>
+      'Numer tygodnia przed każdym wierszem widoku miesiąca.';
+
+  @override
+  String get showWeekendsHint =>
+      'Wyłączone: widok miesiąca i tygodnia pokazuje tylko poniedziałek–piątek.';
+
+  @override
+  String get declinedHint =>
+      'Pokazuj w widokach zaproszenia odrzucone przez Ciebie.';
+
+  @override
+  String get dimPastHint => 'Minione wydarzenia i dni są szare.';
 }

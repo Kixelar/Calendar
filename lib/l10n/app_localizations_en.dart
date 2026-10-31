@@ -1027,4 +1027,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get saveRepeating => 'Save changes to a repeating event';
+
+  @override
+  String get weekNumbersHint =>
+      'Week number in front of each row of the month view.';
+
+  @override
+  String get showWeekendsHint =>
+      'Off: the month and week views show Monday to Friday only.';
+
+  @override
+  String get declinedHint => 'Show invitations you declined in the views.';
+
+  @override
+  String get dimPastHint => 'Events and days that are over are shown in grey.';
 }

@@ -12,10 +12,20 @@ import 'view.dart';
 
 AppLocalizations l10n(BuildContext c) => AppLocalizations.of(c)!;
 String loc(BuildContext c) => Localizations.localeOf(c).toString();
-String hm(BuildContext c, DateTime t) => (Look.use24h ? DateFormat.Hm(loc(c)) : DateFormat('h:mm a', loc(c))).format(t);
+// 12-hour times always use "AM/PM": the Polish locale data abbreviates them to "a"/"p".
+String hm(BuildContext c, DateTime t) => Look.use24h ? DateFormat.Hm(loc(c)).format(t) : DateFormat('h:mm a', 'en').format(t);
 
-/// Width of the time column in event rows: 12-hour times ("10:30 PM") need more room.
-double get timeWidth => Look.use24h ? 48 : 72;
+/// The clock part only ("14:00" or "2:00"), for narrow places; [ampm] gives the "PM" that goes under or beside it.
+String hmShort(BuildContext c, DateTime t) => (Look.use24h ? DateFormat.Hm(loc(c)) : DateFormat('h:mm', loc(c))).format(t);
+String ampm(BuildContext c, DateTime t) => Look.use24h ? '' : DateFormat('a', 'en').format(t);
+
+/// Time for the 48px column of event rows: in 12-hour format "AM/PM" goes on a second small line so it fits.
+Widget timeCell(BuildContext c, DateTime t, Color color) => Look.use24h
+    ? Text(hmShort(c, t), softWrap: false, overflow: TextOverflow.visible, style: T.labelMd(color))
+    : Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Text(hmShort(c, t), softWrap: false, overflow: TextOverflow.visible, style: T.labelMd(color)),
+        Text(ampm(c, t), style: T.labelSm(color)),
+      ]);
 
 /// Uppercase small mono label (.lbl).
 class Lbl extends StatelessWidget {
@@ -329,13 +339,13 @@ class EventRow extends StatelessWidget {
     final cal = store.cal(e.calId);
     return RowItem(border: border, onTap: () => openEvent(context, e, store), children: [
       SizedBox(
-        width: timeWidth,
+        width: 48,
         // Like the mockup's span, the time never wraps; it may run a hair past the 48px column.
         child: e.allDay
             ? Center(
                 child: Icon(Icons.wb_sunny_outlined, size: 18, color: t.secondary, semanticLabel: l10n(context).allDay),
               )
-            : Text(hm(context, e.start), softWrap: false, overflow: TextOverflow.visible, style: T.labelMd(past ? t.secondary : t.display)),
+            : Align(alignment: Alignment.centerLeft, child: timeCell(context, e.start, past ? t.secondary : t.display)),
       ),
       Marker(cal?.shape ?? Shape.dot),
       Expanded(

@@ -53,10 +53,10 @@ Widget _timeHero(BuildContext context, Ev e) {
     child: SizedBox(
       height: 56,
       child: Row(crossAxisAlignment: CrossAxisAlignment.end, spacing: 12, children: [
-        Text(e.allDay ? '${e.start.day}' : hm(context, e.start), style: T.displayXl(t.display)),
+        Text(e.allDay ? '${e.start.day}' : hmShort(context, e.start), style: T.displayXl(t.display)),
         Padding(
           padding: const EdgeInsets.only(bottom: 6),
-          child: Text((e.allDay ? l.allDay : '— ${hm(context, e.end)}').toUpperCase(), style: T.labelMd(t.secondary)),
+          child: Text((e.allDay ? l.allDay : '${ampm(context, e.start)} — ${hm(context, e.end)}'.trim()).toUpperCase(), style: T.labelMd(t.secondary)),
         ),
       ]),
     ),
@@ -696,7 +696,7 @@ class _EventEditState extends State<EventEdit> {
           if (!allDay)
             InkWell(
               onTap: () => _pickTime(isStart),
-              child: Padding(padding: const EdgeInsets.symmetric(vertical: 12), child: Text(hm(context, d), style: T.labelMd(t.display))),
+              child: Padding(padding: const EdgeInsets.symmetric(vertical: 12), child: Text(hm(context, d), softWrap: false, style: T.labelMd(t.display))),
             ),
         ]);
     final guestNames = [for (final g in guests.guests) g.name.split(' ').first];

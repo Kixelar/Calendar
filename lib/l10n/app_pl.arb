@@ -282,5 +282,9 @@
   "crashBody": "Skopiuj ten raport i wyślij go twórcy.",
   "close": "Zamknij",
   "copy": "Kopiuj",
-  "saveRepeating": "Zapisać zmiany w wydarzeniu cyklicznym?"
+  "saveRepeating": "Zapisać zmiany w wydarzeniu cyklicznym?",
+  "weekNumbersHint": "Numer tygodnia przed każdym wierszem widoku miesiąca.",
+  "showWeekendsHint": "Wyłączone: widok miesiąca i tygodnia pokazuje tylko poniedziałek–piątek.",
+  "declinedHint": "Pokazuj w widokach zaproszenia odrzucone przez Ciebie.",
+  "dimPastHint": "Minione wydarzenia i dni są szare."
 }

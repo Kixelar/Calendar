@@ -19,6 +19,7 @@ import 'package:calendar/screens/notifications.dart';
 import 'package:calendar/screens/search.dart';
 import 'package:calendar/screens/settings.dart';
 import 'package:calendar/store.dart';
+import 'package:calendar/view.dart';
 import 'package:calendar/ui.dart';
 import 'package:flutter/material.dart';
 import 'package:googleapis/calendar/v3.dart' as gcal;
@@ -304,8 +305,9 @@ void main() {
         Brightness b = Brightness.dark,
         Widget Function(Store)? page,
         String? tapText,
-        Future<void> Function(WidgetTester)? act}) async {
-      SharedPreferences.setMockInitialValues({'onboarded': onboarded, 'google': onboarded});
+        Future<void> Function(WidgetTester)? act,
+        Map<String, Object> prefs = const {}}) async {
+      SharedPreferences.setMockInitialValues({'onboarded': onboarded, 'google': onboarded, ...prefs});
       t.view.physicalSize = const Size(390, 844);
       t.view.devicePixelRatio = 1;
       t.platformDispatcher.localesTestValue = const [Locale('pl')];
@@ -415,6 +417,10 @@ void main() {
             await t.pump(const Duration(milliseconds: 600));
           }
         }));
+    testWidgets('day 12h', (t) async {
+      addTearDown(() => Look.use24h = true);
+      await shot(t, '02_4_day_12h', tab: 3, prefs: {'use24h': false});
+    });
     testWidgets('month light', (t) => shot(t, '02_2_month_light', b: Brightness.light));
   }, skip: _out == null);
 }

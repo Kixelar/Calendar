@@ -333,7 +333,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
     return SizedBox(
       height: 24,
       child: Row(children: [
-        SizedBox(width: 48, child: Text(hm(c, now), style: T.labelSm(t.accentText))),
+        SizedBox(width: 48, child: Text(hmShort(c, now), softWrap: false, style: T.labelSm(t.accentText))),
         const SizedBox(width: 8),
         Container(width: 6, height: 6, decoration: BoxDecoration(color: t.accent, shape: BoxShape.circle)),
         const SizedBox(width: 8),

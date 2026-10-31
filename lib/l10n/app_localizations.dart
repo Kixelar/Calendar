@@ -1795,6 +1795,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Save changes to a repeating event'**
   String get saveRepeating;
+
+  /// No description provided for @weekNumbersHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Week number in front of each row of the month view.'**
+  String get weekNumbersHint;
+
+  /// No description provided for @showWeekendsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Off: the month and week views show Monday to Friday only.'**
+  String get showWeekendsHint;
+
+  /// No description provided for @declinedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Show invitations you declined in the views.'**
+  String get declinedHint;
+
+  /// No description provided for @dimPastHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Events and days that are over are shown in grey.'**
+  String get dimPastHint;
 }
 
 class _AppLocalizationsDelegate

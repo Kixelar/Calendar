@@ -32,11 +32,23 @@ Widget _head(BuildContext c, String over, String? title) => Padding(
       ]),
     );
 
-Widget _switch(String label, bool value, ValueChanged<bool> onChanged, {Widget? extra}) => RowItem(children: [
-      Expanded(child: Text(label)),
-      ?extra,
-      Toggle(value: value, label: label, onChanged: onChanged),
-    ]);
+Widget _switch(String label, bool value, ValueChanged<bool> onChanged, {Widget? extra, String? hint}) => Builder(
+      builder: (c) => RowItem(children: [
+        Expanded(
+          child: hint == null
+              ? Text(label)
+              : Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, spacing: 2, children: [
+                    Text(label),
+                    Text(hint, style: T.bodySm(Tok.of(c).secondary)),
+                  ]),
+                ),
+        ),
+        ?extra,
+        Toggle(value: value, label: label, onChanged: onChanged),
+      ]),
+    );
 
 /// Segmented choice (.seg).
 Widget _seg<V>(BuildContext c, List<(V, String)> options, V value, ValueChanged<V> onChanged) {
@@ -154,14 +166,14 @@ class Appearance extends StatelessWidget {
                 final p = await pick<bool>(context, Pick(title: l.timeFormat, selected: store.use24h, options: const [(true, '24 h'), (false, '12 h')]));
                 if (p != null) await store.set('use24h', p.$1);
               }),
-              _switch(l.weekNumbers, store.weekNumbers, (v) => store.set('weekNumbers', v)),
-              _switch(l.showWeekends, store.weekends, (v) => store.set('weekends', v)),
-              _switch(l.declinedInvites, store.showDeclined, (v) => store.set('showDeclined', v)),
+              _switch(l.weekNumbers, store.weekNumbers, (v) => store.set('weekNumbers', v), hint: l.weekNumbersHint),
+              _switch(l.showWeekends, store.weekends, (v) => store.set('weekends', v), hint: l.showWeekendsHint),
+              _switch(l.declinedInvites, store.showDeclined, (v) => store.set('showDeclined', v), hint: l.declinedHint),
             ]),
             Section(left: l.style, children: [
               _switch(l.dotDigits, store.dotDigits, (v) => store.set('dotDigits', v),
                   extra: ExcludeSemantics(child: Text('30', style: T.displayMd(t.secondary)))),
-              _switch(l.dimPast, store.dimPast, (v) => store.set('dimPast', v)),
+              _switch(l.dimPast, store.dimPast, (v) => store.set('dimPast', v), hint: l.dimPastHint),
             ]),
           ]);
         },
