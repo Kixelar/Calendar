@@ -22,6 +22,15 @@
 - 05.6 / 05.7 help with four how-to articles; 05.8 about: version, build, Android, time zone, licences, typefaces.
 - 07.3 notifications: event reminders with "Snooze 5 min" and "Details", invitations with Yes / Maybe / No, daily summary, changes in shared calendars.
 - 07.1 / 07.2 home screen widgets, dark and light with the system: month (4×4), today (4×2), week (4×1), date (2×2), next event (2×2 and 2×1), date (1×1). Dates update by themselves; events come from the last sync.
+- App icon: "31" in dots with the red dot (adaptive, with a monochrome layer for themed icons); white status bar icon for notifications.
+- Search works offline and finds parts of words in titles, places, notes, guests, organizers and calendar names (case and Polish letters ignored); recent searches removed.
+- "Offline" label next to the search icon when Google cannot be reached (signed-in only), instead of a load error.
+- Calendars: the primary calendar is called "Personal" instead of the account e-mail; birthdays and other people's calendars have their own sections.
+- Custom reminder (any number of minutes, hours or days, up to 4 weeks) for events and as the default.
+- Background sync every 15–60 min while online, also when the app is closed: reminders, invitation notifications and widgets stay fresh.
+### Fixed
+- Invitations from others were treated as own events (Google omits `organizer.self` when false): the reply screen, invitation notifications and the conflict row now work; the notification says how many events it clashes with.
+- Widgets: text and numbers centred by their glyph bounds; blocks centred in the widget.
 - 06.1 empty day: "Nothing planned." with an add button; weekends and holidays read as days off. Holiday events are labelled "Holiday".
 - 06.3 conflicting changes: if the event changed in Google while you edited it, choose this phone's version, Google's, or keep both.
 ### Fixed

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
 import 'l10n/app_localizations.dart';
@@ -17,6 +18,26 @@ Future<void> main() async {
   // After start: permission prompt and a notification that launched the app need the UI and the Home screen.
   await store.notifier!.init(await store.timeZone());
   await store.reschedule();
+  await store.scheduleBackground();
+}
+
+/// Run by Android's WorkManager (SyncWorker.kt) without the app open: fetch the current year, then reminders,
+/// invitation notifications and widgets follow from the same sync code. Always reports back so the job ends.
+@pragma('vm:entry-point')
+Future<void> backgroundSync() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await initializeDateFormatting();
+  try {
+    final store = Store()..notifier = Notifier();
+    await store.start(background: true);
+    if (store.signedIn) {
+      await store.notifier!.init(await store.timeZone(), background: true);
+      await store.syncNow();
+    }
+  } catch (_) {
+    // offline or no silent access: the next run or opening the app tries again
+  }
+  await const MethodChannel('calendar/device').invokeMethod<void>('done');
 }
 
 class App extends StatelessWidget {

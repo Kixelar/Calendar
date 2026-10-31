@@ -90,7 +90,8 @@ class Notifier {
   void Function(String payload, String? action)? onOpen;
   bool _ready = false;
 
-  Future<void> init(String timeZone) async {
+  /// [background]: in the sync job, without asking for permission or reading a launch tap.
+  Future<void> init(String timeZone, {bool background = false}) async {
     if (_ready) return;
     tzdata.initializeTimeZones();
     try {
@@ -101,8 +102,9 @@ class Notifier {
       onDidReceiveNotificationResponse: (r) => onOpen?.call(r.payload ?? '', r.actionId),
       onDidReceiveBackgroundNotificationResponse: notificationTapBackground,
     );
-    await _p.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()?.requestNotificationsPermission();
     _ready = true;
+    if (background) return;
+    await _p.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()?.requestNotificationsPermission();
     final launch = await _p.getNotificationAppLaunchDetails();
     if (launch?.didNotificationLaunchApp ?? false) {
       final r = launch!.notificationResponse;

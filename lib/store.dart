@@ -106,10 +106,23 @@ class Store extends ChangeNotifier {
     }
   }
 
+  /// Fetches the current year now and waits for it (background sync job).
+  Future<void> syncNow() => _load(DateTime.now().year);
+
+  /// Asks Android to run the sync job every [syncMinutes] (at least 15) while online, or stops it (05.4).
+  Future<void> scheduleBackground() async {
+    try {
+      await const MethodChannel('calendar/device').invokeMethod<void>('scheduleSync', signedIn && autoSync ? syncMinutes : 0);
+    } on MissingPluginException {
+      // tests
+    }
+  }
+
   /// After a fresh sync: reminders, plus notifications for new invitations and others' changes in shared calendars.
   Future<void> _afterSync(List<Ev> evs, DateTime? previous) async {
     final n = notifier;
     if (n == null) return;
+    await _p.reload(); // the background job and the app keep separate copies of the preferences
     await reschedule();
     final now = DateTime.now(), p = notifyPrefs;
     String key(Ev e) => '${e.id}|${e.start.millisecondsSinceEpoch}';
@@ -144,6 +157,7 @@ class Store extends ChangeNotifier {
         await _p.setString(key, v);
     }
     if (key == 'showDeclined') _days.clear();
+    if (key == 'autoSync' || key == 'syncMinutes') await scheduleBackground();
     notifyListeners();
     await reschedule(); // reminder settings, or which events count
   }
@@ -205,7 +219,8 @@ class Store extends ChangeNotifier {
     } catch (_) {}
   }
 
-  Future<void> start() async {
+  /// [background]: started by the Android sync job (main.dart `backgroundSync`); it never signs out on failure.
+  Future<void> start({bool background = false}) async {
     _p = await SharedPreferences.getInstance();
     _dir ??= await getApplicationSupportDirectory();
     // Installs from before the cache had no 'google' flag; a saved calendar list means they signed in.
@@ -217,7 +232,10 @@ class Store extends ChangeNotifier {
     notifyListeners();
     if (!signedIn) return;
     try {
-      if (!await g.restore()) return await _lostAccess();
+      if (!await g.restore(silentOnly: background)) {
+        if (background) throw StateError('no silent access'); // the app decides when it is opened
+        return await _lostAccess();
+      }
       await loadCalendars();
       _days.clear(); // refetch the years already shown from the cache
       notifyListeners();
@@ -313,6 +331,7 @@ class Store extends ChangeNotifier {
         putYear(year, evs);
         error = null;
         if (year == DateTime.now().year) {
+          await _p.reload();
           final previous = lastSync;
           await _p.setInt('lastSync', DateTime.now().millisecondsSinceEpoch);
           await _afterSync(evs, previous);

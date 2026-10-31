@@ -57,7 +57,7 @@ class _FakeGoogle extends GoogleCalendar {
   @override
   String? get email => 'anna.nowak@gmail.com';
   @override
-  Future<bool> restore() async => true;
+  Future<bool> restore({bool silentOnly = false}) async => true;
   @override
   Future<List<Cal>> calendars(Set<String>? enabled, {Map<String, Shape> shapes = const {}, String? primaryName}) async => [
         Cal('p', 'Osobisty', shared: false, holiday: false, shape: Shape.dot, on: true),
@@ -108,7 +108,7 @@ class _FakeGoogle extends GoogleCalendar {
 /// No network: every Google call fails, as on a phone without internet.
 class _OfflineGoogle extends GoogleCalendar {
   @override
-  Future<bool> restore() async => throw const SocketException('offline');
+  Future<bool> restore({bool silentOnly = false}) async => throw const SocketException('offline');
   @override
   Future<List<Ev>> events(List<Cal> cals, DateTime from, DateTime to) async => throw const SocketException('offline');
 }

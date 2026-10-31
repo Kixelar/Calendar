@@ -15,7 +15,7 @@ lib/
   screens/home.dart        02.1 year, 02.2 month, 02.3 week, 02.4 day views + bottom view tabs and + button
   screens/repeat.dart      03.3 custom repeat; rules live in lib/rrule.dart (parse, format, Polish/English sentence; tested)
   screens/invite.dart      03.4 invite guests (suggestions = guests of loaded events, Store.people)
-  screens/search.dart      02.5 search (Google `q` full-text search, two years back and ahead, first 50 per calendar)
+  screens/search.dart      02.5 search in the events on the phone (`Store.search`: substrings, Polish letters folded, two years back and ahead)
   screens/calendars.dart   04.1 calendars, 04.2 add, 04.3 holidays (Google holiday calendars by country), 04.4 share (ACL), 04.5 shared with you
   screens/settings.dart    05.1 settings, 05.2 appearance, 05.4 accounts, 05.5 data, 05.6/05.7 help (texts in lib/help.dart), 05.8 about
   screens/notifications.dart  05.3 notification settings
@@ -78,6 +78,13 @@ Each widget is an `AppWidgetProvider` that draws one bitmap with Canvas, using t
 dark/light mode. Dates are computed natively (updated every 30 min by Android, so the date flips within 30 min after
 midnight); events and strings come from `Store.updateWidgets` (next 14 days, sent after every sync and setting change).
 Tapping a widget opens the app.
+
+## Background sync (05.4)
+`Store.scheduleBackground` asks Android (channel `scheduleSync`) to run `SyncWorker` every N minutes (min 15) when
+online. The worker starts a Flutter engine without UI and runs `backgroundSync` in main.dart: `Store.start(background:
+true)` (silent Google access only, never signs out), `syncNow()`, which saves the year, reschedules reminders, shows
+invitation notifications and updates widgets; then it calls `done`. `Device.kt` serves the channel on both engines.
+Preferences are reloaded before comparing sync state, since each engine keeps its own copy.
 
 ## Settings
 05.x settings live in SharedPreferences (`Store.set`). `App` copies the view ones to `Look` on every change.

@@ -34,7 +34,7 @@ Screen numbers refer to docs/design/mockup.html.
 - [x] 05.1–05.8 Settings, appearance, notifications, accounts, data & privacy, help, about
 - [ ] 05.3 Glyph section (light on reminder, pattern, countdown): needs the Nothing Glyph Developer Kit (owner decision)
 - [ ] 05.4 "On this device" account and "Wi-Fi only": no local calendars / no background sync yet
-- [ ] 05.4 background sync when the app is closed (WorkManager); now: on open, on resume and on a timer while open
+- [x] 05.4 background sync when the app is closed (WorkManager, every 15–60 min, online only)
 - [ ] 05.5 import / export .ics, daily backup, app lock, anonymous statistics (owner decision; the app collects none)
 - [ ] 05.6 contact rows ("Write to support", "Report a bug"): need a support address (owner)
 - [ ] 05.8 terms and privacy policy rows, update check
@@ -46,4 +46,4 @@ Screen numbers refer to docs/design/mockup.html.
 - [x] 07.3 Event notifications (scheduled for the next 7 days at every sync; Glyph countdown waits for the SDK)
 - [ ] Glyph interface on Nothing phones (Glyph Developer Kit)
 - [x] Release signing key
-- [ ] App icon
+- [x] App icon

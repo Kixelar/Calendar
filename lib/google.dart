@@ -156,11 +156,13 @@ class GoogleCalendar {
   }
 
   /// Restores calendar access on app start; true when it is still granted.
-  Future<bool> restore() async {
+  /// [silentOnly] (background sync) never falls back to sign-in, which may need UI.
+  Future<bool> restore({bool silentOnly = false}) async {
     await _init();
     // Calendar calls need only an authorization token, which Android hands out without UI once granted.
     // Lightweight sign-in would pop an account sheet whenever One Tap auto-select is unavailable, so it is the fallback.
     if (await _authorize(interactive: false)) return true;
+    if (silentOnly) return false;
     user = await GoogleSignIn.instance.attemptLightweightAuthentication();
     return user != null && await _authorize(interactive: false);
   }

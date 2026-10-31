@@ -17,24 +17,21 @@
 
 ## Not checked on a device yet
 - Everything added on 2026-10-31 after the event writes: search, repeat/guests/invitations, calendars and sharing,
-  settings, notifications (exact alarms, snooze, actions), home screen widgets (drawn natively; not seen on a screen).
+  settings, notifications (exact alarms, snooze, actions), home screen widgets (drawn natively; not seen on a screen),
+  background sync (WorkManager), invitation replies after the organizer fix.
 
 ## Waiting for the owner (decisions or material)
-- **App icon** (graphics from the owner).
-- **Glyph Interface** (05.3 section, 07.3 countdown): needs the Nothing Glyph Developer Kit.
-- **Terms and privacy policy** texts (welcome caption, 05.8 rows) and a **support address** (05.6 contact rows).
-- **.ics**: subscribe by URL (04.2), import / export file (05.5). The Calendar API cannot add URL subscriptions;
-  it needs an in-app importer. Same question for daily backup and app lock.
-- **CalDAV / Outlook / iCloud** accounts (01.2, 04.2): a separate sync engine.
-- **Holiday filters** (04.3 "days off / religious / name days"): Google holiday calendars do not carry these kinds; name days do not exist there.
-- **Background sync when the app is closed** (05.4): needs WorkManager and Google auth outside the app; notifications
-  and widgets are refreshed only when the app runs (date widgets still update by themselves).
+- **Glyph Interface** (05.3 section, 07.3 countdown): yes, later (owner, 2026-10-31).
+- **Terms and privacy policy** texts and a **support address**: to be done together (owner agreed).
+- **.ics** subscribe / import / export (04.2, 05.5): agreed to build an in-app importer (owner, 2026-10-31), not started.
+- **CalDAV / Outlook / iCloud**: dropped for now (owner).
+- **Holiday filters / name days**: dropped for now (owner).
 
 ## Traps
 - Gradle/Java does not run in Claude's sandbox: build APKs in the owner's terminal (docs/WORKFLOW.md), and run
   `flutter pub get` there after adding packages (different pub cache).
 - Build numbers must keep growing: 30000000 + minutes since 2026-01-01 UTC, and never below the last one sent
-  (30436891 on 2026-10-31).
+  (30436910 on 2026-10-31).
 - `google_sign_in` 7.x gives no refresh token: always get the token through `GoogleCalendar._authorize` before an API call.
 - Builds are signed with the app's own key in `<keystore folder>/` (docs/WORKFLOW.md); its SHA-1 is in the Android OAuth client.
 - ARB files: append keys as text; re-dumping them with a JSON tool reformats the whole file.

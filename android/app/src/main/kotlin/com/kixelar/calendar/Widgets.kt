@@ -131,7 +131,8 @@ abstract class CalendarWidget : AppWidgetProvider() {
     }
 }
 
-/** Canvas helpers in mockup units (dp) and the mockup's text styles. */
+/** Canvas helpers in mockup units (dp) and the mockup's text styles. Text is placed by its glyph bounds, not font
+ *  metrics: Ndot's metrics carry large margins, which pushed numbers off centre. */
 class Painter(
     val context: Context, val c: Canvas, val w: Float, val h: Float, val density: Float,
     val col: Widgets.Colors, val data: Widgets.Data,
@@ -148,15 +149,36 @@ class Painter(
     fun caption(color: Int) = paint(Widgets.font(context, "LetteraMonoLL-Regular.otf"), 12f, color)
     fun body(color: Int) = paint(Widgets.sans(context), 14f, color)
 
-    /** Text with its top at [top] (CSS-like), optional right or centre alignment at [x]. */
-    fun text(s: String, x: Float, top: Float, p: Paint, align: Paint.Align = Paint.Align.LEFT, maxWidth: Float = Float.MAX_VALUE) {
-        p.textAlign = align
+    private fun fit(s: String, p: Paint, maxWidth: Float): String {
+        if (p.measureText(s) <= maxWidth) return s
         var t = s
-        if (p.measureText(t) > maxWidth) {
-            while (t.isNotEmpty() && p.measureText("$t…") > maxWidth) t = t.dropLast(1)
-            t = "$t…"
-        }
-        c.drawText(t, x, top - p.fontMetrics.ascent, p)
+        while (t.isNotEmpty() && p.measureText("$t…") > maxWidth) t = t.dropLast(1)
+        return "$t…"
+    }
+
+    /** Height of capital letters / digits of [p], the visual size used for centring. */
+    fun cap(p: Paint): Float {
+        val r = android.graphics.Rect()
+        p.getTextBounds("0H", 0, 2, r)
+        return r.height().toFloat()
+    }
+
+    /** Draws [s] with its capital-letter box vertically centred on [cy]. */
+    fun mid(s: String, x: Float, cy: Float, p: Paint, align: Paint.Align = Paint.Align.LEFT, maxWidth: Float = Float.MAX_VALUE) {
+        p.textAlign = align
+        c.drawText(fit(s, p, maxWidth), x, cy + cap(p) / 2, p)
+    }
+
+    /** Draws [s] with the top of its capitals at [top]. */
+    fun top(s: String, x: Float, top: Float, p: Paint, align: Paint.Align = Paint.Align.LEFT, maxWidth: Float = Float.MAX_VALUE) {
+        p.textAlign = align
+        c.drawText(fit(s, p, maxWidth), x, top + cap(p), p)
+    }
+
+    /** Draws [s] with its baseline at [base]. */
+    fun base(s: String, x: Float, base: Float, p: Paint, align: Paint.Align = Paint.Align.LEFT, maxWidth: Float = Float.MAX_VALUE) {
+        p.textAlign = align
+        c.drawText(fit(s, p, maxWidth), x, base, p)
     }
 
     fun card(radiusDp: Float, fill: Int = col.surface) {
@@ -168,8 +190,8 @@ class Painter(
         }
     }
 
-    fun circle(cx: Float, cy: Float, rDp: Float, color: Int) =
-        c.drawCircle(cx, cy, dp(rDp), Paint(Paint.ANTI_ALIAS_FLAG).apply { this.color = color })
+    fun circle(cx: Float, cy: Float, r: Float, color: Int) =
+        c.drawCircle(cx, cy, r, Paint(Paint.ANTI_ALIAS_FLAG).apply { this.color = color })
 
     fun fmt(pattern: String, d: Date): String = SimpleDateFormat(pattern, locale).format(d)
     fun upper(s: String) = s.uppercase(locale)
@@ -185,8 +207,8 @@ class Painter(
         return data.events.filter { !it.allDay && it.end > now.timeInMillis && it.start < end }.sortedBy { it.start }
     }
 
-    /** The next timed event that has not started, and its label: "In 12 min", "Today", "Tomorrow" or a date. */
-    fun next(): Pair<Widgets.Ev, String>? {
+    /** The next timed event that has not started, its label ("In 12 min", "Today", "Tomorrow", a date) and whether it is soon. */
+    fun next(): Triple<Widgets.Ev, String, Boolean>? {
         val e = data.events.filter { !it.allDay && it.start > now.timeInMillis }.minByOrNull { it.start } ?: return null
         val mins = ((e.start - now.timeInMillis + 59_999) / 60_000).toInt()
         val day = (startOfDay(Calendar.getInstance().apply { timeInMillis = e.start }) - startOfDay(now)) / 86_400_000L
@@ -194,9 +216,9 @@ class Painter(
             mins <= 60 -> String.format(locale, data.inMin, mins)
             day == 0L -> data.today
             day == 1L -> data.tomorrow
-            else -> upper(fmt("EEE d", Date(e.start)))
+            else -> fmt("EEE d", Date(e.start))
         }
-        return e to label
+        return Triple(e, upper(label), mins <= 60)
     }
 
     /** Weekday column of [dow] (Calendar.MONDAY...) for the app's first day of week. */
@@ -213,26 +235,26 @@ class MonthWidget : CalendarWidget() {
     override fun draw(p: Painter) = with(p) {
         card(24f)
         val pad = dp(24f)
-        text(upper(fmt("LLLL", now.time)), pad, pad, label(col.display))
-        text("${now.get(Calendar.YEAR)}", w - pad, pad, caption(col.secondary), Paint.Align.RIGHT)
+        top(upper(fmt("LLLL", now.time)), pad, pad, label(col.display))
+        top("${now.get(Calendar.YEAR)}", w - pad, pad, caption(col.secondary), Paint.Align.RIGHT)
         val cell = (w - 2 * pad) / 7
         val labels = weekdayLabels()
-        val top = pad + dp(28f)
-        for (i in 0 until 7) text(labels[i], pad + cell * i + cell / 2, top, label(col.secondary), Paint.Align.CENTER)
+        val labelsY = pad + dp(36f)
+        for (i in 0 until 7) mid(labels[i], pad + cell * i + cell / 2, labelsY, label(col.secondary), Paint.Align.CENTER)
         val first = (now.clone() as Calendar).apply { set(Calendar.DAY_OF_MONTH, 1) }
         val offset = col(first.get(Calendar.DAY_OF_WEEK))
         val days = now.getActualMaximum(Calendar.DAY_OF_MONTH)
         val rows = (offset + days + 6) / 7
-        val gridTop = top + dp(20f)
-        val rowH = (h - gridTop - pad / 2) / rows
+        val gridTop = labelsY + dp(12f)
+        val rowH = (h - gridTop - pad * 0.75f) / rows
+        val r = minOf(dp(16f), rowH / 2 - dp(2f), cell / 2 - dp(2f))
         val today = now.get(Calendar.DAY_OF_MONTH)
         for (d in 1..days) {
             val i = offset + d - 1
             val cx = pad + cell * (i % 7) + cell / 2
             val cy = gridTop + rowH * (i / 7) + rowH / 2
-            val num = dot(20f, if (d == today) col.surface else if (d < today) col.secondary else col.display)
-            if (d == today) circle(cx, cy, 16f, col.display)
-            text("$d", cx, cy - dp(12f), num, Paint.Align.CENTER)
+            if (d == today) circle(cx, cy, r, col.display)
+            mid("$d", cx, cy, dot(20f, if (d == today) col.surface else if (d < today) col.secondary else col.display), Paint.Align.CENTER)
         }
     }
 }
@@ -241,23 +263,27 @@ class MonthWidget : CalendarWidget() {
 class TodayWidget : CalendarWidget() {
     override fun draw(p: Painter) = with(p) {
         card(24f)
-        val padX = dp(24f); val padY = dp(20f)
-        text(upper(fmt("EEEE", now.time)), padX, padY, label(col.display))
-        text("${now.get(Calendar.DAY_OF_MONTH)}", padX, h / 2 - dp(28f), dot(56f, col.display))
-        text(upper(fmt("LLLL", now.time)), padX, h - padY - dp(16f), caption(col.secondary))
+        val padX = dp(24f)
+        val padY = dp(20f)
+        top(upper(fmt("EEEE", now.time)), padX, padY, label(col.display), maxWidth = dp(104f))
+        mid("${now.get(Calendar.DAY_OF_MONTH)}", padX, h / 2, dot(56f, col.display))
+        base(upper(fmt("LLLL", now.time)), padX, h - padY, caption(col.secondary), maxWidth = dp(104f))
         val left = padX + dp(104f + 24f)
         val right = w - padX
         val evs = todayLeft()
-        text(if (evs.isEmpty()) upper(data.noEvents) else upper(String.format(locale, data.more, evs.size)), left, padY, label(col.secondary),
-            maxWidth = right - left)
-        next()?.let { (e, lbl) -> if (lbl.contains(Regex("\\d")) && e in evs) text(upper(lbl), right, padY, label(col.accentText), Paint.Align.RIGHT) }
+        top(if (evs.isEmpty()) upper(data.noEvents) else upper(String.format(locale, data.more, evs.size)), left, padY, label(col.secondary),
+            maxWidth = right - left - dp(72f))
+        next()?.let { (e, lbl, soon) -> if (soon && e in evs) top(lbl, right, padY, label(col.accentText), Paint.Align.RIGHT) }
+        // Rows share the height under the header evenly, like the mockup's three 32dp rows.
+        val rowsTop = padY + dp(20f)
+        val rowH = (h - padY - rowsTop) / 3
         val line = Paint().apply { color = col.border; strokeWidth = dp(1f) }
         evs.take(3).forEachIndexed { i, e ->
-            val y = padY + dp(20f) + dp(32f) * i
+            val y = rowsTop + rowH * i
             c.drawLine(left, y, right, y, line)
             val first = i == 0
-            text(hm(e.start), left, y + dp(8f), caption(if (first) col.display else col.secondary))
-            text(e.title, left + dp(44f), y + dp(6f), body(if (first) col.display else col.primary), maxWidth = right - left - dp(44f))
+            mid(hm(e.start), left, y + rowH / 2, caption(if (first) col.display else col.secondary))
+            mid(e.title, left + dp(48f), y + rowH / 2, body(if (first) col.display else col.primary), maxWidth = right - left - dp(48f))
         }
     }
 }
@@ -270,32 +296,42 @@ class WeekWidget : CalendarWidget() {
         val start = (now.clone() as Calendar).apply { add(Calendar.DAY_OF_MONTH, -col(now.get(Calendar.DAY_OF_WEEK))) }
         val step = (w - 2 * pad) / 7
         val labels = weekdayLabels()
+        // Label (12) + gap (4) + day circle (32), centred as one block.
+        val blockTop = (h - dp(48f)) / 2
+        val labelY = blockTop + dp(6f)
+        val numY = blockTop + dp(32f)
         for (i in 0 until 7) {
             val d = (start.clone() as Calendar).apply { add(Calendar.DAY_OF_MONTH, i) }
             val isToday = d.get(Calendar.DAY_OF_YEAR) == now.get(Calendar.DAY_OF_YEAR) && d.get(Calendar.YEAR) == now.get(Calendar.YEAR)
             val cx = pad + step * i + step / 2
-            text(labels[i], cx, h / 2 - dp(24f), label(if (isToday) col.display else col.secondary), Paint.Align.CENTER)
-            if (isToday) circle(cx, h / 2 + dp(8f), 16f, col.display)
-            text("${d.get(Calendar.DAY_OF_MONTH)}", cx, h / 2 - dp(4f), dot(20f, if (isToday) col.surface else col.primary), Paint.Align.CENTER)
+            mid(labels[i], cx, labelY, label(if (isToday) col.display else col.secondary), Paint.Align.CENTER)
+            if (isToday) circle(cx, numY, minOf(dp(16f), step / 2 - dp(1f)), col.display)
+            mid("${d.get(Calendar.DAY_OF_MONTH)}", cx, numY, dot(20f, if (isToday) col.surface else col.primary), Paint.Align.CENTER)
         }
     }
 }
 
-/** 2x2: weekday and big date on a dot grid. */
+/** 2x2: weekday and big date on the mockup's dot grid. */
 class DateWidget : CalendarWidget() {
     override fun draw(p: Painter) = with(p) {
         card(24f)
-        val dotPaint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply { color = col.dotOff }
+        val dots = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = col.dotOff }
+        c.save()
+        c.clipPath(android.graphics.Path().apply { addRoundRect(RectF(0f, 0f, w, h), dp(24f), dp(24f), android.graphics.Path.Direction.CW) })
         var y = dp(5f)
-        while (y < h) {
+        while (y < h - dp(2f)) {
             var x = dp(5f)
-            while (x < w) { c.drawCircle(x, y, dp(1f), dotPaint); x += dp(10f) }
+            while (x < w - dp(2f)) {
+                c.drawCircle(x, y, dp(1f), dots)
+                x += dp(10f)
+            }
             y += dp(10f)
         }
+        c.restore()
         val pad = dp(20f)
-        text(upper(fmt("EEEE", now.time)), pad, pad, label(col.display))
-        text("${now.get(Calendar.DAY_OF_MONTH)}", pad, h - pad - dp(56f), dot(56f, col.display))
-        text(upper(fmt("LLL", now.time)).replace(".", ""), w - pad, h - pad - dp(22f), caption(col.secondary), Paint.Align.RIGHT)
+        top(upper(fmt("EEEE", now.time)), pad, pad, label(col.display), maxWidth = w - 2 * pad)
+        base("${now.get(Calendar.DAY_OF_MONTH)}", pad, h - pad, dot(56f, col.display))
+        base(upper(fmt("LLL", now.time)).replace(".", ""), w - pad, h - pad, caption(col.secondary), Paint.Align.RIGHT)
     }
 }
 
@@ -306,37 +342,40 @@ class NextWidget : CalendarWidget() {
         val pad = dp(20f)
         val n = next()
         if (n == null) {
-            text(upper(data.noEvents), pad, pad, label(col.secondary), maxWidth = w - 2 * pad)
+            mid(upper(data.noEvents), w / 2, h / 2, label(col.secondary), Paint.Align.CENTER, w - 2 * pad)
             return@with
         }
-        val (e, lbl) = n
-        text(upper(lbl), pad, pad, label(if (lbl.contains(Regex("\\d"))) col.accentText else col.secondary), maxWidth = w - 2 * pad)
-        text(hm(e.start), pad, h - pad - dp(66f), dot(40f, col.display))
-        text(e.title, pad, h - pad - dp(20f), body(col.primary), maxWidth = w - 2 * pad)
+        val (e, lbl, soon) = n
+        top(lbl, pad, pad, label(if (soon) col.accentText else col.secondary), maxWidth = w - 2 * pad)
+        base(e.title, pad, h - pad, body(col.primary), maxWidth = w - 2 * pad)
+        base(hm(e.start), pad, h - pad - dp(24f), dot(40f, col.display))
     }
 }
 
-/** 2x1 pill: how soon and the time of the next event. */
+/** 2x1 pill: how soon and the time of the next event, centred. */
 class NextSmallWidget : CalendarWidget() {
     override fun draw(p: Painter) = with(p) {
         card(999f)
-        val pad = dp(28f)
         val n = next()
         if (n == null) {
-            text(upper(data.noEvents), pad, h / 2 - dp(6f), label(col.secondary), maxWidth = w - 2 * pad)
+            mid(upper(data.noEvents), w / 2, h / 2, label(col.secondary), Paint.Align.CENTER, w - dp(32f))
             return@with
         }
-        val (e, lbl) = n
-        text(upper(lbl), pad, h / 2 - dp(26f), label(if (lbl.contains(Regex("\\d"))) col.accentText else col.secondary), maxWidth = w - 2 * pad)
-        text(hm(e.start), pad, h / 2 - dp(10f), dot(40f, col.display))
+        val (e, lbl, soon) = n
+        // Label + gap + time, centred as one block on both axes.
+        val lp = label(if (soon) col.accentText else col.secondary)
+        val tp = dot(40f, col.display)
+        val gap = dp(6f)
+        val topY = (h - (cap(lp) + gap + cap(tp))) / 2
+        top(lbl, w / 2, topY, lp, Paint.Align.CENTER, w - dp(32f))
+        top(hm(e.start), w / 2, topY + cap(lp) + gap, tp, Paint.Align.CENTER)
     }
 }
 
 /** 1x1: today's date in a filled circle. */
 class DaySmallWidget : CalendarWidget() {
     override fun draw(p: Painter) = with(p) {
-        val r = minOf(w, h) / 2
-        c.drawCircle(w / 2, h / 2, r, android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply { color = col.display })
-        text("${now.get(Calendar.DAY_OF_MONTH)}", w / 2, h / 2 - dp(20f), dot(40f, col.bg), Paint.Align.CENTER)
+        circle(w / 2, h / 2, minOf(w, h) / 2, col.display)
+        mid("${now.get(Calendar.DAY_OF_MONTH)}", w / 2, h / 2, dot(40f, col.bg), Paint.Align.CENTER)
     }
 }
