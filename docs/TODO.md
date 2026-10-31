@@ -49,4 +49,4 @@ Screen numbers refer to docs/design/mockup.html.
 - [x] App icon
 - [ ] Widgets do not switch light/dark with the system theme (owner, 2026-10-31)
 - [ ] Owner to test background sync (Settings → Accounts → "In the background")
-- [ ] Google Tasks as a "Tasks" calendar (needs the Tasks API: new scope, enabled in Google Cloud; owner decision)
+- Google Tasks: dropped (owner, 2026-10-31)

@@ -27,7 +27,7 @@
 - Owner asked what happens when an invitation notification is dismissed: nothing is sent; the invitation stays
   unanswered in Google, the app does not notify about it again (`seenInvites`), and it can still be answered from the
   event (03.5 screen).
-- Decision pending: Google Tasks as a "Tasks" calendar (needs the Tasks API).
+- Google Tasks: not doing it (owner, 2026-10-31).
 
 ## Resolved
 - Crash at start (2026-10-31) was caused by WorkManager (it initialises before app code); removed in 30436952,
