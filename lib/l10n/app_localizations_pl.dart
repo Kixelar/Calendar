@@ -163,10 +163,6 @@ class AppLocalizationsPl extends AppLocalizations {
   String get noEvents => 'Brak wydarzeń';
 
   @override
-  String get loadFailed =>
-      'Nie udało się wczytać wydarzeń. Pociągnij, aby ponowić.';
-
-  @override
   String get weekdays => 'PN,WT,ŚR,CZ,PT,SB,ND';
 
   @override

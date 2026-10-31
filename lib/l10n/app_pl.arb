@@ -41,7 +41,6 @@
   "allDay": "Cały dzień",
   "schedule": "Harmonogram",
   "noEvents": "Brak wydarzeń",
-  "loadFailed": "Nie udało się wczytać wydarzeń. Pociągnij, aby ponowić.",
   "weekdays": "PN,WT,ŚR,CZ,PT,SB,ND",
   "previous": "Poprzedni",
   "following": "Następny",

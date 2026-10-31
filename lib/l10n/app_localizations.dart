@@ -344,12 +344,6 @@ abstract class AppLocalizations {
   /// **'No events'**
   String get noEvents;
 
-  /// No description provided for @loadFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Could not load events. Pull to retry.'**
-  String get loadFailed;
-
   /// No description provided for @weekdays.
   ///
   /// In en, this message translates to:

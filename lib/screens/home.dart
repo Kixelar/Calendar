@@ -107,6 +107,8 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
                       final back = [l.year, l.month, l.week, l.day][tab];
                       Navigator.push(context, MaterialPageRoute(builder: (_) => Search(store, backLabel: back)));
                     }),
+                  // Google could not be reached: the views show what is saved on the phone.
+                  if (store.signedIn && store.error != null) Padding(padding: const EdgeInsets.only(left: 4), child: Lbl(l.offline)),
                   const Spacer(),
                   if (store.signedIn)
                     IconBtn(Icons.layers_outlined, label: l.calendars, onTap: () {
@@ -129,8 +131,6 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
                   padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
                   children: [
                     ...switch (tab) { 0 => _year(context), 1 => _month(context), 2 => _week(context), _ => _day(context) },
-                    if (store.error != null)
-                      Padding(padding: const EdgeInsets.only(top: 24), child: Text(l.loadFailed, style: T.bodySm(t.accentText))),
                   ],
                 ),
               ),

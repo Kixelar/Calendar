@@ -161,9 +161,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noEvents => 'No events';
 
   @override
-  String get loadFailed => 'Could not load events. Pull to retry.';
-
-  @override
   String get weekdays => 'MO,TU,WE,TH,FR,SA,SU';
 
   @override

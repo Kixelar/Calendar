@@ -48,7 +48,6 @@
   "allDay": "All day",
   "schedule": "Schedule",
   "noEvents": "No events",
-  "loadFailed": "Could not load events. Pull to retry.",
   "weekdays": "MO,TU,WE,TH,FR,SA,SU",
   "previous": "Previous",
   "following": "Next",
