@@ -10,6 +10,10 @@
 - 03.4 invite guests: suggestions from people in your events or any e-mail, guest permissions; also from the event screen ("Invite more people", share icon).
 - 03.5 received invitations: organizer, guests, clash with another event, reply Yes / Maybe / No.
 - 03.1 shows how a repeating event repeats ("Every 2 weeks on Tuesday and Friday").
+- 06.1 empty day: "Nothing planned." with an add button; weekends and holidays read as days off. Holiday events are labelled "Holiday".
+- 06.3 conflicting changes: if the event changed in Google while you edited it, choose this phone's version, Google's, or keep both.
+### Fixed
+- Day view shows the day number with a leading zero ("01"), as in the mockup; button labels shrink instead of being cut.
 
 ## 2026.10.30-dev
 ### Added

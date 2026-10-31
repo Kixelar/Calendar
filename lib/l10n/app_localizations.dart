@@ -943,6 +943,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Conflict'**
   String get conflict;
+
+  /// No description provided for @nothingPlanned.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing planned.'**
+  String get nothingPlanned;
+
+  /// No description provided for @freeDay.
+  ///
+  /// In en, this message translates to:
+  /// **'A day off work. Rest or add something for yourself.'**
+  String get freeDay;
+
+  /// No description provided for @openDay.
+  ///
+  /// In en, this message translates to:
+  /// **'This day is free. Add something or keep it that way.'**
+  String get openDay;
+
+  /// No description provided for @addEvent.
+  ///
+  /// In en, this message translates to:
+  /// **'Add event'**
+  String get addEvent;
+
+  /// No description provided for @holiday.
+  ///
+  /// In en, this message translates to:
+  /// **'Holiday'**
+  String get holiday;
+
+  /// No description provided for @syncLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync'**
+  String get syncLabel;
+
+  /// No description provided for @conflictTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Conflicting changes'**
+  String get conflictTitle;
+
+  /// No description provided for @conflictBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{title} was changed on this phone and in Google. Choose the version to keep.'**
+  String conflictBody(String title);
+
+  /// No description provided for @thisPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'This phone'**
+  String get thisPhone;
+
+  /// No description provided for @changedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Changed {time}'**
+  String changedAt(String time);
+
+  /// No description provided for @time.
+  ///
+  /// In en, this message translates to:
+  /// **'Time'**
+  String get time;
+
+  /// No description provided for @titleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get titleLabel;
+
+  /// No description provided for @keepBoth.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep both'**
+  String get keepBoth;
+
+  /// No description provided for @useSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Use selected'**
+  String get useSelected;
 }
 
 class _AppLocalizationsDelegate

@@ -49,6 +49,9 @@ The `google` preference marks a signed-in install (older installs: a saved calen
   Occurrences (`recurringId` set) never carry a rule; their rule text is read from the series (`GoogleCalendar.recurrence`).
 - Guests: the attendee list is rebuilt from the screen's list, keeping existing attendees (and their replies) by e-mail;
   `sendUpdates=all` whenever there are guests. Reminders: `customReminder` false = calendar default, else one popup override.
+- Conflicts (06.3): `Ev.updated` is Google's last-change time when the event was loaded. `save` re-reads the event and
+  throws `EditConflict` if Google's copy is newer; the user keeps this phone's version (`force`), Google's, or both
+  (`Ev.asNew` saves a separate copy).
 - Invitations (`Ev.isInvitation`: someone else organizes and you are a guest) open the 03.5 screen;
   `GoogleCalendar.respond` patches your attendee status and notifies the organizer.
 - Edit is offered only when the event's calendar is writable and this calendar organizes the event

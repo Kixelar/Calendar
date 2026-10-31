@@ -163,5 +163,21 @@
   "invitationFrom": "Invitation from {name}",
   "@invitationFrom": {"placeholders": {"name": {"type": "String"}}},
   "organizerLabel": "Organizer",
-  "conflict": "Conflict"
+  "conflict": "Conflict",
+  "nothingPlanned": "Nothing planned.",
+  "freeDay": "A day off work. Rest or add something for yourself.",
+  "openDay": "This day is free. Add something or keep it that way.",
+  "addEvent": "Add event",
+  "holiday": "Holiday",
+  "syncLabel": "Sync",
+  "conflictTitle": "Conflicting changes",
+  "conflictBody": "{title} was changed on this phone and in Google. Choose the version to keep.",
+  "@conflictBody": {"placeholders": {"title": {"type": "String"}}},
+  "thisPhone": "This phone",
+  "changedAt": "Changed {time}",
+  "@changedAt": {"placeholders": {"time": {"type": "String"}}},
+  "time": "Time",
+  "titleLabel": "Title",
+  "keepBoth": "Keep both",
+  "useSelected": "Use selected"
 }

@@ -54,6 +54,7 @@ class Ev {
   final int? reminder; // minutes before; null = none
   final bool customReminder; // false: the calendar's default reminders apply
   final bool guestsInvite, guestsModify, guestsSee; // what guests may do (03.4), Google's defaults
+  final DateTime? updated; // Google's last change, to catch edits made elsewhere meanwhile (06.3)
   const Ev(this.title, this.calId, this.start, this.end,
       {this.id = '',
       this.allDay = false,
@@ -68,7 +69,13 @@ class Ev {
       this.customReminder = false,
       this.guestsInvite = true,
       this.guestsModify = false,
-      this.guestsSee = true});
+      this.guestsSee = true,
+      this.updated});
+
+  /// A copy saved as a separate new event ("keep both" in 06.3): no id, not part of a series.
+  Ev asNew() => Ev(title, calId, start, end,
+      allDay: allDay, location: location, notes: notes, recurrence: const [], reminder: reminder, customReminder: customReminder,
+      guests: guests, guestsInvite: guestsInvite, guestsModify: guestsModify, guestsSee: guestsSee);
 
   /// The signed-in user's own reply when they are a guest, otherwise null.
   Guest? get me => guests.where((g) => g.self).firstOrNull;
@@ -80,7 +87,7 @@ class Ev {
   Map<String, Object?> toJson() => {
         'id': id, 't': title, 'c': calId, 's': start.millisecondsSinceEpoch, 'e': end.millisecondsSinceEpoch, 'a': allDay,
         'l': location, 'n': notes, 'r': recurringId, 'o': organizer, 'on': organizerName, 'g': [for (final g in guests) g.toJson()],
-        'm': reminder, 'cm': customReminder, 'p': [guestsInvite, guestsModify, guestsSee],
+        'm': reminder, 'cm': customReminder, 'p': [guestsInvite, guestsModify, guestsSee], 'u': updated?.millisecondsSinceEpoch,
       };
   factory Ev.fromJson(Map<String, Object?> j) {
     final p = (j['p'] as List?) ?? const [true, false, true];
@@ -98,11 +105,18 @@ class Ev {
         customReminder: (j['cm'] as bool?) ?? false,
         guestsInvite: p[0] as bool,
         guestsModify: p[1] as bool,
-        guestsSee: p[2] as bool);
+        guestsSee: p[2] as bool,
+        updated: j['u'] == null ? null : DateTime.fromMillisecondsSinceEpoch(j['u'] as int));
   }
 }
 
 enum DeleteScope { one, following, all }
+
+/// Saving found that Google changed the event after it was opened here; [remote] is Google's version (06.3).
+class EditConflict implements Exception {
+  const EditConflict(this.remote);
+  final Ev remote;
+}
 
 class GoogleCalendar {
   GoogleSignInAccount? user;
@@ -223,6 +237,7 @@ class GoogleCalendar {
         guestsInvite: e.guestsCanInviteOthers ?? true,
         guestsModify: e.guestsCanModify ?? false,
         guestsSee: e.guestsCanSeeOtherGuests ?? true,
+        updated: e.updated?.toLocal(),
         guests: [
           for (final a in e.attendees ?? const <gcal.EventAttendee>[])
             if (a.resource != true) Guest(a.displayName ?? a.email ?? '', a.email ?? '', a.responseStatus ?? 'needsAction', self: a.self ?? false),
@@ -234,12 +249,17 @@ class GoogleCalendar {
 
   /// Creates [e] (empty id) or updates it; [fromCal] is its calendar before the edit when the user moved it.
   /// [timeZone] (IANA, e.g. Europe/Warsaw) is required by Google for repeating timed events.
-  Future<void> save(Ev e, {String? fromCal, required String timeZone}) async {
+  /// Throws [EditConflict] when Google's copy changed after [e] was loaded, unless [force].
+  Future<void> save(Ev e, {String? fromCal, required String timeZone, bool force = false}) async {
     await _authorize(interactive: false);
     final api = _api!;
     if (e.id.isNotEmpty && fromCal != null && fromCal != e.calId) await api.events.move(fromCal, e.id, e.calId);
     // Updating the fetched resource keeps conference links and everything this app does not edit.
     final ev = e.id.isEmpty ? gcal.Event() : await api.events.get(e.calId, e.id);
+    final seen = e.updated, now = ev.updated?.toLocal();
+    if (!force && seen != null && now != null && now.isAfter(seen)) {
+      throw EditConflict(_ev(ev, Cal(e.calId, '', shared: false, holiday: false, shape: Shape.dot, on: true))!);
+    }
     final endDay = DateTime(e.end.year, e.end.month, e.end.day); // all-day end is exclusive, as Google expects
     gcal.EventDateTime at(DateTime t, DateTime day) =>
         e.allDay ? gcal.EventDateTime(date: day) : gcal.EventDateTime(dateTime: t, timeZone: timeZone);

@@ -173,8 +173,8 @@ class Store extends ChangeNotifier {
     }
   }
 
-  Future<void> save(Ev e, {String? fromCal}) async {
-    await g.save(e, fromCal: fromCal, timeZone: await timeZone());
+  Future<void> save(Ev e, {String? fromCal, bool force = false}) async {
+    await g.save(e, fromCal: fromCal, timeZone: await timeZone(), force: force);
     _days.clear();
     notifyListeners();
   }

@@ -548,4 +548,51 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get conflict => 'Kolizja';
+
+  @override
+  String get nothingPlanned => 'Nic nie zaplanowano.';
+
+  @override
+  String get freeDay =>
+      'Dzień wolny od pracy. Odpocznij albo dodaj coś dla siebie.';
+
+  @override
+  String get openDay => 'Ten dzień jest wolny. Dodaj coś albo zostaw go tak.';
+
+  @override
+  String get addEvent => 'Dodaj wydarzenie';
+
+  @override
+  String get holiday => 'Święto';
+
+  @override
+  String get syncLabel => 'Synchronizacja';
+
+  @override
+  String get conflictTitle => 'Konflikt zmian';
+
+  @override
+  String conflictBody(String title) {
+    return '$title zmieniono na tym telefonie i w Google. Wybierz wersję, którą zachować.';
+  }
+
+  @override
+  String get thisPhone => 'Ten telefon';
+
+  @override
+  String changedAt(String time) {
+    return 'Zmieniono $time';
+  }
+
+  @override
+  String get time => 'Godzina';
+
+  @override
+  String get titleLabel => 'Tytuł';
+
+  @override
+  String get keepBoth => 'Zachowaj obie';
+
+  @override
+  String get useSelected => 'Użyj wybranej';
 }

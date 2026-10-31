@@ -210,7 +210,7 @@ class _HomeState extends State<Home> {
     return [
       Hero2(
         xl: true,
-        big: '${focus.day}',
+        big: '${focus.day}'.padLeft(2, '0'),
         title: DateFormat.EEEE(loc(c)).format(focus),
         caption: DateFormat('LLLL y', loc(c)).format(focus).toUpperCase(),
         onMove: (d) => go(DateTime(focus.year, focus.month, focus.day + d), 3),
@@ -218,9 +218,9 @@ class _HomeState extends State<Home> {
       if (all.isNotEmpty) Section(left: l.allDay, children: [for (final e in all) EventRow(e, store, now: now)]),
       Section(
         left: l.schedule,
-        right: timed.isEmpty ? null : l.eventsN(timed.length),
+        right: evs == null ? null : l.eventsN(timed.length),
         children: [
-          if (evs == null) const _Loading() else if (timed.isEmpty) _empty(c),
+          if (evs == null) const _Loading() else if (timed.isEmpty) _emptyDay(c, free: focus.weekday >= 6 || all.any(_holiday)),
           for (var i = 0; i < timed.length; i++) ...[
             if (i == nowAt) _nowLine(c, now),
             EventRow(timed[i], store, now: now, red: false, border: i + 1 != nowAt),
@@ -395,6 +395,27 @@ class _HomeState extends State<Home> {
           ]),
         ),
     ];
+  }
+
+  /// 06.1: an empty day says so and offers to add something; weekends and holidays read as days off.
+  Widget _emptyDay(BuildContext c, {required bool free}) {
+    final t = Tok.of(c), l = l10n(c);
+    return Padding(
+      padding: const EdgeInsets.only(top: 48),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, spacing: 8, children: [
+        Text(l.nothingPlanned, style: T.headlineMd(t.display)),
+        Text(free ? l.freeDay : l.openDay, style: T.bodySm(t.secondary)),
+        if (store.signedIn && store.writable.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: 16),
+            child: IntrinsicWidth(
+              child: Btn(l.addEvent, kind: BtnKind.secondary, icon: Icons.add, onTap: () {
+                Navigator.push(c, MaterialPageRoute(builder: (_) => EventEdit(store, day: focus)));
+              }),
+            ),
+          ),
+      ]),
+    );
   }
 
   Widget _empty(BuildContext c) => Padding(

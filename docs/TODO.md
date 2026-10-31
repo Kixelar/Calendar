@@ -22,7 +22,7 @@ Screen numbers refer to docs/design/mockup.html.
 - [x] 03.4 Invite guests, 03.5 Received invitation (reply)
 - [ ] 03.5 "Add to" another calendar and "Propose another time": the Calendar API has no call for either (left out)
 - [x] 06.2 Delete event (only this / this and following / all, notify guests)
-- [ ] 06.1 Empty day, 06.3 Sync conflict
+- [x] 06.1 Empty day, 06.3 Sync conflict (compares Google's `updated` time when saving)
 
 ## Stage 3: calendars and settings
 - [ ] 04.1 Calendars, 04.2 Add calendar, 04.3 Holidays, 04.4 Share calendar, 04.5 Shared with you

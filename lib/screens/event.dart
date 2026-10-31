@@ -107,7 +107,8 @@ Future<void> _inviteAndSave(BuildContext context, Ev e, Store store) async {
         guests: r.guests,
         guestsInvite: r.invite,
         guestsModify: r.modify,
-        guestsSee: r.see));
+        guestsSee: r.see,
+        updated: e.updated));
     if (context.mounted) Navigator.of(context).popUntil((r) => r.isFirst);
   } catch (err) {
     if (context.mounted) _fail(context, err);
@@ -399,10 +400,7 @@ class _EventEditState extends State<EventEdit> {
       return;
     }
     final old = widget.ev;
-    setState(() => busy = true);
-    try {
-      await widget.store.save(
-        Ev(_title.text.trim(), calId, s, e,
+    final draft = Ev(_title.text.trim(), calId, s, e,
             id: old?.id ?? '',
             allDay: allDay,
             location: place,
@@ -414,10 +412,27 @@ class _EventEditState extends State<EventEdit> {
             guests: guests.guests,
             guestsInvite: guests.invite,
             guestsModify: guests.modify,
-            guestsSee: guests.see),
-        fromCal: old?.calId,
-      );
+            guestsSee: guests.see,
+            updated: old?.updated);
+    setState(() => busy = true);
+    try {
+      await widget.store.save(draft, fromCal: old?.calId);
       if (mounted) Navigator.of(context).popUntil((r) => r.isFirst);
+    } on EditConflict catch (c) {
+      if (!mounted) return;
+      setState(() => busy = false);
+      final choice = await Navigator.push<_Keep>(context, MaterialPageRoute(builder: (_) => _Conflict(mine: draft, remote: c.remote)));
+      if (choice == null || !mounted) return;
+      setState(() => busy = true);
+      try {
+        if (choice != _Keep.google) await widget.store.save(choice == _Keep.both ? draft.asNew() : draft, fromCal: old?.calId, force: true);
+        if (mounted) Navigator.of(context).popUntil((r) => r.isFirst);
+      } catch (err) {
+        if (mounted) {
+          setState(() => busy = false);
+          _fail(context, err);
+        }
+      }
     } catch (err) {
       if (mounted) {
         setState(() => busy = false);
@@ -635,6 +650,100 @@ class _EventEditState extends State<EventEdit> {
                   if (v != null) setState(() => notes = v.isEmpty ? null : v);
                 }),
               ]),
+            ]),
+          ),
+        ]),
+      ),
+    );
+  }
+}
+
+enum _Keep { mine, google, both }
+
+/// 06.3: the event changed in Google while it was being edited here; keep one version or both.
+class _Conflict extends StatefulWidget {
+  const _Conflict({required this.mine, required this.remote});
+  final Ev mine, remote;
+  @override
+  State<_Conflict> createState() => _ConflictState();
+}
+
+class _ConflictState extends State<_Conflict> {
+  _Keep picked = _Keep.mine;
+  final _editedAt = DateTime.now();
+
+  @override
+  Widget build(BuildContext context) {
+    final t = Tok.of(context), l = l10n(context), mine = widget.mine, remote = widget.remote;
+    String at(DateTime d) => dayOf(d) == dayOf(DateTime.now()) ? hm(context, d) : '${DateFormat.MMMd(loc(context)).format(d)} ${hm(context, d)}';
+    String time(Ev e) => e.allDay ? l.allDay : '${hm(context, e.start)}–${hm(context, e.end)}';
+    Widget card(_Keep k, String who, DateTime? changed, Ev e) {
+      final on = picked == k;
+      Widget line(String label, String value) => SizedBox(
+            height: 36,
+            child: Row(children: [
+              Text(label, style: T.bodySm(t.secondary)),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Text(value.toUpperCase(),
+                    textAlign: TextAlign.right, style: T.labelMd(on ? t.display : t.primary), maxLines: 1, overflow: TextOverflow.ellipsis),
+              ),
+            ]),
+          );
+      return Semantics(
+        selected: on,
+        button: true,
+        child: GestureDetector(
+          onTap: () => setState(() => picked = k),
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(color: t.surface, border: Border.all(color: on ? t.display : t.borderSubtle), borderRadius: BorderRadius.circular(8)),
+            child: Column(spacing: 12, children: [
+              Row(children: [
+                Expanded(
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, spacing: 2, children: [
+                    Lbl(who, color: t.display),
+                    if (changed != null) Text(l.changedAt(at(changed)), style: T.caption(t.secondary)),
+                  ]),
+                ),
+                Icon(on ? Icons.radio_button_checked : Icons.radio_button_unchecked, size: 24, color: on ? t.display : t.borderControl),
+              ]),
+              Container(
+                decoration: BoxDecoration(border: Border(top: BorderSide(color: t.borderSubtle))),
+                child: Column(children: [
+                  if (mine.title != remote.title) line(l.titleLabel, e.title),
+                  line(l.time, time(e)),
+                  line(l.place, e.location ?? '—'),
+                ]),
+              ),
+            ]),
+          ),
+        ),
+      );
+    }
+
+    return Scaffold(
+      body: SafeArea(
+        child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+          const BackBar(),
+          Expanded(
+            child: ListView(padding: const EdgeInsets.fromLTRB(24, 24, 24, 24), children: [
+              Lbl(l.syncLabel),
+              const SizedBox(height: 8),
+              Text(l.conflictTitle, style: T.headlineLg(t.display)),
+              const SizedBox(height: 8),
+              Text(l.conflictBody(mine.title), style: T.bodySm(t.secondary)),
+              const SizedBox(height: 24),
+              card(_Keep.mine, l.thisPhone, _editedAt, mine),
+              const SizedBox(height: 16),
+              card(_Keep.google, 'Google', remote.updated, remote),
+            ]),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
+            child: Row(spacing: 8, children: [
+              Expanded(child: Btn(l.keepBoth, kind: BtnKind.secondary, onTap: () => Navigator.pop(context, _Keep.both))),
+              Expanded(child: Btn(l.useSelected, onTap: () => Navigator.pop(context, picked))),
             ]),
           ),
         ]),

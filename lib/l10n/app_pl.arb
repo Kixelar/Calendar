@@ -140,5 +140,19 @@
   "moreOptions": "Więcej opcji",
   "invitationFrom": "Zaproszenie od: {name}",
   "organizerLabel": "Organizator",
-  "conflict": "Kolizja"
+  "conflict": "Kolizja",
+  "nothingPlanned": "Nic nie zaplanowano.",
+  "freeDay": "Dzień wolny od pracy. Odpocznij albo dodaj coś dla siebie.",
+  "openDay": "Ten dzień jest wolny. Dodaj coś albo zostaw go tak.",
+  "addEvent": "Dodaj wydarzenie",
+  "holiday": "Święto",
+  "syncLabel": "Synchronizacja",
+  "conflictTitle": "Konflikt zmian",
+  "conflictBody": "{title} zmieniono na tym telefonie i w Google. Wybierz wersję, którą zachować.",
+  "thisPhone": "Ten telefon",
+  "changedAt": "Zmieniono {time}",
+  "time": "Godzina",
+  "titleLabel": "Tytuł",
+  "keepBoth": "Zachowaj obie",
+  "useSelected": "Użyj wybranej"
 }

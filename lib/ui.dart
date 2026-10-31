@@ -158,11 +158,12 @@ enum BtnKind { primary, secondary, danger, text }
 
 /// Pill button (.btn).
 class Btn extends StatelessWidget {
-  const Btn(this.text, {super.key, required this.onTap, this.kind = BtnKind.primary, this.busy = false});
+  const Btn(this.text, {super.key, required this.onTap, this.kind = BtnKind.primary, this.busy = false, this.icon});
   final String text;
   final VoidCallback? onTap;
   final BtnKind kind;
   final bool busy;
+  final IconData? icon;
   @override
   Widget build(BuildContext context) {
     final t = Tok.of(context);
@@ -178,13 +179,17 @@ class Btn extends StatelessWidget {
       child: InkWell(
         customBorder: const StadiumBorder(),
         onTap: busy ? null : onTap,
-        child: SizedBox(
+        child: Container(
           height: 48,
-          child: Center(
-            child: busy
-                ? SizedBox.square(dimension: 16, child: CircularProgressIndicator(strokeWidth: 1.5, color: fg))
-                : Text(text.toUpperCase(), style: T.labelMd(fg), maxLines: 1),
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          alignment: Alignment.center,
+          child: busy
+              ? SizedBox.square(dimension: 16, child: CircularProgressIndicator(strokeWidth: 1.5, color: fg))
+              : Row(mainAxisSize: MainAxisSize.min, spacing: 8, children: [
+                  if (icon != null) Icon(icon, size: 20, color: fg),
+                  // Shrinks a label that is a few pixels too wide (Lettera Mono is broad) instead of cutting it.
+                  Flexible(child: FittedBox(fit: BoxFit.scaleDown, child: Text(text.toUpperCase(), style: T.labelMd(fg), maxLines: 1))),
+                ]),
         ),
       ),
     );
@@ -334,7 +339,7 @@ class EventRow extends StatelessWidget {
       ),
       if (!e.allDay && e.start.isAfter(n) && soon <= 60)
         Lbl(l10n(context).inMin(soon), color: red ? t.accentText : t.primary)
-      else if ((e.location ?? cal?.name) case final s? when s.isNotEmpty)
+      else if ((cal?.holiday ?? false ? l10n(context).holiday : e.location ?? cal?.name) case final s? when s.isNotEmpty)
         ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 110),
           child: Marquee(s.toUpperCase(), style: T.labelSm(t.secondary)),

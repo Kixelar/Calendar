@@ -81,6 +81,14 @@ class _FakeGoogle extends GoogleCalendar {
   }
 
   @override
+  Future<void> save(Ev e, {String? fromCal, required String timeZone, bool force = false}) async {
+    if (force) return;
+    // Someone moved the meeting in Google meanwhile (06.3).
+    throw EditConflict(Ev(e.title, e.calId, e.start.add(const Duration(minutes: 30)), e.end.add(const Duration(minutes: 30)),
+        location: 'Sala 2', updated: DateTime.now().subtract(const Duration(minutes: 1))));
+  }
+
+  @override
   Future<List<Ev>> search(List<Cal> cals, String query) async {
     final d = dayOf(DateTime.now());
     return [
@@ -307,6 +315,17 @@ void main() {
     testWidgets('month', (t) => shot(t, '02_2_month'));
     testWidgets('week', (t) => shot(t, '02_3_week', tab: 2));
     testWidgets('day', (t) => shot(t, '02_4_day', tab: 3));
+    testWidgets('empty day', (t) => shot(t, '06_1_empty_day', tab: 3, act: (t) async {
+          for (var i = 0; i < 3; i++) {
+            await t.tap(find.byTooltip('Następny'));
+            await t.pump();
+          }
+        }));
+    testWidgets('sync conflict', (t) => shot(t, '06_3_conflict', page: (s) => EventEdit(s, ev: _demo()), tapText: 'ZAPISZ', act: (t) async {
+          await t.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50))); // save reaches the fake Google
+          await t.pump();
+          await t.pump(const Duration(milliseconds: 600));
+        }));
     testWidgets('month light', (t) => shot(t, '02_2_month_light', b: Brightness.light));
   }, skip: _out == null);
 }
