@@ -80,15 +80,16 @@ midnight); events and strings come from `Store.updateWidgets` (next 14 days, sen
 Tapping a widget opens the app.
 
 ## Background sync (05.4)
-`Store.scheduleBackground` asks Android (channel `scheduleSync`) to run `SyncWorker` every N minutes (min 15) when
-online. The worker starts a Flutter engine without UI and runs `backgroundSync` in main.dart: `Store.start(background:
+`Store.scheduleBackground` asks Android (channel `scheduleSync`) to run `SyncJob` (framework JobScheduler, no
+WorkManager: that library made the app crash at start) every N minutes (min 15) when online, skipped while the app is
+on screen (`MainActivity.visible`). The job starts a Flutter engine without UI and runs `backgroundSync` in main.dart: `Store.start(background:
 true)` (silent Google access only, never signs out), `syncNow()`, which saves the year, reschedules reminders, shows
 invitation notifications and updates widgets; then it calls `done`. `Device.kt` serves the channel on both engines.
 Preferences are reloaded before comparing sync state, since each engine keeps its own copy.
 
 ## Crash report
 `CalendarApp` (CrashLog.kt) installs an uncaught-exception handler for the whole process (app, widgets, notification
-receivers, SyncWorker) that writes `files/crash.txt`. `CrashActivity` (plain Android, own `:crash` process) opens at once with
+receivers, SyncJob) that writes `files/crash.txt`. `CrashActivity` (plain Android, own `:crash` process) opens at once with
 the report and a Copy button; Home also shows an unread report on the next start (`Store.lastCrash`). Widget drawing errors are recorded the same way without crashing.
 
 ## Settings

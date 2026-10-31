@@ -31,7 +31,7 @@
 - Crash report: if the app (or a widget, reminder or background sync) crashes, a separate screen opens at once with the report and a Copy button (works even when the app dies at start).
 ### Fixed
 - Icon: the last dot is white like the others (the grey one was hard to see); the red sixth dot stays.
-- Background sync cannot crash the app (errors go to the crash report); its first run waits one interval instead of starting together with the app.
+- The app crashed at start since background sync was added (version with WorkManager). WorkManager is removed; background sync now uses Android's JobScheduler (SyncJob.kt) and skips runs while the app is on screen.
 - Widgets cannot crash the app any more (errors go to the crash report) and their bitmaps stay under ~2 MB.
 - Invitations from others were treated as own events (Google omits `organizer.self` when false): the reply screen, invitation notifications and the conflict row now work; the notification says how many events it clashes with.
 - Widgets: text and numbers centred by their glyph bounds; blocks centred in the widget.

@@ -21,7 +21,7 @@ Future<void> main() async {
   await store.scheduleBackground();
 }
 
-/// Run by Android's WorkManager (SyncWorker.kt) without the app open: fetch the current year, then reminders,
+/// Run by Android's JobScheduler (SyncJob.kt) without the app on screen: fetch the current year, then reminders,
 /// invitation notifications and widgets follow from the same sync code. Always reports back so the job ends.
 @pragma('vm:entry-point')
 Future<void> backgroundSync() async {

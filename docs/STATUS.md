@@ -21,8 +21,9 @@
   background sync (WorkManager), invitation replies after the organizer fix.
 
 ## Open problem
-- **The app keeps stopping** on the owner's phone (2026-10-31); cause unknown without a log. The next APK records the
-  crash (CrashLog.kt) and shows it on the next start for the owner to copy and send.
+- **The app crashed at start** on the owner's phone since the build that added WorkManager (2026-10-31); no report
+  could be shown, so the crash happened before app code ran. WorkManager was removed (30436952); not yet confirmed
+  fixed. If it still crashes: uninstall and reinstall, then read logcat over USB.
 
 ## Waiting for the owner (decisions or material)
 - **Glyph Interface** (05.3 section, 07.3 countdown): yes, later (owner, 2026-10-31).
@@ -35,7 +36,7 @@
 - Gradle/Java does not run in Claude's sandbox: build APKs in the owner's terminal (docs/WORKFLOW.md), and run
   `flutter pub get` there after adding packages (different pub cache).
 - Build numbers must keep growing: 30000000 + minutes since 2026-01-01 UTC, and never below the last one sent
-  (30436946 on 2026-10-31).
+  (30436952 on 2026-10-31).
 - `google_sign_in` 7.x gives no refresh token: always get the token through `GoogleCalendar._authorize` before an API call.
 - Builds are signed with the app's own key in `<keystore folder>/` (docs/WORKFLOW.md); its SHA-1 is in the Android OAuth client.
 - ARB files: append keys as text; re-dumping them with a JSON tool reformats the whole file.

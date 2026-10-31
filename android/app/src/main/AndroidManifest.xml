@@ -42,6 +42,8 @@
         <!-- Crash report screen, in its own process so it opens even when the app dies at start (CrashLog.kt). -->
         <activity android:name=".CrashActivity" android:process=":crash" android:exported="false"
             android:theme="@android:style/Theme.Material.NoActionBar" android:excludeFromRecents="true" />
+        <!-- Background sync (SyncJob.kt) -->
+        <service android:name=".SyncJob" android:permission="android.permission.BIND_JOB_SERVICE" android:exported="false" />
         <!-- Home screen widgets 07.1/07.2 (Widgets.kt) -->
         <receiver android:name=".MonthWidget" android:label="@string/widget_month" android:exported="false">
             <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>

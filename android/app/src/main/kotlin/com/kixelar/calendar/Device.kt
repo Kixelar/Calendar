@@ -2,17 +2,11 @@ package com.kixelar.calendar
 
 import android.content.Context
 import android.os.Build
-import androidx.work.Constraints
-import androidx.work.ExistingPeriodicWorkPolicy
-import androidx.work.NetworkType
-import androidx.work.PeriodicWorkRequestBuilder
-import androidx.work.WorkManager
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 import java.util.TimeZone
-import java.util.concurrent.TimeUnit
 
-/** Channel `calendar/device`, on the app's engine and on the background sync engine (SyncWorker). */
+/** Channel `calendar/device`, on the app's engine and on the background sync engine (SyncJob). */
 object Device {
     fun attach(engine: FlutterEngine, context: Context, onDone: (() -> Unit)? = null) {
         MethodChannel(engine.dartExecutor.binaryMessenger, "calendar/device").setMethodCallHandler { call, result ->
@@ -30,21 +24,9 @@ object Device {
                     Widgets.save(context, call.arguments as String)
                     result.success(null)
                 }
-                // 05.4 automatic sync: run SyncWorker every N minutes (WorkManager's minimum is 15) when online; 0 stops it.
+                // 05.4 automatic sync: run SyncJob every N minutes (Android's minimum is 15) when online; 0 stops it.
                 "scheduleSync" -> {
-                    val minutes = (call.arguments as Int)
-                    val wm = WorkManager.getInstance(context)
-                    if (minutes <= 0) {
-                        wm.cancelUniqueWork(SyncWorker.NAME)
-                    } else {
-                        val every = maxOf(15L, minutes.toLong())
-                        // First run after one interval: the app has just synced itself when it schedules this.
-                        val request = PeriodicWorkRequestBuilder<SyncWorker>(every, TimeUnit.MINUTES)
-                            .setInitialDelay(every, TimeUnit.MINUTES)
-                            .setConstraints(Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build())
-                            .build()
-                        wm.enqueueUniquePeriodicWork(SyncWorker.NAME, ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE, request)
-                    }
+                    SyncJob.schedule(context, call.arguments as Int)
                     result.success(null)
                 }
                 // Report of a crash since the last start (CrashLog.kt), shown once by the app.
