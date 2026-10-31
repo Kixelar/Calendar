@@ -1010,4 +1010,15 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get reminderLimit => 'Najwyżej 4 tygodnie przed.';
+
+  @override
+  String clashesWith(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'koliduje z $n wydarzeniami',
+      one: 'koliduje z 1 wydarzeniem',
+    );
+    return '$_temp0';
+  }
 }

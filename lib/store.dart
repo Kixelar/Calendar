@@ -118,7 +118,7 @@ class Store extends ChangeNotifier {
     // The first sync only remembers what is there, so installing the app does not flood the shade.
     if (seen != null && p.invites) {
       for (final e in open.where((e) => !seen.contains(key(e)))) {
-        await n.invitation(e, _l, _lang, p);
+        await n.invitation(e, _l, _lang, p, clashes: clashes(e).length);
       }
     }
     await _p.setStringList('seenInvites', [for (final e in open) key(e)]);
@@ -351,6 +351,14 @@ class Store extends ChangeNotifier {
     }
     return found.values.toList()..sort((a, b) => a.start.compareTo(b.start));
   }
+
+  /// Other timed events on the same day that overlap [e] (03.5 conflict row, invitation notification).
+  List<Ev> clashes(Ev e) => e.allDay
+      ? const []
+      : [
+          for (final o in on(e.start) ?? const <Ev>[])
+            if (o.id != e.id && !o.allDay && o.me?.status != 'declined' && o.start.isBefore(e.end) && o.end.isAfter(e.start)) o,
+        ];
 
   /// Calendars a new event can go to: shown and writable, holidays excluded.
   List<Cal> get writable => [for (final c in cals) if (c.on && c.writable && !c.holiday) c];

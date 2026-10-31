@@ -1759,6 +1759,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Up to 4 weeks before.'**
   String get reminderLimit;
+
+  /// No description provided for @clashesWith.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{clashes with 1 event} other{clashes with {n} events}}'**
+  String clashesWith(int n);
 }
 
 class _AppLocalizationsDelegate

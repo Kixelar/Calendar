@@ -308,7 +308,7 @@ class GoogleCalendar {
         location: e.location,
         notes: e.description,
         recurringId: e.recurringEventId,
-        organizer: e.organizer?.self ?? true,
+        organizer: organizes(e, cal.id),
         organizerName: e.organizer?.displayName ?? e.organizer?.email,
         customReminder: !(rem?.useDefault ?? true),
         guestsInvite: e.guestsCanInviteOthers ?? true,
@@ -397,6 +397,10 @@ class GoogleCalendar {
     await api.events.update(parent, e.calId, series, sendUpdates: send);
   }
 }
+
+/// Whether the calendar [calId] organizes [e]. Google sends `organizer.self` only when it is true, so a missing
+/// value means someone else organizes it (an invitation), unless the organizer is this calendar itself.
+bool organizes(gcal.Event e, String calId) => e.organizer == null || e.organizer!.self == true || e.organizer!.email == calId;
 
 DateTime? _at(gcal.EventDateTime? t) =>
     t?.dateTime?.toLocal() ?? (t?.date == null ? null : DateTime(t!.date!.year, t.date!.month, t.date!.day));

@@ -21,6 +21,7 @@ import 'package:calendar/screens/settings.dart';
 import 'package:calendar/store.dart';
 import 'package:calendar/ui.dart';
 import 'package:flutter/material.dart';
+import 'package:googleapis/calendar/v3.dart' as gcal;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -157,6 +158,14 @@ void main() {
     expect((await titles(online, 'wisniew')).toSet(), {'Demo sprintu', 'Planowanie Q1'}); // guest, no Polish letters
     expect(await titles(online, 'zielin brunch'), ['Brunch z Olą']); // every word, one from the calendar name
     expect(await titles(online, 'nic takiego'), isEmpty);
+  });
+
+  test('invitations are told apart from own events (Google omits organizer.self when false)', () {
+    gcal.Event ev(Map<String, Object?> organizer) => gcal.Event.fromJson({'organizer': organizer});
+    expect(organizes(ev({'email': 'marek@example.com', 'displayName': 'Marek'}), 'anna@gmail.com'), isFalse); // invitation
+    expect(organizes(ev({'email': 'anna@gmail.com', 'self': true}), 'anna@gmail.com'), isTrue); // own event
+    expect(organizes(ev({'email': 'team@group.calendar.google.com'}), 'team@group.calendar.google.com'), isTrue); // shared calendar's own event
+    expect(organizes(gcal.Event(), 'anna@gmail.com'), isTrue);
   });
 
   test('ISO week numbers', () {

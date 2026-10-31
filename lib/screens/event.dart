@@ -235,9 +235,7 @@ class _InvitationState extends State<_Invitation> {
     final t = Tok.of(context), l = l10n(context), e = widget.e, store = widget.store;
     final cal = store.cal(e.calId);
     // Another timed event that overlaps this one, shown in red like the mockup.
-    final clash = (store.on(e.start) ?? const <Ev>[])
-        .where((o) => o.id != e.id && !o.allDay && !e.allDay && o.start.isBefore(e.end) && o.end.isAfter(e.start))
-        .firstOrNull;
+    final clash = store.clashes(e).firstOrNull;
     final others = [for (final g in e.guests) if (!g.self) g.name.split(' ').first];
     final current = e.me?.status == 'needsAction' ? 'accepted' : e.me?.status; // unanswered: "Yes" leads, as in the mockup
     return Scaffold(

@@ -276,5 +276,6 @@
   "customReminder": "Własne przypomnienie",
   "unitMinutes": "Minuty",
   "unitHours": "Godziny",
-  "reminderLimit": "Najwyżej 4 tygodnie przed."
+  "reminderLimit": "Najwyżej 4 tygodnie przed.",
+  "clashesWith": "{n, plural, =1{koliduje z 1 wydarzeniem} other{koliduje z {n} wydarzeniami}}"
 }

@@ -314,5 +314,7 @@
   "customReminder": "Custom reminder",
   "unitMinutes": "Minutes",
   "unitHours": "Hours",
-  "reminderLimit": "Up to 4 weeks before."
+  "reminderLimit": "Up to 4 weeks before.",
+  "clashesWith": "{n, plural, =1{clashes with 1 event} other{clashes with {n} events}}",
+  "@clashesWith": {"placeholders": {"n": {"type": "int"}}}
 }

@@ -144,13 +144,17 @@ class Notifier {
   }
 
   /// A new invitation (07.3): Yes / Maybe / No open the app, which sends the reply.
-  Future<void> invitation(Ev e, AppLocalizations l, String locale, NotifyPrefs p) async {
+  Future<void> invitation(Ev e, AppLocalizations l, String locale, NotifyPrefs p, {int clashes = 0}) async {
     if (!_ready) return;
     final hm = DateFormat.Hm(locale);
     await _p.show(
       id: _id('invite${e.id}${e.start}'),
       title: l.invitesYou(e.organizerName ?? '', e.title),
-      body: '${DateFormat.MMMEd(locale).format(e.start)} · ${hm.format(e.start)}–${hm.format(e.end)}',
+      body: [
+        DateFormat.MMMEd(locale).format(e.start),
+        '${hm.format(e.start)}–${hm.format(e.end)}',
+        if (clashes > 0) l.clashesWith(clashes),
+      ].join(' · '),
       notificationDetails: NotificationDetails(
         android: _channel(l, 'invites', l.invitations, p.hideOnLock, actions: [
           AndroidNotificationAction('accepted', l.rsvpYes, showsUserInterface: true),
