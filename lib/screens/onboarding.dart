@@ -164,8 +164,9 @@ class Choose extends StatelessWidget {
               Expanded(child: Text(c.name, maxLines: 1, overflow: TextOverflow.ellipsis)),
               Toggle(value: c.on, label: c.name, onChanged: (v) => store.toggle(c, v)),
             ]);
-        final own = store.cals.where((c) => !c.shared && !c.holiday);
+        final own = store.cals.where((c) => !c.shared && !c.holiday && !c.birthdays);
         final shared = store.cals.where((c) => c.shared);
+        final birthdays = store.cals.where((c) => c.birthdays);
         final holidays = store.cals.where((c) => c.holiday);
         final n = store.cals.where((c) => c.on).length;
         return _screen(context, top: const BackBar(), body: [
@@ -176,6 +177,7 @@ class Choose extends StatelessWidget {
             children: [for (final c in own) row(c)],
           ),
           if (shared.isNotEmpty) Section(left: l.sharedWithYou, children: [for (final c in shared) row(c)]),
+          if (birthdays.isNotEmpty) Section(left: l.birthdays, children: [for (final c in birthdays) row(c)]),
           if (holidays.isNotEmpty) Section(left: l.suggested, children: [for (final c in holidays) row(c)]),
         ], foot: [
           Btn(onboarding ? l.syncN(n) : l.done, onTap: () {

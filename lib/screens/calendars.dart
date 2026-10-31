@@ -110,9 +110,10 @@ class Calendars extends StatelessWidget {
         listenable: store,
         builder: (context, _) {
           final t = Tok.of(context), l = l10n(context);
-          final mine = [for (final c in store.cals) if (!c.shared && !c.holiday && c.role == 'owner') c];
-          final shared = [for (final c in store.cals) if (c.shared && !c.holiday) c];
-          final subs = [for (final c in store.cals) if (c.holiday || (!c.shared && c.role != 'owner')) c];
+          final mine = [for (final c in store.cals) if (!c.shared && !c.holiday && !c.birthdays) c];
+          final shared = [for (final c in store.cals) if (c.shared) c];
+          final birthdays = [for (final c in store.cals) if (c.birthdays) c];
+          final subs = [for (final c in store.cals) if (c.holiday) c];
           Widget toggle(Cal c) => Toggle(value: c.on, label: c.name, onChanged: (v) => store.toggle(c, v));
           return _page(context, top: BackBar(label: backLabel), body: [
             _head(context, l.visibility, l.calendars),
@@ -135,6 +136,15 @@ class Calendars extends StatelessWidget {
                   RowItem(onTap: () => _go(context, SharedWithYou(store, c)), children: [
                     Marker(c.shape),
                     Expanded(child: _twoLine(context, c.name, roleText(l, c.role))),
+                    toggle(c),
+                  ]),
+              ]),
+            if (birthdays.isNotEmpty)
+              Section(left: l.birthdays, children: [
+                for (final c in birthdays)
+                  RowItem(onTap: () => _go(context, SharedWithYou(store, c)), children: [
+                    Marker(c.shape),
+                    Expanded(child: Text(c.name, maxLines: 1, overflow: TextOverflow.ellipsis)),
                     toggle(c),
                   ]),
               ]),
@@ -485,7 +495,7 @@ class SharedWithYou extends StatelessWidget {
             if (who != null)
               Section(left: l.otherWay, children: [
                 ValueRow(l.shareYours, value: l.choose, onTap: () async {
-                  final own = [for (final x in store.cals) if (x.role == 'owner' && !x.holiday) x];
+                  final own = [for (final x in store.cals) if (x.role == 'owner' && !x.holiday && !x.birthdays) x];
                   final p = await pick<String>(context, Pick(
                     title: l.shareYours,
                     selected: '',

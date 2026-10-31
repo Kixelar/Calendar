@@ -1723,6 +1723,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Off'**
   String get off2;
+
+  /// No description provided for @personal.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal'**
+  String get personal;
+
+  /// No description provided for @birthdays.
+  ///
+  /// In en, this message translates to:
+  /// **'Birthdays'**
+  String get birthdays;
 }
 
 class _AppLocalizationsDelegate

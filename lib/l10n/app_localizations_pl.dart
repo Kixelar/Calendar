@@ -992,4 +992,10 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get off2 => 'Wyłączone';
+
+  @override
+  String get personal => 'Osobisty';
+
+  @override
+  String get birthdays => 'Urodziny';
 }

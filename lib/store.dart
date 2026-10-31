@@ -258,7 +258,7 @@ class Store extends ChangeNotifier {
 
   Future<void> loadCalendars() async {
     final saved = _p.getStringList('calendars');
-    cals = await g.calendars(saved?.toSet(), shapes: _shapes);
+    cals = await g.calendars(saved?.toSet(), shapes: _shapes, primaryName: _l.personal);
     error = null; // Google answered: online again
     _write('calendars', [for (final c in cals) c.toJson()]);
     notifyListeners();

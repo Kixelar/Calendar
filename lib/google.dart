@@ -14,6 +14,7 @@ enum Shape { dot, square, half, diamond, ring, dash }
 class Cal {
   final String id, name;
   final bool shared, holiday, writable;
+  final bool birthdays; // Google's contacts birthdays calendar
   final Shape shape;
   final int? defaultReminder; // minutes before, applies to events that use the calendar's default reminders
   final String role; // owner, writer, reader or freeBusyReader
@@ -21,6 +22,7 @@ class Cal {
   Cal(this.id, this.name,
       {required this.shared,
       required this.holiday,
+      this.birthdays = false,
       required this.shape,
       required this.on,
       this.writable = true,
@@ -31,10 +33,11 @@ class Cal {
   String? get ownerEmail => id.contains('@') && !id.endsWith('calendar.google.com') ? id : null;
 
   Map<String, Object?> toJson() =>
-      {'id': id, 'name': name, 'shared': shared, 'holiday': holiday, 'writable': writable, 'shape': shape.index, 'rem': defaultReminder, 'on': on, 'role': role};
+      {'id': id, 'name': name, 'shared': shared, 'holiday': holiday, 'writable': writable, 'shape': shape.index, 'rem': defaultReminder, 'on': on, 'role': role, 'bday': birthdays};
   factory Cal.fromJson(Map<String, Object?> j) => Cal(j['id'] as String, j['name'] as String,
       shared: j['shared'] as bool,
       holiday: j['holiday'] as bool,
+      birthdays: (j['bday'] as bool?) ?? false,
       writable: j['writable'] as bool,
       shape: Shape.values[j['shape'] as int],
       defaultReminder: j['rem'] as int?,
@@ -185,8 +188,9 @@ class GoogleCalendar {
     return true;
   }
 
-  /// [shapes] are markers the user picked (04.5); others follow the default order.
-  Future<List<Cal>> calendars(Set<String>? enabled, {Map<String, Shape> shapes = const {}}) async {
+  /// [shapes] are markers the user picked (04.5); others follow the default order. Google names the primary
+  /// calendar after the account's e-mail; it is shown as [primaryName] instead.
+  Future<List<Cal>> calendars(Set<String>? enabled, {Map<String, Shape> shapes = const {}, String? primaryName}) async {
     await _authorize(interactive: false);
     final items = <gcal.CalendarListEntry>[];
     String? page;
@@ -202,14 +206,17 @@ class GoogleCalendar {
       for (final e in items)
         () {
           final holiday = e.id!.contains('#holiday@');
-          final shared = !holiday && e.accessRole != 'owner';
-          return Cal(e.id!, e.summaryOverride ?? e.summary ?? e.id!,
+          final birthdays = e.id!.contains('#contacts@');
+          final shared = !holiday && !birthdays && e.accessRole != 'owner';
+          final name = e.summaryOverride ?? e.summary ?? e.id!;
+          return Cal(e.id!, e.primary == true && name.contains('@') && primaryName != null ? primaryName : name,
               shared: shared,
               holiday: holiday,
+              birthdays: birthdays,
               writable: e.accessRole == 'owner' || e.accessRole == 'writer',
               role: e.accessRole ?? 'reader',
               defaultReminder: e.defaultReminders?.where((r) => r.method == 'popup').firstOrNull?.minutes,
-              shape: shapes[e.id] ?? (holiday ? Shape.ring : shared ? Shape.dash : own[i++ % own.length]),
+              shape: shapes[e.id] ?? (holiday ? Shape.ring : birthdays ? Shape.diamond : shared ? Shape.dash : own[i++ % own.length]),
               on: enabled?.contains(e.id) ?? e.selected == true);
         }(),
     ];

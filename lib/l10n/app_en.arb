@@ -308,5 +308,7 @@
   "sharedCalendars": "Shared calendars",
   "snooze": "Snooze 5 min",
   "details": "Details",
-  "off2": "Off"
+  "off2": "Off",
+  "personal": "Personal",
+  "birthdays": "Birthdays"
 }

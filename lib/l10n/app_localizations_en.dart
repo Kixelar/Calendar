@@ -983,4 +983,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get off2 => 'Off';
+
+  @override
+  String get personal => 'Personal';
+
+  @override
+  String get birthdays => 'Birthdays';
 }

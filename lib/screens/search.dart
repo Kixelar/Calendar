@@ -78,7 +78,7 @@ class _SearchState extends State<Search> {
   @override
   Widget build(BuildContext context) {
     final t = Tok.of(context), l = l10n(context), now = DateTime.now();
-    final own = [for (final c in store.cals) if (c.on && !c.holiday && !c.shared) c];
+    final own = [for (final c in store.cals) if (c.on && !c.holiday && !c.shared && !c.birthdays) c];
     final shown = (_results ?? const <Ev>[]).where((e) => switch (_filter) {
           null => true,
           _guests => e.guests.isNotEmpty,
