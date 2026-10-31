@@ -97,7 +97,7 @@ class Notifier {
       tz.setLocalLocation(tz.getLocation(timeZone));
     } catch (_) {} // unknown zone: the plugin falls back to UTC offsets
     await _p.initialize(
-      settings: const InitializationSettings(android: AndroidInitializationSettings('@mipmap/ic_launcher')),
+      settings: const InitializationSettings(android: AndroidInitializationSettings('ic_notification')),
       onDidReceiveNotificationResponse: (r) => onOpen?.call(r.payload ?? '', r.actionId),
       onDidReceiveBackgroundNotificationResponse: notificationTapBackground,
     );
@@ -182,7 +182,7 @@ Future<void> notificationTapBackground(NotificationResponse r) async {
   final l = lookupAppLocalizations(PlatformDispatcher.instance.locale.languageCode == 'pl' ? const Locale('pl') : const Locale('en'));
   tzdata.initializeTimeZones();
   final p = FlutterLocalNotificationsPlugin();
-  await p.initialize(settings: const InitializationSettings(android: AndroidInitializationSettings('@mipmap/ic_launcher')));
+  await p.initialize(settings: const InitializationSettings(android: AndroidInitializationSettings('ic_notification')));
   await p.zonedSchedule(
     id: r.id ?? 0,
     scheduledDate: tz.TZDateTime.now(tz.UTC).add(const Duration(minutes: 5)),
