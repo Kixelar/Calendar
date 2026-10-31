@@ -113,10 +113,21 @@ abstract class CalendarWidget : AppWidgetProvider() {
     }
 
     private fun render(context: Context, manager: AppWidgetManager, id: Int, options: Bundle) {
-        val density = context.resources.displayMetrics.density
+        // A widget must never take the app down: a failure is recorded for the crash report instead.
+        try {
+            draw(context, manager, id, options)
+        } catch (e: Exception) {
+            CrashLog.write(context, Thread.currentThread(), e)
+        }
+    }
+
+    private fun draw(context: Context, manager: AppWidgetManager, id: Int, options: Bundle) {
+        // Widget bitmaps travel to the launcher through IPC: keep them under ~2 MB by lowering the scale if needed.
+        val wanted = context.resources.displayMetrics.density
         // Portrait size: min width, max height (what launchers report for the cell area).
         val wDp = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 160).coerceAtLeast(40)
         val hDp = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, 160).coerceAtLeast(40)
+        val density = minOf(wanted, kotlin.math.sqrt(2_000_000f / 4f / (wDp * hDp)))
         val w = (wDp * density).toInt()
         val h = (hDp * density).toInt()
         val bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)

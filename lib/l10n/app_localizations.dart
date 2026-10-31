@@ -1765,6 +1765,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{n, plural, =1{clashes with 1 event} other{clashes with {n} events}}'**
   String clashesWith(int n);
+
+  /// No description provided for @crashTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The app closed unexpectedly'**
+  String get crashTitle;
+
+  /// No description provided for @crashBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy this report and send it to the developer.'**
+  String get crashBody;
+
+  /// No description provided for @close.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get close;
+
+  /// No description provided for @copy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get copy;
 }
 
 class _AppLocalizationsDelegate

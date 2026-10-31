@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 
 import '../google.dart';
@@ -39,6 +40,46 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
     });
     WidgetsBinding.instance.addObserver(this);
     store.notifier?.onOpen = _fromNotification;
+    WidgetsBinding.instance.addPostFrameCallback((_) => _showCrash());
+  }
+
+  /// After a crash the app shows its report once, so the owner can copy it (CrashLog.kt).
+  Future<void> _showCrash() async {
+    final report = await store.lastCrash();
+    if (report == null || !mounted) return;
+    final t = Tok.of(context), l = l10n(context);
+    await showDialog<void>(
+      context: context,
+      barrierColor: const Color(0xA3000000),
+      builder: (c) => Dialog(
+        backgroundColor: t.surfaceRaised,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 48),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8), side: BorderSide(color: t.borderSubtle)),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, spacing: 16, children: [
+            Text(l.crashTitle, style: T.headlineMd(t.display)),
+            Text(l.crashBody, style: T.bodySm(t.secondary)),
+            Flexible(
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(color: t.surface, border: Border.all(color: t.borderSubtle), borderRadius: BorderRadius.circular(6)),
+                child: SingleChildScrollView(child: SelectableText(report, style: T.caption(t.primary))),
+              ),
+            ),
+            Row(spacing: 8, children: [
+              Expanded(child: Btn(l.close, kind: BtnKind.secondary, onTap: () => Navigator.pop(c))),
+              Expanded(
+                child: Btn(l.copy, onTap: () async {
+                  await Clipboard.setData(ClipboardData(text: report));
+                  if (c.mounted) Navigator.pop(c);
+                }),
+              ),
+            ]),
+          ]),
+        ),
+      ),
+    );
   }
 
   @override

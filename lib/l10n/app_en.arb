@@ -316,5 +316,9 @@
   "unitHours": "Hours",
   "reminderLimit": "Up to 4 weeks before.",
   "clashesWith": "{n, plural, =1{clashes with 1 event} other{clashes with {n} events}}",
-  "@clashesWith": {"placeholders": {"n": {"type": "int"}}}
+  "@clashesWith": {"placeholders": {"n": {"type": "int"}}},
+  "crashTitle": "The app closed unexpectedly",
+  "crashBody": "Copy this report and send it to the developer.",
+  "close": "Close",
+  "copy": "Copy"
 }

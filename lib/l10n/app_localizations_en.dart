@@ -1012,4 +1012,16 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get crashTitle => 'The app closed unexpectedly';
+
+  @override
+  String get crashBody => 'Copy this report and send it to the developer.';
+
+  @override
+  String get close => 'Close';
+
+  @override
+  String get copy => 'Copy';
 }

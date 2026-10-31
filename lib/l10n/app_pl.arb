@@ -277,5 +277,9 @@
   "unitMinutes": "Minuty",
   "unitHours": "Godziny",
   "reminderLimit": "Najwyżej 4 tygodnie przed.",
-  "clashesWith": "{n, plural, =1{koliduje z 1 wydarzeniem} other{koliduje z {n} wydarzeniami}}"
+  "clashesWith": "{n, plural, =1{koliduje z 1 wydarzeniem} other{koliduje z {n} wydarzeniami}}",
+  "crashTitle": "Aplikacja nieoczekiwanie się zamknęła",
+  "crashBody": "Skopiuj ten raport i wyślij go twórcy.",
+  "close": "Zamknij",
+  "copy": "Kopiuj"
 }

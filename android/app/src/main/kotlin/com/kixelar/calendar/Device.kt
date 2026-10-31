@@ -44,6 +44,8 @@ object Device {
                     }
                     result.success(null)
                 }
+                // Report of a crash since the last start (CrashLog.kt), shown once by the app.
+                "lastCrash" -> result.success(CrashLog.take(context))
                 // The background sync finished (main.dart backgroundSync).
                 "done" -> {
                     result.success(null)

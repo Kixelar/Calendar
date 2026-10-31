@@ -1021,4 +1021,16 @@ class AppLocalizationsPl extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get crashTitle => 'Aplikacja nieoczekiwanie się zamknęła';
+
+  @override
+  String get crashBody => 'Skopiuj ten raport i wyślij go twórcy.';
+
+  @override
+  String get close => 'Zamknij';
+
+  @override
+  String get copy => 'Kopiuj';
 }

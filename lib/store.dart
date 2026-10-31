@@ -391,6 +391,15 @@ class Store extends ChangeNotifier {
     }
   }
 
+  /// The report of a crash since the last start (CrashLog.kt), or null. Read once.
+  Future<String?> lastCrash() async {
+    try {
+      return await const MethodChannel('calendar/device').invokeMethod<String>('lastCrash');
+    } on MissingPluginException {
+      return null;
+    }
+  }
+
   /// App version, build number and Android release (MainActivity.kt); empty in tests.
   Future<Map<String, String>> deviceInfo() async {
     try {

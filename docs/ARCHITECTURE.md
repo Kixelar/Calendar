@@ -86,6 +86,11 @@ true)` (silent Google access only, never signs out), `syncNow()`, which saves th
 invitation notifications and updates widgets; then it calls `done`. `Device.kt` serves the channel on both engines.
 Preferences are reloaded before comparing sync state, since each engine keeps its own copy.
 
+## Crash report
+`CalendarApp` (CrashLog.kt) installs an uncaught-exception handler for the whole process (app, widgets, notification
+receivers, SyncWorker) that writes `files/crash.txt`. Home shows it once on the next start (`Store.lastCrash`) with a
+Copy button. Widget drawing errors are recorded the same way without crashing.
+
 ## Settings
 05.x settings live in SharedPreferences (`Store.set`). `App` copies the view ones to `Look` on every change.
 
