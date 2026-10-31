@@ -559,6 +559,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Failed: {error}'**
   String failed(String error);
+
+  /// No description provided for @syncing.
+  ///
+  /// In en, this message translates to:
+  /// **'Syncing'**
+  String get syncing;
+
+  /// No description provided for @eventsFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{events from 1 calendar} other{events from {n} calendars}}'**
+  String eventsFrom(int n);
+
+  /// No description provided for @aboutSecondsLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'About {n} s left'**
+  String aboutSecondsLeft(int n);
+
+  /// No description provided for @statusDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get statusDone;
+
+  /// No description provided for @statusRunning.
+  ///
+  /// In en, this message translates to:
+  /// **'In progress'**
+  String get statusRunning;
+
+  /// No description provided for @statusQueued.
+  ///
+  /// In en, this message translates to:
+  /// **'Queued'**
+  String get statusQueued;
+
+  /// No description provided for @statusFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed'**
+  String get statusFailed;
+
+  /// No description provided for @runInBackground.
+  ///
+  /// In en, this message translates to:
+  /// **'Run in background'**
+  String get runInBackground;
 }
 
 class _AppLocalizationsDelegate

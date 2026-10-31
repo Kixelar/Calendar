@@ -9,9 +9,9 @@ Screen numbers refer to docs/design/mockup.html.
 - [x] Test sign-in and event loading on a phone (owner)
 - [x] Confirm the app no longer asks to sign in on every launch (owner)
 - [x] Fonts (owner supplied, docs/DESIGN.md)
-- [ ] 01.4 Sync progress screen
+- [x] 01.4 Sync progress screen
 - [ ] 02.5 Search (top bar search icon is hidden until then)
-- [ ] Offline cache of events (now in memory only, refetched on start)
+- [x] Offline cache of events (JSON files per year in the app support folder)
 
 ## Stage 2: events
 - [x] 03.1 Event details (time, title, calendar, place, reminder, notes, guests with replies; edit, delete)

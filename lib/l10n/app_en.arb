@@ -88,5 +88,15 @@
   "notifyGuests": "Notify guests",
   "endBeforeStart": "The end must be after the start.",
   "failed": "Failed: {error}",
-  "@failed": {"placeholders": {"error": {"type": "String"}}}
+  "@failed": {"placeholders": {"error": {"type": "String"}}},
+  "syncing": "Syncing",
+  "eventsFrom": "{n, plural, =1{events from 1 calendar} other{events from {n} calendars}}",
+  "@eventsFrom": {"placeholders": {"n": {"type": "int"}}},
+  "aboutSecondsLeft": "About {n} s left",
+  "@aboutSecondsLeft": {"placeholders": {"n": {"type": "int"}}},
+  "statusDone": "Done",
+  "statusRunning": "In progress",
+  "statusQueued": "Queued",
+  "statusFailed": "Failed",
+  "runInBackground": "Run in background"
 }

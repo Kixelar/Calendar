@@ -24,7 +24,14 @@ test/screens_test.dart   Logic tests + PNG renders of screens with a fake Google
 2. Views ask `Store.on(day)`. If that year is not loaded, it fetches all events of the enabled calendars for the
    whole year (`events.list`, `singleEvents=true` so recurring events come expanded) and indexes them by day
    (`indexByDay`; multi-day events appear on every day they touch). Until then `on()` returns `null` (spinner).
-3. Pull-to-refresh or toggling a calendar clears the cache.
+3. Pull-to-refresh or toggling a calendar clears the in-memory index.
+
+## Offline cache
+`Store` keeps `calendars.json` and `events_<year>.json` in the app support folder (`path_provider`). On start the
+saved calendars are shown at once; each year is first read from its file (asynchronously: `on()` runs during build)
+and then refetched from Google, which rewrites the file. Without internet the files stay on screen and `error` is set.
+If Google says access is gone (`restore()` returns false) the app goes back to the welcome screen.
+The `google` preference marks a signed-in install (older installs: a saved calendar list).
 
 ## Writing events
 - `GoogleCalendar.save`: new events are inserted; existing ones are fetched (`events.get`), changed and sent back

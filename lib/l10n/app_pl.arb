@@ -76,5 +76,13 @@
   "allOccurrences": "Wszystkie",
   "notifyGuests": "Powiadom gości",
   "endBeforeStart": "Koniec musi być po początku.",
-  "failed": "Nie udało się: {error}"
+  "failed": "Nie udało się: {error}",
+  "syncing": "Synchronizuję",
+  "eventsFrom": "{n, plural, =1{wydarzeń z 1 kalendarza} other{wydarzeń z {n} kalendarzy}}",
+  "aboutSecondsLeft": "Jeszcze ok. {n} s",
+  "statusDone": "Gotowe",
+  "statusRunning": "W toku",
+  "statusQueued": "W kolejce",
+  "statusFailed": "Błąd",
+  "runInBackground": "Działaj w tle"
 }

@@ -283,4 +283,38 @@ class AppLocalizationsEn extends AppLocalizations {
   String failed(String error) {
     return 'Failed: $error';
   }
+
+  @override
+  String get syncing => 'Syncing';
+
+  @override
+  String eventsFrom(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'events from $n calendars',
+      one: 'events from 1 calendar',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String aboutSecondsLeft(int n) {
+    return 'About $n s left';
+  }
+
+  @override
+  String get statusDone => 'Done';
+
+  @override
+  String get statusRunning => 'In progress';
+
+  @override
+  String get statusQueued => 'Queued';
+
+  @override
+  String get statusFailed => 'Failed';
+
+  @override
+  String get runInBackground => 'Run in background';
 }

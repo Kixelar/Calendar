@@ -19,6 +19,16 @@ class Cal {
   bool on;
   Cal(this.id, this.name,
       {required this.shared, required this.holiday, required this.shape, required this.on, this.writable = true, this.defaultReminder});
+
+  Map<String, Object?> toJson() =>
+      {'id': id, 'name': name, 'shared': shared, 'holiday': holiday, 'writable': writable, 'shape': shape.index, 'rem': defaultReminder, 'on': on};
+  factory Cal.fromJson(Map<String, Object?> j) => Cal(j['id'] as String, j['name'] as String,
+      shared: j['shared'] as bool,
+      holiday: j['holiday'] as bool,
+      writable: j['writable'] as bool,
+      shape: Shape.values[j['shape'] as int],
+      defaultReminder: j['rem'] as int?,
+      on: j['on'] as bool);
 }
 
 /// Invitation reply as Google stores it: accepted, tentative, declined, needsAction.
@@ -26,6 +36,9 @@ class Guest {
   final String name, email, status;
   final bool self;
   const Guest(this.name, this.email, this.status, {this.self = false});
+
+  List<Object> toJson() => [name, email, status, self];
+  factory Guest.fromJson(List<Object?> j) => Guest(j[0] as String, j[1] as String, j[2] as String, self: j[3] as bool);
 }
 
 class Ev {
@@ -46,6 +59,22 @@ class Ev {
       this.organizer = true,
       this.guests = const [],
       this.reminder});
+
+  /// Offline cache form (store.dart). Times are kept as epoch milliseconds.
+  Map<String, Object?> toJson() => {
+        'id': id, 't': title, 'c': calId, 's': start.millisecondsSinceEpoch, 'e': end.millisecondsSinceEpoch, 'a': allDay,
+        'l': location, 'n': notes, 'r': recurringId, 'o': organizer, 'g': [for (final g in guests) g.toJson()], 'm': reminder,
+      };
+  factory Ev.fromJson(Map<String, Object?> j) => Ev(j['t'] as String, j['c'] as String,
+      DateTime.fromMillisecondsSinceEpoch(j['s'] as int), DateTime.fromMillisecondsSinceEpoch(j['e'] as int),
+      id: j['id'] as String,
+      allDay: j['a'] as bool,
+      location: j['l'] as String?,
+      notes: j['n'] as String?,
+      recurringId: j['r'] as String?,
+      organizer: j['o'] as bool,
+      guests: [for (final g in j['g'] as List) Guest.fromJson(g as List)],
+      reminder: j['m'] as int?);
 }
 
 enum DeleteScope { one, following, all }

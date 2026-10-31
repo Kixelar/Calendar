@@ -1,6 +1,6 @@
 # Status
 
-**Version:** `2026.10.30-dev` (branch `dev`). Nothing released on `main` yet.
+**Version:** `2026.10.31-dev` (branch `dev`). Nothing released on `main` yet.
 
 ## Done
 - Flutter Android project `com.kixelar.calendar`, private repo `Kixelar/calendar`.

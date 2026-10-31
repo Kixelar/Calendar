@@ -61,6 +61,14 @@ class _FakeGoogle extends GoogleCalendar {
   }
 }
 
+/// No network: every Google call fails, as on a phone without internet.
+class _OfflineGoogle extends GoogleCalendar {
+  @override
+  Future<bool> restore() async => throw const SocketException('offline');
+  @override
+  Future<List<Ev>> events(List<Cal> cals, DateTime from, DateTime to) async => throw const SocketException('offline');
+}
+
 Future<void> _fonts() async {
   const dir = 'C:/src/flutter/bin/cache/artifacts/material_fonts';
   // flutter test does not load the app's own fonts (pubspec.yaml): add them from the files.
@@ -108,6 +116,27 @@ void main() {
     expect(endRuleBefore('EXDATE:20261106T130000Z', DateTime(2026, 11, 1), allDay: false), 'EXDATE:20261106T130000Z');
   });
 
+  test('events and calendars come from the disk cache when Google is unreachable', () async {
+    SharedPreferences.setMockInitialValues({'onboarded': true, 'google': true});
+    final dir = Directory.systemTemp.createTempSync();
+    final online = Store(_FakeGoogle(), dir);
+    await online.start();
+    final today = dayOf(DateTime.now());
+    online.on(today);
+    await Future<void>.delayed(const Duration(milliseconds: 100));
+    final fetched = online.on(today)!;
+    expect(fetched, isNotEmpty);
+
+    final offline = Store(_OfflineGoogle(), dir);
+    await offline.start();
+    expect(offline.signedIn, isTrue);
+    expect(offline.cals.map((c) => c.name), contains('Praca'));
+    expect(offline.on(today), isNull); // loading: cache is read asynchronously
+    await Future<void>.delayed(const Duration(milliseconds: 100));
+    expect(offline.on(today)!.map((e) => e.title), fetched.map((e) => e.title));
+    expect(offline.error, isNotNull);
+  });
+
   testWidgets('marquee waits, scrolls to the end, then starts over', (t) async {
     await t.pumpWidget(const Directionality(
       textDirection: TextDirection.ltr,
@@ -145,14 +174,14 @@ void main() {
 
     Future<void> shot(WidgetTester t, String name,
         {int tab = -1, bool onboarded = true, Brightness b = Brightness.dark, Widget Function(Store)? page, String? tapText}) async {
-      SharedPreferences.setMockInitialValues({'onboarded': onboarded});
+      SharedPreferences.setMockInitialValues({'onboarded': onboarded, 'google': onboarded});
       t.view.physicalSize = const Size(390, 844);
       t.view.devicePixelRatio = 1;
       t.platformDispatcher.localesTestValue = const [Locale('pl')];
       t.platformDispatcher.platformBrightnessTestValue = b;
       addTearDown(t.view.reset);
       addTearDown(t.platformDispatcher.clearAllTestValues);
-      final store = Store(_FakeGoogle());
+      final store = Store(_FakeGoogle(), Directory.systemTemp.createTempSync());
       final key = GlobalKey();
       await t.runAsync(store.start);
       await t.pumpWidget(RepaintBoundary(key: key, child: App(store)));
@@ -185,8 +214,14 @@ void main() {
     }
 
     testWidgets('welcome', (t) => shot(t, '01_1_welcome', onboarded: false));
+    testWidgets('syncing', (t) async {
+      final store = Store(_FakeGoogle(), Directory.systemTemp.createTempSync());
+      await t.runAsync(store.start);
+      await t.runAsync(store.loadCalendars);
+      await shot(t, '01_4_syncing', onboarded: false, page: (_) => Syncing(store));
+    });
     testWidgets('choose', (t) async {
-      final store = Store(_FakeGoogle());
+      final store = Store(_FakeGoogle(), Directory.systemTemp.createTempSync());
       await t.runAsync(store.start);
       await t.runAsync(store.loadCalendars);
       await shot(t, '01_3_choose', onboarded: false, page: (_) => Choose(store, onboarding: true));

@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026.10.31-dev
+### Added
+- 01.4 sync screen after choosing calendars: events counter, progress, status per calendar, "Run in background".
+- Offline cache: calendars and events are saved on the phone, shown at once on start and without internet, then refreshed from Google.
+
 ## 2026.10.30-dev
 ### Added
 - Android Flutter app `com.kixelar.calendar`; launcher name "Kalendarz" in Polish, "Calendar" in other languages.

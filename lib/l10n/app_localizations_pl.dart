@@ -286,4 +286,38 @@ class AppLocalizationsPl extends AppLocalizations {
   String failed(String error) {
     return 'Nie udało się: $error';
   }
+
+  @override
+  String get syncing => 'Synchronizuję';
+
+  @override
+  String eventsFrom(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'wydarzeń z $n kalendarzy',
+      one: 'wydarzeń z 1 kalendarza',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String aboutSecondsLeft(int n) {
+    return 'Jeszcze ok. $n s';
+  }
+
+  @override
+  String get statusDone => 'Gotowe';
+
+  @override
+  String get statusRunning => 'W toku';
+
+  @override
+  String get statusQueued => 'W kolejce';
+
+  @override
+  String get statusFailed => 'Błąd';
+
+  @override
+  String get runInBackground => 'Działaj w tle';
 }

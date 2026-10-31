@@ -1,20 +1,26 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'google.dart';
 
 DateTime dayOf(DateTime t) => DateTime(t.year, t.month, t.day);
 
-/// App state: Google account, chosen calendars and events cached per year.
+/// App state: Google account, chosen calendars and events per year.
+/// Calendars and events are also kept on disk ([_dir]) so the app opens instantly and works offline;
+/// Google refreshes them in the background.
 class Store extends ChangeNotifier {
-  Store([GoogleCalendar? g]) : g = g ?? GoogleCalendar();
+  Store([GoogleCalendar? g, this._dir]) : g = g ?? GoogleCalendar();
   final GoogleCalendar g;
   late final SharedPreferences _p;
+  Directory? _dir;
 
   bool ready = false, signedIn = false;
   List<Cal> cals = [];
   String? error;
-  // shortcut: events live only in memory and are refetched per year on start; add an offline cache when sync lands.
   final _days = <int, Map<DateTime, List<Ev>>>{};
   final _loading = <int>{};
 
@@ -23,24 +29,68 @@ class Store extends ChangeNotifier {
   // Saved at sign-in: a silent restore on start has no account object to read it from.
   String? get email => g.email ?? _p.getString('email');
   Cal? cal(String id) => cals.where((c) => c.id == id).firstOrNull;
+  SharedPreferences get prefs => _p;
+
+  File _file(String name) => File('${_dir!.path}/$name.json');
+
+  Object? _read(String name) {
+    try {
+      final f = _file(name);
+      return f.existsSync() ? jsonDecode(f.readAsStringSync()) : null;
+    } catch (_) {
+      return null; // a broken cache is only a missed shortcut; Google has the data
+    }
+  }
+
+  Future<Object?> _readAsync(String name) async {
+    try {
+      final f = _file(name);
+      return await f.exists() ? jsonDecode(await f.readAsString()) : null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  void _write(String name, Object json) {
+    try {
+      _file(name).writeAsStringSync(jsonEncode(json));
+    } catch (_) {}
+  }
 
   Future<void> start() async {
     _p = await SharedPreferences.getInstance();
-    if (onboarded) {
-      try {
-        signedIn = await g.restore();
-        if (signedIn) await loadCalendars();
-      } catch (e) {
-        error = '$e';
-      }
+    _dir ??= await getApplicationSupportDirectory();
+    // Installs from before the cache had no 'google' flag; a saved calendar list means they signed in.
+    signedIn = onboarded && (_p.getBool('google') ?? _p.getStringList('calendars') != null);
+    if (signedIn) {
+      cals = [for (final c in (_read('calendars') as List?) ?? const []) Cal.fromJson((c as Map).cast())];
     }
     ready = true;
+    notifyListeners();
+    if (!signedIn) return;
+    try {
+      if (!await g.restore()) return await _lostAccess();
+      await loadCalendars();
+      _days.clear(); // refetch the years already shown from the cache
+      notifyListeners();
+    } catch (e) {
+      error = '$e'; // offline: keep showing the cache
+      notifyListeners();
+    }
+  }
+
+  /// Access was revoked (or the account removed): back to the welcome screen to connect again.
+  Future<void> _lostAccess() async {
+    signedIn = false;
+    await _p.setBool('onboarded', false);
+    await _p.setBool('google', false);
     notifyListeners();
   }
 
   Future<void> signIn() async {
     await g.signIn();
     signedIn = true;
+    await _p.setBool('google', true);
     if (g.email != null) await _p.setString('email', g.email!);
     await loadCalendars();
   }
@@ -48,12 +98,14 @@ class Store extends ChangeNotifier {
   Future<void> loadCalendars() async {
     final saved = _p.getStringList('calendars');
     cals = await g.calendars(saved?.toSet());
+    _write('calendars', [for (final c in cals) c.toJson()]);
     notifyListeners();
   }
 
   Future<void> toggle(Cal c, bool on) async {
     c.on = on;
     await _p.setStringList('calendars', [for (final c in cals) if (c.on) c.id]);
+    _write('calendars', [for (final c in cals) c.toJson()]);
     _days.clear();
     notifyListeners();
   }
@@ -61,6 +113,18 @@ class Store extends ChangeNotifier {
   Future<void> finishOnboarding() async {
     await _p.setBool('onboarded', true);
     if (signedIn) await _p.setStringList('calendars', [for (final c in cals) if (c.on) c.id]);
+    notifyListeners();
+  }
+
+  List<Ev> _visible(Iterable<Ev> evs) {
+    final on = {for (final c in cals) if (c.on) c.id};
+    return [for (final e in evs) if (on.contains(e.calId)) e];
+  }
+
+  /// Stores a freshly fetched year in memory and on disk (also used by the 01.4 sync screen).
+  void putYear(int year, List<Ev> evs) {
+    _days[year] = indexByDay(_visible(evs), year);
+    _write('events_$year', [for (final e in evs) e.toJson()]);
     notifyListeners();
   }
 
@@ -75,17 +139,21 @@ class Store extends ChangeNotifier {
   }
 
   Future<void> _load(int year) async {
-    if (!signedIn) {
-      _days[year] = {};
-      return;
-    }
     if (!_loading.add(year)) return;
-    try {
-      final evs = await g.events([for (final c in cals) if (c.on) c], DateTime(year), DateTime(year + 1));
-      _days[year] = indexByDay(evs, year);
-      error = null;
-    } catch (e) {
-      error = '$e';
+    // Read asynchronously: on() runs during build, so nothing here may notify before the first await.
+    if (await _readAsync('events_$year') case final List cached when signedIn) {
+      _days[year] = indexByDay(_visible([for (final e in cached) Ev.fromJson((e as Map).cast())]), year);
+      notifyListeners();
+    }
+    if (signedIn) {
+      try {
+        putYear(year, await g.events([for (final c in cals) if (c.on) c], DateTime(year), DateTime(year + 1)));
+        error = null;
+      } catch (e) {
+        error = '$e';
+        _days[year] ??= {};
+      }
+    } else {
       _days[year] = {};
     }
     _loading.remove(year);
@@ -109,7 +177,11 @@ class Store extends ChangeNotifier {
 
   Future<void> refresh() async {
     _days.clear();
-    if (signedIn) await loadCalendars();
+    try {
+      if (signedIn) await loadCalendars();
+    } catch (e) {
+      error = '$e'; // offline pull-to-refresh: the cache stays on screen
+    }
     notifyListeners();
   }
 }
