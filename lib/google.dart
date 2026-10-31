@@ -142,6 +142,10 @@ class EditConflict implements Exception {
   final Ev remote;
 }
 
+/// Google keeps contacts' birthdays as events of type "birthday" in the primary calendar and shows them as a separate
+/// "Birthdays" calendar; the app does the same with this virtual calendar id.
+const birthdaysId = '#birthdays';
+
 class GoogleCalendar {
   GoogleSignInAccount? user;
   gcal.CalendarApi? _api;
@@ -191,13 +195,15 @@ class GoogleCalendar {
   }
 
   /// [shapes] are markers the user picked (04.5); others follow the default order. Google names the primary
-  /// calendar after the account's e-mail; it is shown as [primaryName] instead.
-  Future<List<Cal>> calendars(Set<String>? enabled, {Map<String, Shape> shapes = const {}, String? primaryName}) async {
+  /// calendar after the account's e-mail; it is shown as [primaryName] (the account name) instead, like Google does.
+  /// Hidden calendars are listed too, plus the virtual birthdays calendar named [birthdaysName].
+  Future<List<Cal>> calendars(Set<String>? enabled,
+      {Map<String, Shape> shapes = const {}, String? primaryName, String birthdaysName = 'Birthdays'}) async {
     await _authorize(interactive: false);
     final items = <gcal.CalendarListEntry>[];
     String? page;
     do {
-      final r = await _api!.calendarList.list(pageToken: page);
+      final r = await _api!.calendarList.list(pageToken: page, showHidden: true);
       items.addAll(r.items ?? const []);
       page = r.nextPageToken;
     } while (page != null);
@@ -221,6 +227,14 @@ class GoogleCalendar {
               shape: shapes[e.id] ?? (holiday ? Shape.ring : birthdays ? Shape.diamond : shared ? Shape.dash : own[i++ % own.length]),
               on: enabled?.contains(e.id) ?? e.selected == true);
         }(),
+      Cal(birthdaysId, birthdaysName,
+          shared: false,
+          holiday: false,
+          birthdays: true,
+          writable: false,
+          role: 'reader',
+          shape: shapes[birthdaysId] ?? Shape.diamond,
+          on: enabled?.contains(birthdaysId) ?? true),
     ];
   }
 
@@ -284,7 +298,7 @@ class GoogleCalendar {
   Future<List<Ev>> _list(List<Cal> cals, DateTime from, DateTime to) async {
     await _authorize(interactive: false);
     final out = <Ev>[];
-    await Future.wait(cals.map((cal) async {
+    await Future.wait(cals.where((c) => !c.id.startsWith('#')).map((cal) async {
       String? page;
       do {
         final r = await _api!.events.list(cal.id,
@@ -304,7 +318,7 @@ class GoogleCalendar {
     final s = _at(e.start);
     if (s == null) return null;
     final rem = e.reminders;
-    return Ev(e.summary ?? '', cal.id, s, _at(e.end) ?? s,
+    return Ev(e.summary ?? '', e.eventType == 'birthday' ? birthdaysId : cal.id, s, _at(e.end) ?? s,
         id: e.id ?? '',
         allDay: e.start!.dateTime == null,
         location: e.location,

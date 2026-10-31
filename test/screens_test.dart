@@ -59,13 +59,15 @@ class _FakeGoogle extends GoogleCalendar {
   @override
   Future<bool> restore({bool silentOnly = false}) async => true;
   @override
-  Future<List<Cal>> calendars(Set<String>? enabled, {Map<String, Shape> shapes = const {}, String? primaryName}) async => [
+  Future<List<Cal>> calendars(Set<String>? enabled,
+          {Map<String, Shape> shapes = const {}, String? primaryName, String birthdaysName = 'Birthdays'}) async =>
+      [
         Cal('p', 'Osobisty', shared: false, holiday: false, shape: Shape.dot, on: true),
         Cal('w', 'Praca', shared: false, holiday: false, shape: Shape.square, on: true),
         Cal('f', 'Rodzina', shared: false, holiday: false, shape: Shape.half, on: true),
         Cal('ola.zielinska@gmail.com', 'Ola Zielińska', shared: true, holiday: false, shape: Shape.dash, on: true, writable: false, role: 'reader'),
         Cal('design', 'Zespół Design', shared: true, holiday: false, shape: Shape.dash, on: false, role: 'writer'),
-        Cal('addressbook#contacts@group.v.calendar.google.com', 'Urodziny', shared: false, holiday: false, birthdays: true,
+        Cal(birthdaysId, 'Urodziny', shared: false, holiday: false, birthdays: true,
             shape: Shape.diamond, on: true, writable: false, role: 'reader'),
         Cal('h', 'Święta w Polsce', shared: false, holiday: true, shape: Shape.ring, on: true),
       ];

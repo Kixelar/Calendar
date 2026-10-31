@@ -276,7 +276,7 @@ class Store extends ChangeNotifier {
 
   Future<void> loadCalendars() async {
     final saved = _p.getStringList('calendars');
-    cals = await g.calendars(saved?.toSet(), shapes: _shapes, primaryName: _l.personal);
+    cals = await g.calendars(saved?.toSet(), shapes: _shapes, primaryName: name ?? _l.personal, birthdaysName: _l.birthdays);
     error = null; // Google answered: online again
     _write('calendars', [for (final c in cals) c.toJson()]);
     notifyListeners();
@@ -294,6 +294,14 @@ class Store extends ChangeNotifier {
     await _p.setBool('onboarded', true);
     if (signedIn) await _p.setStringList('calendars', [for (final c in cals) if (c.on) c.id]);
     notifyListeners();
+  }
+
+  /// Calendars to ask Google for: the shown ones, plus the primary when only its birthdays are shown.
+  List<Cal> get _toFetch {
+    final on = [for (final c in cals) if (c.on) c];
+    final primary = cals.where((c) => !c.shared && !c.holiday && !c.birthdays && c.role == 'owner').firstOrNull;
+    if (on.any((c) => c.id == birthdaysId) && primary != null && !primary.on) on.add(primary);
+    return on;
   }
 
   List<Ev> _visible(Iterable<Ev> evs) {
@@ -327,7 +335,7 @@ class Store extends ChangeNotifier {
     }
     if (signedIn) {
       try {
-        final evs = await g.events([for (final c in cals) if (c.on) c], DateTime(year), DateTime(year + 1));
+        final evs = await g.events(_toFetch, DateTime(year), DateTime(year + 1));
         putYear(year, evs);
         error = null;
         if (year == DateTime.now().year) {
