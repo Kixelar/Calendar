@@ -20,10 +20,9 @@
   settings, notifications (exact alarms, snooze, actions), home screen widgets (drawn natively; not seen on a screen),
   background sync (WorkManager), invitation replies after the organizer fix.
 
-## Open problem
-- **The app crashed at start** on the owner's phone since the build that added WorkManager (2026-10-31); no report
-  could be shown, so the crash happened before app code ran. WorkManager was removed (30436952); not yet confirmed
-  fixed. If it still crashes: uninstall and reinstall, then read logcat over USB.
+## Resolved
+- Crash at start (2026-10-31) was caused by WorkManager (it initialises before app code); removed in 30436952,
+  background sync moved to JobScheduler. Confirmed working on the owner's phone.
 
 ## Waiting for the owner (decisions or material)
 - **Glyph Interface** (05.3 section, 07.3 countdown): yes, later (owner, 2026-10-31).
