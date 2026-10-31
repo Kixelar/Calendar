@@ -1831,6 +1831,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Not yet'**
   String get notYet;
+
+  /// No description provided for @check.
+  ///
+  /// In en, this message translates to:
+  /// **'Check'**
+  String get check;
+
+  /// No description provided for @testBackgroundHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Close the app for 1–2 minutes, then come back here.'**
+  String get testBackgroundHint;
 }
 
 class _AppLocalizationsDelegate

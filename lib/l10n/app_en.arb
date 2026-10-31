@@ -327,5 +327,7 @@
   "declinedHint": "Show invitations you declined in the views.",
   "dimPastHint": "Events and days that are over are shown in grey.",
   "inBackground": "In the background",
-  "notYet": "Not yet"
+  "notYet": "Not yet",
+  "check": "Check",
+  "testBackgroundHint": "Close the app for 1–2 minutes, then come back here."
 }

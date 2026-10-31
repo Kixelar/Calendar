@@ -1057,4 +1057,11 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get notYet => 'Jeszcze nie';
+
+  @override
+  String get check => 'Sprawdź';
+
+  @override
+  String get testBackgroundHint =>
+      'Zamknij aplikację na 1–2 minuty, potem wróć tutaj.';
 }

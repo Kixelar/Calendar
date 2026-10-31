@@ -288,5 +288,7 @@
   "declinedHint": "Pokazuj w widokach zaproszenia odrzucone przez Ciebie.",
   "dimPastHint": "Minione wydarzenia i dni są szare.",
   "inBackground": "W tle",
-  "notYet": "Jeszcze nie"
+  "notYet": "Jeszcze nie",
+  "check": "Sprawdź",
+  "testBackgroundHint": "Zamknij aplikację na 1–2 minuty, potem wróć tutaj."
 }

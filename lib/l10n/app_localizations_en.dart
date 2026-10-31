@@ -1047,4 +1047,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get notYet => 'Not yet';
+
+  @override
+  String get check => 'Check';
+
+  @override
+  String get testBackgroundHint =>
+      'Close the app for 1–2 minutes, then come back here.';
 }

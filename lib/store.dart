@@ -136,6 +136,15 @@ class Store extends ChangeNotifier {
     }
   }
 
+  /// Asks for one background run in about a minute (the app must be left for it to run).
+  Future<void> testBackground() async {
+    try {
+      await const MethodChannel('calendar/device').invokeMethod<void>('testSync');
+    } on MissingPluginException {
+      // tests
+    }
+  }
+
   /// After a fresh sync: reminders, plus notifications for new invitations and others' changes in shared calendars.
   Future<void> _afterSync(List<Ev> evs, DateTime? previous) async {
     final n = notifier;

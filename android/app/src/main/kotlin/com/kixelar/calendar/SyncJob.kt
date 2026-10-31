@@ -20,6 +20,7 @@ import io.flutter.embedding.engine.dart.DartExecutor
 class SyncJob : JobService() {
     companion object {
         private const val ID = 31
+        private const val TEST_ID = 32
         private const val TIMEOUT_MS = 120_000L
 
         /** Runs the job every [minutes] (at least 15) when online; 0 or less cancels it. */
@@ -29,11 +30,30 @@ class SyncJob : JobService() {
                 js.cancel(ID)
                 return
             }
+            val every = maxOf(15, minutes) * 60_000L
+            // Scheduling again restarts the period: the app does this on every start, so leave a matching job alone.
+            if (js.getPendingJob(ID)?.intervalMillis == every) return
             js.schedule(JobInfo.Builder(ID, ComponentName(context, SyncJob::class.java))
-                .setPeriodic(maxOf(15, minutes) * 60_000L)
+                .setPeriodic(every)
                 .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
                 .setPersisted(true)
                 .build())
+        }
+
+        /** One extra run in about a minute, to check background sync without waiting a full period (Settings → Accounts). */
+        fun testSoon(context: Context) {
+            context.getSystemService(JobScheduler::class.java).schedule(JobInfo.Builder(TEST_ID, ComponentName(context, SyncJob::class.java))
+                .setMinimumLatency(60_000L)
+                .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
+                .build())
+        }
+
+        /** Writes the run's state where the app's Dart preferences read it (shared_preferences keys carry "flutter."). */
+        private fun note(context: Context, result: String) {
+            context.getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE).edit()
+                .putLong("flutter.bgLast", System.currentTimeMillis())
+                .putString("flutter.bgResult", result)
+                .apply()
         }
     }
 
@@ -41,7 +61,12 @@ class SyncJob : JobService() {
     private val main = Handler(Looper.getMainLooper())
 
     override fun onStartJob(params: JobParameters): Boolean {
-        if (MainActivity.visible) return false
+        if (MainActivity.visible) {
+            note(applicationContext, "skipped: app open")
+            return false
+        }
+        // Dart replaces this with "ok" or the error; if it stays, the Flutter part never finished.
+        note(applicationContext, "started")
         try {
             val loader = FlutterInjector.instance().flutterLoader()
             loader.startInitialization(applicationContext)

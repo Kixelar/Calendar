@@ -33,6 +33,7 @@
 - Hints under week numbers, weekends, declined invitations and dimming in Appearance.
 - 12-hour times: AM/PM on a small second line so they fit; widgets show 12-hour times too.
 - Widgets switch between light and dark with the system theme; the widget picker shows previews (Polish/English, light/dark).
+- Background sync no longer restarts its timer on every app start (it never got to run); "Check" in Settings → Accounts runs a test in about a minute.
 - Settings → Accounts shows the last background sync run and its error, if any.
 - Crash report: if the app (or a widget, reminder or background sync) crashes, a separate screen opens at once with the report and a Copy button (works even when the app dies at start).
 ### Fixed

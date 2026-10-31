@@ -275,6 +275,13 @@ class _AccountsState extends State<Accounts> {
                       ),
                       Lbl(bg == null ? l.notYet : '${hm(context, bg.at)} · ${ok ? 'OK' : l.statusFailed}',
                           color: bg == null ? t.secondary : ok ? t.success : t.accentText),
+                      TextButton(
+                        onPressed: () async {
+                          await store.testBackground();
+                          if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l.testBackgroundHint)));
+                        },
+                        child: Text(l.check.toUpperCase(), style: T.labelSm(t.display)),
+                      ),
                     ]);
                   }),
                 if (store.autoSync)
