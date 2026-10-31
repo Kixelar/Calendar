@@ -47,4 +47,6 @@ Screen numbers refer to docs/design/mockup.html.
 - [ ] Glyph interface on Nothing phones (Glyph Developer Kit)
 - [x] Release signing key
 - [x] App icon
+- [ ] Widgets do not switch light/dark with the system theme (owner, 2026-10-31)
+- [ ] Owner to test background sync (Settings → Accounts → "In the background")
 - [ ] Google Tasks as a "Tasks" calendar (needs the Tasks API: new scope, enabled in Google Cloud; owner decision)

@@ -20,6 +20,15 @@
   settings, notifications (exact alarms, snooze, actions), home screen widgets (drawn natively; not seen on a screen),
   background sync (WorkManager), invitation replies after the organizer fix.
 
+## Open (owner's test, 2026-10-31, build 30437026)
+- **Widget theme switching does not work**: widgets do not change between light and dark with the system theme
+  (layout/ vs layout-night/ approach in Widgets.kt). Not investigated yet.
+- **Background sync not tested yet** by the owner: check Settings → Accounts → "In the background" after ~30 min closed.
+- Owner asked what happens when an invitation notification is dismissed: nothing is sent; the invitation stays
+  unanswered in Google, the app does not notify about it again (`seenInvites`), and it can still be answered from the
+  event (03.5 screen).
+- Decision pending: Google Tasks as a "Tasks" calendar (needs the Tasks API).
+
 ## Resolved
 - Crash at start (2026-10-31) was caused by WorkManager (it initialises before app code); removed in 30436952,
   background sync moved to JobScheduler. Confirmed working on the owner's phone.
