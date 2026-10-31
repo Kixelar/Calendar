@@ -320,5 +320,6 @@
   "crashTitle": "The app closed unexpectedly",
   "crashBody": "Copy this report and send it to the developer.",
   "close": "Close",
-  "copy": "Copy"
+  "copy": "Copy",
+  "saveRepeating": "Save changes to a repeating event"
 }

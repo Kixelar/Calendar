@@ -328,6 +328,42 @@ class _DeleteDialogState extends State<_DeleteDialog> {
   }
 }
 
+/// Saving an edited occurrence of a repeating event: only this one, this and following, or all.
+/// "Only this" is not offered when the repeat rule itself changed.
+class _SaveScopeDialog extends StatefulWidget {
+  const _SaveScopeDialog({required this.allowOne});
+  final bool allowOne;
+  @override
+  State<_SaveScopeDialog> createState() => _SaveScopeDialogState();
+}
+
+class _SaveScopeDialogState extends State<_SaveScopeDialog> {
+  late DeleteScope scope = widget.allowOne ? DeleteScope.one : DeleteScope.following;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = Tok.of(context), l = l10n(context);
+    return _dialog(context, [
+      Text(l.saveRepeating, style: T.headlineMd(t.display)),
+      Group(gap: 0, children: [
+        for (final (s, label) in [
+          if (widget.allowOne) (DeleteScope.one, l.onlyThis),
+          (DeleteScope.following, l.thisAndFollowing),
+          (DeleteScope.all, l.allOccurrences),
+        ])
+          RowItem(onTap: () => setState(() => scope = s), children: [
+            Icon(s == scope ? Icons.radio_button_checked : Icons.radio_button_unchecked, size: 24, color: s == scope ? t.display : t.borderControl),
+            Expanded(child: Text(label)),
+          ]),
+      ]),
+      Row(spacing: 8, children: [
+        Expanded(child: Btn(l.cancel, kind: BtnKind.secondary, onTap: () => Navigator.pop(context))),
+        Expanded(child: Btn(l.save, onTap: () => Navigator.pop(context, scope))),
+      ]),
+    ]);
+  }
+}
+
 /// 03.2 new event, also used to edit [ev]. All-day ranges are edited with an inclusive last day.
 class EventEdit extends StatefulWidget {
   const EventEdit(this.store, {super.key, this.ev, this.day});
@@ -418,7 +454,9 @@ class _EventEditState extends State<EventEdit> {
   String timeZone = '';
   bool busy = false;
 
-  bool get _occurrence => widget.ev?.recurringId != null; // its rule belongs to the series and is not edited here
+  bool get _occurrence => widget.ev?.recurringId != null; // an occurrence: its rule belongs to the series
+  Rule? _seriesRule; // the series' rule as loaded, to tell whether the user changed it
+  bool _ruleLoaded = true;
 
   @override
   void initState() {
@@ -442,6 +480,16 @@ class _EventEditState extends State<EventEdit> {
       reminderChoice = _defaultReminder;
       guests = (guests: const [], invite: true, modify: false, see: true);
     }
+    if (_occurrence) {
+      _ruleLoaded = false;
+      widget.store.g.recurrence(e!.calId, e.recurringId!).then((lines) {
+        if (!mounted) return;
+        setState(() {
+          _seriesRule = rule = lines.map(Rule.parse).nonNulls.firstOrNull;
+          _ruleLoaded = true;
+        });
+      }, onError: (_) {});
+    }
     widget.store.timeZone().then((z) {
       if (mounted) setState(() => timeZone = z);
     });
@@ -462,13 +510,22 @@ class _EventEditState extends State<EventEdit> {
       return;
     }
     final old = widget.ev;
+    final ruleChanged = _occurrence && rule?.format() != _seriesRule?.format();
+    // A repeating event asks which occurrences the change is for, like Google Calendar.
+    DeleteScope scope = DeleteScope.one;
+    if (_occurrence) {
+      final picked = await showDialog<DeleteScope>(
+          context: context, barrierColor: _scrim, builder: (_) => _SaveScopeDialog(allowOne: !ruleChanged));
+      if (picked == null || !mounted) return;
+      scope = picked;
+    }
     final draft = Ev(_title.text.trim(), calId, s, e,
             id: old?.id ?? '',
             allDay: allDay,
             location: place,
             notes: notes,
             recurringId: old?.recurringId,
-            recurrence: _occurrence ? null : [?rule?.format()],
+            recurrence: _occurrence ? (ruleChanged ? [?rule?.format()] : null) : [?rule?.format()],
             reminder: reminderChoice >= 0 ? reminderChoice : null,
             customReminder: reminderChoice != _defaultReminder,
             guests: guests.guests,
@@ -478,7 +535,11 @@ class _EventEditState extends State<EventEdit> {
             updated: old?.updated);
     setState(() => busy = true);
     try {
-      await widget.store.save(draft, fromCal: old?.calId);
+      if (scope == DeleteScope.one) {
+        await widget.store.save(draft, fromCal: old?.calId);
+      } else {
+        await widget.store.saveSeries(draft, scope, originalStart: old!.start);
+      }
       if (mounted) Navigator.of(context).popUntil((r) => r.isFirst);
     } on EditConflict catch (c) {
       if (!mounted) return;
@@ -679,10 +740,8 @@ class _EventEditState extends State<EventEdit> {
                 if (!allDay && timeZone.isNotEmpty) ValueRow(l.timeZone, value: timeZone.split('/').last.replaceAll('_', ' ')),
               ]),
               Group(children: [
-                if (_occurrence)
-                  _RuleText(widget.ev!, store, builder: (text) => ValueRow(l.repeat, value: text ?? l.custom))
-                else
-                  ValueRow(l.repeat, value: rule?.describe(l, loc(context)) ?? l.never, onTap: _pickRepeat),
+                ValueRow(l.repeat,
+                    value: !_ruleLoaded ? '…' : rule?.describe(l, loc(context)) ?? l.never, onTap: _ruleLoaded ? _pickRepeat : null),
                 ValueRow(l.reminder, value: _reminderLabel(l, reminderChoice), onTap: _pickReminder),
                 RowItem(
                   onTap: () async {

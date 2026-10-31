@@ -1033,4 +1033,7 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get copy => 'Kopiuj';
+
+  @override
+  String get saveRepeating => 'Zapisać zmiany w wydarzeniu cyklicznym?';
 }

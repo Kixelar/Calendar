@@ -1789,6 +1789,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Copy'**
   String get copy;
+
+  /// No description provided for @saveRepeating.
+  ///
+  /// In en, this message translates to:
+  /// **'Save changes to a repeating event'**
+  String get saveRepeating;
 }
 
 class _AppLocalizationsDelegate

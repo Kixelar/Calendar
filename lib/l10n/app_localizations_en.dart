@@ -1024,4 +1024,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get copy => 'Copy';
+
+  @override
+  String get saveRepeating => 'Save changes to a repeating event';
 }

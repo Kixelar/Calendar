@@ -353,24 +353,7 @@ class GoogleCalendar {
     if (!force && seen != null && now != null && now.isAfter(seen)) {
       throw EditConflict(_ev(ev, Cal(e.calId, '', shared: false, holiday: false, shape: Shape.dot, on: true))!);
     }
-    final endDay = DateTime(e.end.year, e.end.month, e.end.day); // all-day end is exclusive, as Google expects
-    gcal.EventDateTime at(DateTime t, DateTime day) =>
-        e.allDay ? gcal.EventDateTime(date: day) : gcal.EventDateTime(dateTime: t, timeZone: timeZone);
-    // Existing guests keep their reply; new e-mails are invited.
-    final old = {for (final a in ev.attendees ?? const <gcal.EventAttendee>[]) a.email: a};
-    ev
-      ..summary = e.title
-      ..location = e.location
-      ..description = e.notes
-      ..start = at(e.start, DateTime(e.start.year, e.start.month, e.start.day))
-      ..end = at(e.end, endDay)
-      ..attendees = [for (final g in e.guests) old[g.email] ?? gcal.EventAttendee(email: g.email, displayName: g.name == g.email ? null : g.name)]
-      ..guestsCanInviteOthers = e.guestsInvite
-      ..guestsCanModify = e.guestsModify
-      ..guestsCanSeeOtherGuests = e.guestsSee
-      ..reminders = e.customReminder
-          ? gcal.EventReminders(useDefault: false, overrides: [if (e.reminder != null) gcal.EventReminder(method: 'popup', minutes: e.reminder)])
-          : gcal.EventReminders(useDefault: true);
+    _fill(ev, e, e.start, e.end, timeZone);
     // Occurrences cannot carry a rule; a series or single event can.
     if (e.recurringId == null && e.recurrence != null) ev.recurrence = e.recurrence!.isEmpty ? null : e.recurrence;
     final send = e.guests.isEmpty ? 'none' : 'all';
@@ -379,6 +362,59 @@ class GoogleCalendar {
     } else {
       await api.events.update(ev, e.calId, e.id, sendUpdates: send);
     }
+  }
+
+  /// Copies what the edit screen changes from [e] onto [ev], with [start]–[end] as its time.
+  void _fill(gcal.Event ev, Ev e, DateTime start, DateTime end, String timeZone) {
+    gcal.EventDateTime at(DateTime t) => e.allDay
+        ? gcal.EventDateTime(date: DateTime(t.year, t.month, t.day)) // all-day end is exclusive, as Google expects
+        : gcal.EventDateTime(dateTime: t, timeZone: timeZone);
+    // Existing guests keep their reply; new e-mails are invited.
+    final old = {for (final a in ev.attendees ?? const <gcal.EventAttendee>[]) a.email: a};
+    ev
+      ..summary = e.title
+      ..location = e.location
+      ..description = e.notes
+      ..start = at(start)
+      ..end = at(end)
+      ..attendees = [for (final g in e.guests) old[g.email] ?? gcal.EventAttendee(email: g.email, displayName: g.name == g.email ? null : g.name)]
+      ..guestsCanInviteOthers = e.guestsInvite
+      ..guestsCanModify = e.guestsModify
+      ..guestsCanSeeOtherGuests = e.guestsSee
+      ..reminders = e.customReminder
+          ? gcal.EventReminders(useDefault: false, overrides: [if (e.reminder != null) gcal.EventReminder(method: 'popup', minutes: e.reminder)])
+          : gcal.EventReminders(useDefault: true);
+  }
+
+  /// Saves an edited occurrence of a series for "this and following" or "all" (03.2), like Google Calendar:
+  /// time changes shift the series by the same amount; [e.recurrence] is the series' new rule ([] = stop repeating).
+  /// "This and following" ends the old series before [originalStart] and starts a new one there.
+  Future<void> saveSeries(Ev e, DeleteScope scope, {required DateTime originalStart, required String timeZone}) async {
+    await _authorize(interactive: false);
+    final api = _api!, series = e.recurringId!, send = e.guests.isEmpty ? 'none' : 'all';
+    final master = await api.events.get(e.calId, series);
+    final first = _at(master.start) ?? originalStart;
+    final rule = e.recurrence ?? [for (final r in master.recurrence ?? const <String>[]) if (r.startsWith('RRULE:')) r];
+    final shift = e.start.difference(originalStart), length = e.end.difference(e.start);
+    if (scope == DeleteScope.all || !originalStart.isAfter(first)) {
+      final start = first.add(shift);
+      _fill(master, e, start, start.add(length), timeZone);
+      // Keep exceptions (EXDATE) of the series, replace its rule.
+      master.recurrence = rule.isEmpty ? null : [...rule, for (final r in master.recurrence ?? const <String>[]) if (!r.startsWith('RRULE:')) r];
+      await api.events.update(master, e.calId, series, sendUpdates: send);
+      return;
+    }
+    master.recurrence = [for (final r in master.recurrence ?? const <String>[]) endRuleBefore(r, originalStart, allDay: e.allDay)];
+    await api.events.update(master, e.calId, series, sendUpdates: send);
+    // The new series repeats as before (without the old end), unless a new rule was chosen.
+    final next = gcal.Event();
+    _fill(next, e, e.start, e.end, timeZone);
+    next.recurrence = [
+      for (final r in rule)
+        e.recurrence != null ? r : 'RRULE:${r.substring(6).split(';').where((p) => !p.startsWith('UNTIL=') && !p.startsWith('COUNT=')).join(';')}',
+    ];
+    if (next.recurrence!.isEmpty) next.recurrence = null;
+    await api.events.insert(next, e.calId, sendUpdates: send);
   }
 
   /// Recurrence lines of a series, for the "every 2 weeks" text of an occurrence (03.1).

@@ -281,5 +281,6 @@
   "crashTitle": "Aplikacja nieoczekiwanie się zamknęła",
   "crashBody": "Skopiuj ten raport i wyślij go twórcy.",
   "close": "Zamknij",
-  "copy": "Kopiuj"
+  "copy": "Kopiuj",
+  "saveRepeating": "Zapisać zmiany w wydarzeniu cyklicznym?"
 }

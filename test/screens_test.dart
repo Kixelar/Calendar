@@ -39,6 +39,13 @@ Ev _demo() => Ev('Demo sprintu', 'w', DateTime.now().add(const Duration(minutes:
       Guest('Piotr Kamiński', 'piotr@example.com', 'needsAction'),
     ]);
 
+/// A one-off event (no series), for screens where the repeat question would get in the way.
+Ev _single() {
+  final d = dayOf(DateTime.now());
+  return Ev('Demo sprintu', 'w', DateTime(d.year, d.month, d.day, 14), DateTime(d.year, d.month, d.day, 15),
+      id: 'single', location: 'Sala 4B', updated: DateTime.now().subtract(const Duration(hours: 1)));
+}
+
 /// The mockup's 03.5 example: an invitation from Marek that clashes with another event.
 Ev _invitation() {
   final d = dayOf(DateTime.now());
@@ -90,6 +97,9 @@ class _FakeGoogle extends GoogleCalendar {
     ];
     return evs.where((e) => e.start.isBefore(to) && e.end.isAfter(from)).toList()..sort((a, b) => a.start.compareTo(b.start));
   }
+
+  @override
+  Future<List<String>> recurrence(String calId, String seriesId) async => const ['RRULE:FREQ=WEEKLY;INTERVAL=2;BYDAY=FR'];
 
   @override
   Future<void> save(Ev e, {String? fromCal, required String timeZone, bool force = false}) async {
@@ -379,7 +389,8 @@ void main() {
             await t.pump();
           }
         }));
-    testWidgets('sync conflict', (t) => shot(t, '06_3_conflict', page: (s) => EventEdit(s, ev: _demo()), tapText: 'ZAPISZ', act: (t) async {
+    testWidgets('save repeating', (t) => shot(t, '03_2_save_repeating', page: (s) => EventEdit(s, ev: _demo()), tapText: 'ZAPISZ'));
+    testWidgets('sync conflict', (t) => shot(t, '06_3_conflict', page: (s) => EventEdit(s, ev: _single()), tapText: 'ZAPISZ', act: (t) async {
           await t.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50))); // save reaches the fake Google
           await t.pump();
           await t.pump(const Duration(milliseconds: 600));

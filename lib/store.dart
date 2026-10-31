@@ -449,6 +449,12 @@ class Store extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> saveSeries(Ev e, DeleteScope scope, {required DateTime originalStart}) async {
+    await g.saveSeries(e, scope, originalStart: originalStart, timeZone: await timeZone());
+    _days.clear();
+    notifyListeners();
+  }
+
   Future<void> respond(Ev e, String status) async {
     await g.respond(e, status);
     _days.clear();
