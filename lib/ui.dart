@@ -25,11 +25,12 @@ class Lbl extends StatelessWidget {
 
 /// Calendar marker (.mk and its variants).
 class Marker extends StatelessWidget {
-  const Marker(this.shape, {super.key});
+  const Marker(this.shape, {super.key, this.color});
   final Shape shape;
+  final Color? color; // defaults to the display colour; inverted inside a pressed chip
   @override
   Widget build(BuildContext context) =>
-      CustomPaint(size: const Size(10, 10), painter: _MarkerPainter(shape, Tok.of(context).display));
+      CustomPaint(size: const Size(10, 10), painter: _MarkerPainter(shape, color ?? Tok.of(context).display));
 }
 
 class _MarkerPainter extends CustomPainter {
@@ -417,3 +418,36 @@ void openEvent(BuildContext c, Ev e, Store store) =>
 /// Splits a day's events into all-day and timed lists.
 (List<Ev>, List<Ev>) splitAllDay(List<Ev> evs) =>
     (evs.where((e) => e.allDay).toList(), evs.where((e) => !e.allDay).toList());
+
+/// Filter chip (.chip): pill with optional leading widget, filled when pressed.
+class Chip2 extends StatelessWidget {
+  const Chip2(this.label, {super.key, this.pressed = false, required this.onTap, this.leading});
+  final String label;
+  final bool pressed;
+  final VoidCallback onTap;
+  final Widget? leading;
+  @override
+  Widget build(BuildContext context) {
+    final t = Tok.of(context);
+    return Semantics(
+      button: true,
+      selected: pressed,
+      child: InkWell(
+        onTap: onTap,
+        customBorder: const StadiumBorder(),
+        child: Container(
+          height: 28,
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          decoration: ShapeDecoration(
+            color: pressed ? t.display : null,
+            shape: StadiumBorder(side: BorderSide(color: pressed ? t.display : t.borderControl)),
+          ),
+          child: Row(mainAxisSize: MainAxisSize.min, spacing: 6, children: [
+            ?leading,
+            Text(label.toUpperCase(), style: T.labelSm(pressed ? t.bg : t.primary)),
+          ]),
+        ),
+      ),
+    );
+  }
+}

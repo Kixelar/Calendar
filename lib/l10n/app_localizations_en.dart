@@ -317,4 +317,31 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get runInBackground => 'Run in background';
+
+  @override
+  String get search => 'Search';
+
+  @override
+  String get searchHint => 'Search events, people, places';
+
+  @override
+  String get clear => 'Clear';
+
+  @override
+  String get filterAll => 'All';
+
+  @override
+  String get withGuests => 'With guests';
+
+  @override
+  String get upcoming => 'Upcoming';
+
+  @override
+  String get past => 'Past';
+
+  @override
+  String get recentSearches => 'Recent searches';
+
+  @override
+  String get noResults => 'Nothing found';
 }

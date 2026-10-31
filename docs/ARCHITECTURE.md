@@ -13,6 +13,7 @@ lib/
   l10n/app_pl.arb        Polish strings
   screens/onboarding.dart  01.1 Welcome, 01.2 Connect, 01.3 Choose (also used as the calendar picker later)
   screens/home.dart        02.1 year, 02.2 month, 02.3 week, 02.4 day views + bottom view tabs and + button
+  screens/search.dart      02.5 search (Google `q` full-text search, two years back and ahead, first 50 per calendar)
   screens/event.dart       03.1 event details, 03.2 new/edit event, 06.2 delete dialog, calendar picker
 android/app/src/main/res/values*/strings.xml   Launcher name per device language
 test/screens_test.dart   Logic tests + PNG renders of screens with a fake Google account

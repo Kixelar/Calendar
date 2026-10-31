@@ -320,4 +320,31 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get runInBackground => 'Działaj w tle';
+
+  @override
+  String get search => 'Szukaj';
+
+  @override
+  String get searchHint => 'Szukaj wydarzeń, osób, miejsc';
+
+  @override
+  String get clear => 'Wyczyść';
+
+  @override
+  String get filterAll => 'Wszystko';
+
+  @override
+  String get withGuests => 'Z gośćmi';
+
+  @override
+  String get upcoming => 'Nadchodzące';
+
+  @override
+  String get past => 'Minione';
+
+  @override
+  String get recentSearches => 'Ostatnio szukane';
+
+  @override
+  String get noResults => 'Nic nie znaleziono';
 }

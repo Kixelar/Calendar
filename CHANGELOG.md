@@ -4,6 +4,7 @@
 ### Added
 - 01.4 sync screen after choosing calendars: events counter, progress, status per calendar, "Run in background".
 - Offline cache: calendars and events are saved on the phone, shown at once on start and without internet, then refreshed from Google.
+- 02.5 search: Google full-text search (titles, notes, places, guests), filters by calendar and "with guests", upcoming and past results, recent searches.
 
 ## 2026.10.30-dev
 ### Added

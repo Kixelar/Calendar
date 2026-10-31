@@ -154,39 +154,52 @@ class GoogleCalendar {
   }
 
   /// Events of [cals] that overlap [from, to), recurring events expanded.
-  Future<List<Ev>> events(List<Cal> cals, DateTime from, DateTime to) async {
+  Future<List<Ev>> events(List<Cal> cals, DateTime from, DateTime to) => _list(cals, from, to);
+
+  /// Google's full-text search (title, description, place, guests) over two years back and ahead (02.5).
+  Future<List<Ev>> search(List<Cal> cals, String query) {
+    final now = DateTime.now();
+    return _list(cals, DateTime(now.year - 2, now.month), DateTime(now.year + 2, now.month), query: query, max: 50);
+  }
+
+  Future<List<Ev>> _list(List<Cal> cals, DateTime from, DateTime to, {String? query, int max = 2500}) async {
     await _authorize(interactive: false);
     final out = <Ev>[];
     await Future.wait(cals.map((cal) async {
       String? page;
       do {
         final r = await _api!.events.list(cal.id,
-            timeMin: from.toUtc(), timeMax: to.toUtc(), singleEvents: true, maxResults: 2500, pageToken: page);
+            timeMin: from.toUtc(), timeMax: to.toUtc(), singleEvents: true, maxResults: max, pageToken: page, q: query);
         for (final e in r.items ?? const <gcal.Event>[]) {
-          if (e.status == 'cancelled' || e.start == null) continue;
-          final s = _at(e.start);
-          if (s == null) continue;
-          final rem = e.reminders;
-          out.add(Ev(e.summary ?? '', cal.id, s, _at(e.end) ?? s,
-              id: e.id ?? '',
-              allDay: e.start!.dateTime == null,
-              location: e.location,
-              notes: e.description,
-              recurringId: e.recurringEventId,
-              organizer: e.organizer?.self ?? true,
-              guests: [
-                for (final a in e.attendees ?? const <gcal.EventAttendee>[])
-                  if (a.resource != true) Guest(a.displayName ?? a.email ?? '', a.email ?? '', a.responseStatus ?? 'needsAction', self: a.self ?? false),
-              ],
-              reminder: rem?.useDefault ?? true
-                  ? cal.defaultReminder
-                  : rem?.overrides?.where((o) => o.method == 'popup').firstOrNull?.minutes));
+          if (_ev(e, cal) case final ev?) out.add(ev);
         }
-        page = r.nextPageToken;
+        // A search shows the first page only; a year load needs every page.
+        page = query == null ? r.nextPageToken : null;
       } while (page != null);
     }));
     out.sort((a, b) => a.start.compareTo(b.start));
     return out;
+  }
+
+  Ev? _ev(gcal.Event e, Cal cal) {
+    if (e.status == 'cancelled' || e.start == null) return null;
+    final s = _at(e.start);
+    if (s == null) return null;
+    final rem = e.reminders;
+    return Ev(e.summary ?? '', cal.id, s, _at(e.end) ?? s,
+        id: e.id ?? '',
+        allDay: e.start!.dateTime == null,
+        location: e.location,
+        notes: e.description,
+        recurringId: e.recurringEventId,
+        organizer: e.organizer?.self ?? true,
+        guests: [
+          for (final a in e.attendees ?? const <gcal.EventAttendee>[])
+            if (a.resource != true) Guest(a.displayName ?? a.email ?? '', a.email ?? '', a.responseStatus ?? 'needsAction', self: a.self ?? false),
+        ],
+        reminder: rem?.useDefault ?? true
+            ? cal.defaultReminder
+            : rem?.overrides?.where((o) => o.method == 'popup').firstOrNull?.minutes);
   }
 
   /// Creates [e] (empty id) or updates it; [fromCal] is its calendar before the edit when the user moved it.

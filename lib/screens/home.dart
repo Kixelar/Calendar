@@ -9,6 +9,7 @@ import '../theme.dart';
 import '../ui.dart';
 import 'event.dart';
 import 'onboarding.dart';
+import 'search.dart';
 
 /// Main screen with the four views from the mockup: 02.1 year, 02.2 month, 02.3 week, 02.4 day.
 class Home extends StatefulWidget {
@@ -55,7 +56,13 @@ class _HomeState extends State<Home> {
               padding: const EdgeInsets.fromLTRB(14, 12, 14, 0),
               child: SizedBox(
                 height: 44,
-                child: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+                child: Row(children: [
+                  if (store.signedIn)
+                    IconBtn(Icons.search, label: l.search, onTap: () {
+                      final back = [l.year, l.month, l.week, l.day][tab];
+                      Navigator.push(context, MaterialPageRoute(builder: (_) => Search(store, backLabel: back)));
+                    }),
+                  const Spacer(),
                   if (store.signedIn)
                     IconBtn(Icons.layers_outlined, label: l.calendars, onTap: () {
                       Navigator.push(context, MaterialPageRoute(builder: (_) => Choose(store, onboarding: false)));

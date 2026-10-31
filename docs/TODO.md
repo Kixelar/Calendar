@@ -10,7 +10,7 @@ Screen numbers refer to docs/design/mockup.html.
 - [x] Confirm the app no longer asks to sign in on every launch (owner)
 - [x] Fonts (owner supplied, docs/DESIGN.md)
 - [x] 01.4 Sync progress screen
-- [ ] 02.5 Search (top bar search icon is hidden until then)
+- [x] 02.5 Search
 - [x] Offline cache of events (JSON files per year in the app support folder)
 
 ## Stage 2: events

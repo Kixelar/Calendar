@@ -8,6 +8,7 @@ import 'package:calendar/main.dart';
 import 'package:calendar/screens/event.dart';
 import 'package:calendar/screens/home.dart';
 import 'package:calendar/screens/onboarding.dart';
+import 'package:calendar/screens/search.dart';
 import 'package:calendar/store.dart';
 import 'package:calendar/ui.dart';
 import 'package:flutter/material.dart';
@@ -58,6 +59,17 @@ class _FakeGoogle extends GoogleCalendar {
       for (var i = -40; i < 60; i += 3) Ev('Spotkanie', 'w', at(i, 9), at(i, 10 + i % 4)),
     ];
     return evs.where((e) => e.start.isBefore(to) && e.end.isAfter(from)).toList()..sort((a, b) => a.start.compareTo(b.start));
+  }
+
+  @override
+  Future<List<Ev>> search(List<Cal> cals, String query) async {
+    final d = dayOf(DateTime.now());
+    return [
+      Ev('Demo wersji 2.0', 'w', DateTime(d.year, d.month - 1, 18, 11), DateTime(d.year, d.month - 1, 18, 12), location: 'Zoom'),
+      Ev('Demo sprintu', 'w', DateTime(d.year, d.month, d.day - 14, 14), DateTime(d.year, d.month, d.day - 14, 15), location: 'Sala 4B'),
+      _demo(),
+      Ev('Demo sprintu', 'w', DateTime(d.year, d.month, d.day + 14, 14), DateTime(d.year, d.month, d.day + 14, 15), location: 'Sala 4B'),
+    ];
   }
 }
 
@@ -173,7 +185,12 @@ void main() {
     });
 
     Future<void> shot(WidgetTester t, String name,
-        {int tab = -1, bool onboarded = true, Brightness b = Brightness.dark, Widget Function(Store)? page, String? tapText}) async {
+        {int tab = -1,
+        bool onboarded = true,
+        Brightness b = Brightness.dark,
+        Widget Function(Store)? page,
+        String? tapText,
+        Future<void> Function(WidgetTester)? act}) async {
       SharedPreferences.setMockInitialValues({'onboarded': onboarded, 'google': onboarded});
       t.view.physicalSize = const Size(390, 844);
       t.view.devicePixelRatio = 1;
@@ -201,6 +218,7 @@ void main() {
         await t.tap(find.text(['ROK', 'MIESIĄC', 'TYDZIEŃ', 'DZIEŃ'][tab]));
         await t.pump();
       }
+      await act?.call(t);
       await t.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50))); // fake event load
       await t.pump();
       expect(t.takeException(), isNull);
@@ -227,6 +245,12 @@ void main() {
       await shot(t, '01_3_choose', onboarded: false, page: (_) => Choose(store, onboarding: true));
     });
     testWidgets('connect', (t) => shot(t, '01_2_connect', onboarded: false, page: (s) => Connect(s)));
+    testWidgets('search', (t) => shot(t, '02_5_search', page: (s) => Search(s, backLabel: 'Miesiąc'), act: (t) async {
+          await t.enterText(find.byType(TextField), 'demo');
+          await t.pump(const Duration(milliseconds: 500)); // debounce
+          await t.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
+          await t.pump();
+        }));
     testWidgets('event', (t) => shot(t, '03_1_event', page: (s) => EventDetails(_demo(), s)));
     testWidgets('new event', (t) => shot(t, '03_2_new_event', page: (s) => EventEdit(s)));
     testWidgets('edit event', (t) => shot(t, '03_2_edit_event', page: (s) => EventEdit(s, ev: _demo())));

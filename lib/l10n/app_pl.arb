@@ -84,5 +84,14 @@
   "statusRunning": "W toku",
   "statusQueued": "W kolejce",
   "statusFailed": "Błąd",
-  "runInBackground": "Działaj w tle"
+  "runInBackground": "Działaj w tle",
+  "search": "Szukaj",
+  "searchHint": "Szukaj wydarzeń, osób, miejsc",
+  "clear": "Wyczyść",
+  "filterAll": "Wszystko",
+  "withGuests": "Z gośćmi",
+  "upcoming": "Nadchodzące",
+  "past": "Minione",
+  "recentSearches": "Ostatnio szukane",
+  "noResults": "Nic nie znaleziono"
 }

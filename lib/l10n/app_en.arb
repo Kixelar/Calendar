@@ -98,5 +98,14 @@
   "statusRunning": "In progress",
   "statusQueued": "Queued",
   "statusFailed": "Failed",
-  "runInBackground": "Run in background"
+  "runInBackground": "Run in background",
+  "search": "Search",
+  "searchHint": "Search events, people, places",
+  "clear": "Clear",
+  "filterAll": "All",
+  "withGuests": "With guests",
+  "upcoming": "Upcoming",
+  "past": "Past",
+  "recentSearches": "Recent searches",
+  "noResults": "Nothing found"
 }
