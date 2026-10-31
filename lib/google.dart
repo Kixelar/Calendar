@@ -16,18 +16,29 @@ class Cal {
   final bool shared, holiday, writable;
   final Shape shape;
   final int? defaultReminder; // minutes before, applies to events that use the calendar's default reminders
+  final String role; // owner, writer, reader or freeBusyReader
   bool on;
   Cal(this.id, this.name,
-      {required this.shared, required this.holiday, required this.shape, required this.on, this.writable = true, this.defaultReminder});
+      {required this.shared,
+      required this.holiday,
+      required this.shape,
+      required this.on,
+      this.writable = true,
+      this.defaultReminder,
+      this.role = 'owner'});
+
+  /// The owner's address for a calendar shared by a person (their primary calendar's id is their e-mail).
+  String? get ownerEmail => id.contains('@') && !id.endsWith('calendar.google.com') ? id : null;
 
   Map<String, Object?> toJson() =>
-      {'id': id, 'name': name, 'shared': shared, 'holiday': holiday, 'writable': writable, 'shape': shape.index, 'rem': defaultReminder, 'on': on};
+      {'id': id, 'name': name, 'shared': shared, 'holiday': holiday, 'writable': writable, 'shape': shape.index, 'rem': defaultReminder, 'on': on, 'role': role};
   factory Cal.fromJson(Map<String, Object?> j) => Cal(j['id'] as String, j['name'] as String,
       shared: j['shared'] as bool,
       holiday: j['holiday'] as bool,
       writable: j['writable'] as bool,
       shape: Shape.values[j['shape'] as int],
       defaultReminder: j['rem'] as int?,
+      role: (j['role'] as String?) ?? 'owner',
       on: j['on'] as bool);
 }
 
@@ -112,6 +123,16 @@ class Ev {
 
 enum DeleteScope { one, following, all }
 
+/// One access rule of a calendar (04.4). [scope] is user, group, domain or default (anyone with the link).
+class Access {
+  const Access(this.id, this.scope, this.email, this.role);
+  final String id, scope, role;
+  final String? email;
+}
+
+/// Public link to a calendar that has `default` read access.
+String publicLink(String calId) => 'https://calendar.google.com/calendar/embed?src=${Uri.encodeComponent(calId)}';
+
 /// Saving found that Google changed the event after it was opened here; [remote] is Google's version (06.3).
 class EditConflict implements Exception {
   const EditConflict(this.remote);
@@ -164,7 +185,8 @@ class GoogleCalendar {
     return true;
   }
 
-  Future<List<Cal>> calendars(Set<String>? enabled) async {
+  /// [shapes] are markers the user picked (04.5); others follow the default order.
+  Future<List<Cal>> calendars(Set<String>? enabled, {Map<String, Shape> shapes = const {}}) async {
     await _authorize(interactive: false);
     final items = <gcal.CalendarListEntry>[];
     String? page;
@@ -185,11 +207,66 @@ class GoogleCalendar {
               shared: shared,
               holiday: holiday,
               writable: e.accessRole == 'owner' || e.accessRole == 'writer',
+              role: e.accessRole ?? 'reader',
               defaultReminder: e.defaultReminders?.where((r) => r.method == 'popup').firstOrNull?.minutes,
-              shape: holiday ? Shape.ring : shared ? Shape.dash : own[i++ % own.length],
+              shape: shapes[e.id] ?? (holiday ? Shape.ring : shared ? Shape.dash : own[i++ % own.length]),
               on: enabled?.contains(e.id) ?? e.selected == true);
         }(),
     ];
+  }
+
+  /// 04.2: a new secondary Google calendar.
+  Future<void> createCalendar(String name, String timeZone) async {
+    await _authorize(interactive: false);
+    await _api!.calendars.insert(gcal.Calendar(summary: name, timeZone: timeZone));
+  }
+
+  /// Adds an existing calendar (e.g. a holiday calendar, 04.3) to the user's list.
+  Future<void> addCalendar(String id) async {
+    await _authorize(interactive: false);
+    await _api!.calendarList.insert(gcal.CalendarListEntry(id: id));
+  }
+
+  /// Removes a calendar from the user's list (it is not deleted for its owner).
+  Future<void> removeCalendar(String id) async {
+    await _authorize(interactive: false);
+    await _api!.calendarList.delete(id);
+  }
+
+  /// 04.4: who has access to [calId]: (rule id, scope type, e-mail or null, role).
+  Future<List<Access>> access(String calId) async {
+    await _authorize(interactive: false);
+    final r = await _api!.acl.list(calId);
+    return [
+      for (final a in r.items ?? const <gcal.AclRule>[])
+        Access(a.id ?? '', a.scope?.type ?? 'user', a.scope?.value, a.role ?? 'reader'),
+    ];
+  }
+
+  /// Shares [calId] with [email] ([role] reader, writer or freeBusyReader); Google e-mails them.
+  Future<void> share(String calId, String email, String role) async {
+    await _authorize(interactive: false);
+    await _api!.acl.insert(gcal.AclRule(role: role, scope: gcal.AclRuleScope(type: 'user', value: email)), calId, sendNotifications: true);
+  }
+
+  Future<void> setAccess(String calId, String ruleId, String role) async {
+    await _authorize(interactive: false);
+    await _api!.acl.patch(gcal.AclRule(role: role), calId, ruleId);
+  }
+
+  Future<void> removeAccess(String calId, String ruleId) async {
+    await _authorize(interactive: false);
+    await _api!.acl.delete(calId, ruleId);
+  }
+
+  /// Public read access ("access by link"): a rule with scope type `default`.
+  Future<void> setPublic(String calId, bool on) async {
+    await _authorize(interactive: false);
+    if (on) {
+      await _api!.acl.insert(gcal.AclRule(role: 'reader', scope: gcal.AclRuleScope(type: 'default')), calId);
+    } else {
+      await _api!.acl.delete(calId, 'default');
+    }
   }
 
   /// Events of [cals] that overlap [from, to), recurring events expanded.

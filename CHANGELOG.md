@@ -10,6 +10,11 @@
 - 03.4 invite guests: suggestions from people in your events or any e-mail, guest permissions; also from the event screen ("Invite more people", share icon).
 - 03.5 received invitations: organizer, guests, clash with another event, reply Yes / Maybe / No.
 - 03.1 shows how a repeating event repeats ("Every 2 weeks on Tuesday and Friday").
+- 04.1 calendars: mine (with share), shared with me (with your access level), subscriptions, show/hide, add calendar.
+- 04.2 add calendar: new Google calendar, holidays, Google account.
+- 04.3 holidays: holiday calendars by country (+ add country), holidays per year, the next three holidays.
+- 04.4 share a calendar: people with access and their level (busy only / view / edit / remove), add a person, access by link with copy.
+- 04.5 shared with you: owner, your access, choose the marker shape, show in views, share yours back, remove.
 - 06.1 empty day: "Nothing planned." with an add button; weekends and holidays read as days off. Holiday events are labelled "Holiday".
 - 06.3 conflicting changes: if the event changed in Google while you edited it, choose this phone's version, Google's, or keep both.
 ### Fixed

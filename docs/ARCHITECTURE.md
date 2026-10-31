@@ -16,6 +16,7 @@ lib/
   screens/repeat.dart      03.3 custom repeat; rules live in lib/rrule.dart (parse, format, Polish/English sentence; tested)
   screens/invite.dart      03.4 invite guests (suggestions = guests of loaded events, Store.people)
   screens/search.dart      02.5 search (Google `q` full-text search, two years back and ahead, first 50 per calendar)
+  screens/calendars.dart   04.1 calendars, 04.2 add, 04.3 holidays (Google holiday calendars by country), 04.4 share (ACL), 04.5 shared with you
   screens/event.dart       03.1 event details, 03.2 new/edit event, 06.2 delete dialog, calendar picker
 android/app/src/main/res/values*/strings.xml   Launcher name per device language
 test/screens_test.dart   Logic tests + PNG renders of screens with a fake Google account

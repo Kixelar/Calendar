@@ -7,6 +7,7 @@ import 'package:calendar/google.dart';
 import 'package:calendar/l10n/app_localizations.dart';
 import 'package:calendar/main.dart';
 import 'package:calendar/rrule.dart';
+import 'package:calendar/screens/calendars.dart';
 import 'package:calendar/screens/event.dart';
 import 'package:calendar/screens/home.dart';
 import 'package:calendar/screens/invite.dart';
@@ -53,11 +54,12 @@ class _FakeGoogle extends GoogleCalendar {
   @override
   Future<bool> restore() async => true;
   @override
-  Future<List<Cal>> calendars(Set<String>? enabled) async => [
+  Future<List<Cal>> calendars(Set<String>? enabled, {Map<String, Shape> shapes = const {}}) async => [
         Cal('p', 'Osobisty', shared: false, holiday: false, shape: Shape.dot, on: true),
         Cal('w', 'Praca', shared: false, holiday: false, shape: Shape.square, on: true),
         Cal('f', 'Rodzina', shared: false, holiday: false, shape: Shape.half, on: true),
-        Cal('o', 'Ola Zielińska', shared: true, holiday: false, shape: Shape.dash, on: true),
+        Cal('ola.zielinska@gmail.com', 'Ola Zielińska', shared: true, holiday: false, shape: Shape.dash, on: true, writable: false, role: 'reader'),
+        Cal('design', 'Zespół Design', shared: true, holiday: false, shape: Shape.dash, on: false, role: 'writer'),
         Cal('h', 'Święta w Polsce', shared: false, holiday: true, shape: Shape.ring, on: true),
       ];
   @override
@@ -72,7 +74,7 @@ class _FakeGoogle extends GoogleCalendar {
       _invitation(),
       Ev('Przegląd kodu', 'w', at(2, 10), at(2, 11)),
       Ev('Trening', 'p', at(0, 22), at(0, 23), location: 'Siłownia'),
-      Ev('Brunch z Olą', 'o', at(1, 11), at(1, 13), location: 'U Oli'),
+      Ev('Brunch z Olą', 'ola.zielinska@gmail.com', at(1, 11), at(1, 13), location: 'U Oli'),
       Ev('Koncert', 'p', at(1, 19), at(1, 22), location: 'Stodoła'),
       Ev('Wszystkich Świętych', 'h', DateTime(d.year, 11, 1), DateTime(d.year, 11, 2), allDay: true),
       for (var i = -40; i < 60; i += 3) Ev('Spotkanie', 'w', at(i, 9), at(i, 10 + i % 4)),
@@ -87,6 +89,13 @@ class _FakeGoogle extends GoogleCalendar {
     throw EditConflict(Ev(e.title, e.calId, e.start.add(const Duration(minutes: 30)), e.end.add(const Duration(minutes: 30)),
         location: 'Sala 2', updated: DateTime.now().subtract(const Duration(minutes: 1))));
   }
+
+  @override
+  Future<List<Access>> access(String calId) async => const [
+        Access('user:anna.nowak@gmail.com', 'user', 'anna.nowak@gmail.com', 'owner'),
+        Access('user:marek@example.com', 'user', 'marek@example.com', 'writer'),
+        Access('user:ola@example.com', 'user', 'ola@example.com', 'reader'),
+      ];
 
   @override
   Future<List<Ev>> search(List<Cal> cals, String query) async {
@@ -326,6 +335,11 @@ void main() {
           await t.pump();
           await t.pump(const Duration(milliseconds: 600));
         }));
+    testWidgets('calendars', (t) => shot(t, '04_1_calendars', page: (s) => Calendars(s, backLabel: 'Miesiąc')));
+    testWidgets('add calendar', (t) => shot(t, '04_2_add_calendar', page: (s) => AddCalendar(s)));
+    testWidgets('holidays', (t) => shot(t, '04_3_holidays', page: (s) => Holidays(s)));
+    testWidgets('share', (t) => shot(t, '04_4_share', page: (s) => Share(s, s.cal('w')!)));
+    testWidgets('shared with you', (t) => shot(t, '04_5_shared_with_you', page: (s) => SharedWithYou(s, s.cal('ola.zielinska@gmail.com')!)));
     testWidgets('month light', (t) => shot(t, '02_2_month_light', b: Brightness.light));
   }, skip: _out == null);
 }

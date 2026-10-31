@@ -96,9 +96,21 @@ class Store extends ChangeNotifier {
     await loadCalendars();
   }
 
+  /// Marker shapes the user picked per calendar (04.5), stored as calendar id -> Shape index.
+  Map<String, Shape> get _shapes {
+    final raw = _p.getString('shapes');
+    if (raw == null) return const {};
+    return {for (final e in (jsonDecode(raw) as Map).entries) e.key as String: Shape.values[e.value as int]};
+  }
+
+  Future<void> setShape(Cal c, Shape s) async {
+    await _p.setString('shapes', jsonEncode({for (final e in {..._shapes, c.id: s}.entries) e.key: e.value.index}));
+    await loadCalendars();
+  }
+
   Future<void> loadCalendars() async {
     final saved = _p.getStringList('calendars');
-    cals = await g.calendars(saved?.toSet());
+    cals = await g.calendars(saved?.toSet(), shapes: _shapes);
     _write('calendars', [for (final c in cals) c.toJson()]);
     notifyListeners();
   }
@@ -175,6 +187,32 @@ class Store extends ChangeNotifier {
 
   Future<void> save(Ev e, {String? fromCal, bool force = false}) async {
     await g.save(e, fromCal: fromCal, timeZone: await timeZone(), force: force);
+    _days.clear();
+    notifyListeners();
+  }
+
+  /// Adds a calendar to the list and shows it (holidays, a shared calendar).
+  Future<void> addCalendar(String id) async {
+    await g.addCalendar(id);
+    await _p.setStringList('calendars', {..._p.getStringList('calendars') ?? const <String>[], id}.toList());
+    await loadCalendars();
+    _days.clear();
+    notifyListeners();
+  }
+
+  Future<void> createCalendar(String name) async {
+    await g.createCalendar(name, await timeZone());
+    // A new calendar is enabled: its id is not known before the list reloads, so enable whatever is new.
+    final before = {for (final c in cals) c.id};
+    await loadCalendars();
+    for (final c in cals.where((c) => !before.contains(c.id))) {
+      await toggle(c, true);
+    }
+  }
+
+  Future<void> removeCalendar(Cal c) async {
+    await g.removeCalendar(c.id);
+    await loadCalendars();
     _days.clear();
     notifyListeners();
   }

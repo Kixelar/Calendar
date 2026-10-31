@@ -1027,6 +1027,282 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Use selected'**
   String get useSelected;
+
+  /// No description provided for @visibility.
+  ///
+  /// In en, this message translates to:
+  /// **'Visibility'**
+  String get visibility;
+
+  /// No description provided for @mineGoogle.
+  ///
+  /// In en, this message translates to:
+  /// **'Mine · Google'**
+  String get mineGoogle;
+
+  /// No description provided for @sharedWithMe.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared with me'**
+  String get sharedWithMe;
+
+  /// No description provided for @subscriptions.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscriptions'**
+  String get subscriptions;
+
+  /// No description provided for @addCalendar.
+  ///
+  /// In en, this message translates to:
+  /// **'Add calendar'**
+  String get addCalendar;
+
+  /// No description provided for @roleOwner.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner'**
+  String get roleOwner;
+
+  /// No description provided for @roleWriter.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get roleWriter;
+
+  /// No description provided for @roleReader.
+  ///
+  /// In en, this message translates to:
+  /// **'View'**
+  String get roleReader;
+
+  /// No description provided for @roleFreeBusy.
+  ///
+  /// In en, this message translates to:
+  /// **'Busy only'**
+  String get roleFreeBusy;
+
+  /// No description provided for @shareCalendar.
+  ///
+  /// In en, this message translates to:
+  /// **'Share calendar {name}'**
+  String shareCalendar(String name);
+
+  /// No description provided for @newCalendar.
+  ///
+  /// In en, this message translates to:
+  /// **'New calendar'**
+  String get newCalendar;
+
+  /// No description provided for @newCalendarHint.
+  ///
+  /// In en, this message translates to:
+  /// **'In your Google account'**
+  String get newCalendarHint;
+
+  /// No description provided for @holidaysAndDaysOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Holidays and days off'**
+  String get holidaysAndDaysOff;
+
+  /// No description provided for @holidaysHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Public and religious holidays'**
+  String get holidaysHint;
+
+  /// No description provided for @googleAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Google account'**
+  String get googleAccount;
+
+  /// No description provided for @googleAccountHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in and sync'**
+  String get googleAccountHint;
+
+  /// No description provided for @calendarName.
+  ///
+  /// In en, this message translates to:
+  /// **'Calendar name'**
+  String get calendarName;
+
+  /// No description provided for @holidays.
+  ///
+  /// In en, this message translates to:
+  /// **'Holidays'**
+  String get holidays;
+
+  /// No description provided for @country.
+  ///
+  /// In en, this message translates to:
+  /// **'Country'**
+  String get country;
+
+  /// No description provided for @addCountry.
+  ///
+  /// In en, this message translates to:
+  /// **'+ Add country'**
+  String get addCountry;
+
+  /// No description provided for @holidaysInYear.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{1 holiday this year} other{{n} holidays this year}}'**
+  String holidaysInYear(int n);
+
+  /// No description provided for @nearest.
+  ///
+  /// In en, this message translates to:
+  /// **'Coming up'**
+  String get nearest;
+
+  /// No description provided for @shareTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get shareTitle;
+
+  /// No description provided for @calendarNamed.
+  ///
+  /// In en, this message translates to:
+  /// **'Calendar {name}'**
+  String calendarNamed(String name);
+
+  /// No description provided for @peopleWithAccess.
+  ///
+  /// In en, this message translates to:
+  /// **'People with access'**
+  String get peopleWithAccess;
+
+  /// No description provided for @you.
+  ///
+  /// In en, this message translates to:
+  /// **'You'**
+  String get you;
+
+  /// No description provided for @addPerson.
+  ///
+  /// In en, this message translates to:
+  /// **'Add person'**
+  String get addPerson;
+
+  /// No description provided for @newPeopleAccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Access for new people'**
+  String get newPeopleAccess;
+
+  /// No description provided for @freeBusyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Busy only shows when you are busy, without event names.'**
+  String get freeBusyHint;
+
+  /// No description provided for @link.
+  ///
+  /// In en, this message translates to:
+  /// **'Link'**
+  String get link;
+
+  /// No description provided for @linkAccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Access by link'**
+  String get linkAccess;
+
+  /// No description provided for @copyLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy link'**
+  String get copyLink;
+
+  /// No description provided for @off.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get off;
+
+  /// No description provided for @linkCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Link copied'**
+  String get linkCopied;
+
+  /// No description provided for @removeAccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove access'**
+  String get removeAccess;
+
+  /// No description provided for @emailAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'E-mail address'**
+  String get emailAddress;
+
+  /// No description provided for @sharesWithYou.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} shares a calendar with you'**
+  String sharesWithYou(String name);
+
+  /// No description provided for @yourAccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Your access'**
+  String get yourAccess;
+
+  /// No description provided for @marker.
+  ///
+  /// In en, this message translates to:
+  /// **'Marker'**
+  String get marker;
+
+  /// No description provided for @shapeNames.
+  ///
+  /// In en, this message translates to:
+  /// **'Dot,Square,Half,Diamond,Ring,Dashed'**
+  String get shapeNames;
+
+  /// No description provided for @showInViews.
+  ///
+  /// In en, this message translates to:
+  /// **'Show in views'**
+  String get showInViews;
+
+  /// No description provided for @otherWay.
+  ///
+  /// In en, this message translates to:
+  /// **'The other way'**
+  String get otherWay;
+
+  /// No description provided for @shareYours.
+  ///
+  /// In en, this message translates to:
+  /// **'Share your calendar back'**
+  String get shareYours;
+
+  /// No description provided for @choose.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose'**
+  String get choose;
+
+  /// No description provided for @shared.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared'**
+  String get shared;
+
+  /// No description provided for @reject.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get reject;
 }
 
 class _AppLocalizationsDelegate

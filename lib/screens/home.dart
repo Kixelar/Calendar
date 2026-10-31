@@ -7,8 +7,8 @@ import '../google.dart';
 import '../store.dart';
 import '../theme.dart';
 import '../ui.dart';
+import 'calendars.dart';
 import 'event.dart';
-import 'onboarding.dart';
 import 'search.dart';
 
 /// Main screen with the four views from the mockup: 02.1 year, 02.2 month, 02.3 week, 02.4 day.
@@ -65,7 +65,8 @@ class _HomeState extends State<Home> {
                   const Spacer(),
                   if (store.signedIn)
                     IconBtn(Icons.layers_outlined, label: l.calendars, onTap: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (_) => Choose(store, onboarding: false)));
+                      final back = [l.year, l.month, l.week, l.day][tab];
+                      Navigator.push(context, MaterialPageRoute(builder: (_) => Calendars(store, backLabel: back)));
                     }),
                 ]),
               ),

@@ -588,4 +588,157 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get useSelected => 'Use selected';
+
+  @override
+  String get visibility => 'Visibility';
+
+  @override
+  String get mineGoogle => 'Mine · Google';
+
+  @override
+  String get sharedWithMe => 'Shared with me';
+
+  @override
+  String get subscriptions => 'Subscriptions';
+
+  @override
+  String get addCalendar => 'Add calendar';
+
+  @override
+  String get roleOwner => 'Owner';
+
+  @override
+  String get roleWriter => 'Edit';
+
+  @override
+  String get roleReader => 'View';
+
+  @override
+  String get roleFreeBusy => 'Busy only';
+
+  @override
+  String shareCalendar(String name) {
+    return 'Share calendar $name';
+  }
+
+  @override
+  String get newCalendar => 'New calendar';
+
+  @override
+  String get newCalendarHint => 'In your Google account';
+
+  @override
+  String get holidaysAndDaysOff => 'Holidays and days off';
+
+  @override
+  String get holidaysHint => 'Public and religious holidays';
+
+  @override
+  String get googleAccount => 'Google account';
+
+  @override
+  String get googleAccountHint => 'Sign in and sync';
+
+  @override
+  String get calendarName => 'Calendar name';
+
+  @override
+  String get holidays => 'Holidays';
+
+  @override
+  String get country => 'Country';
+
+  @override
+  String get addCountry => '+ Add country';
+
+  @override
+  String holidaysInYear(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n holidays this year',
+      one: '1 holiday this year',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get nearest => 'Coming up';
+
+  @override
+  String get shareTitle => 'Share';
+
+  @override
+  String calendarNamed(String name) {
+    return 'Calendar $name';
+  }
+
+  @override
+  String get peopleWithAccess => 'People with access';
+
+  @override
+  String get you => 'You';
+
+  @override
+  String get addPerson => 'Add person';
+
+  @override
+  String get newPeopleAccess => 'Access for new people';
+
+  @override
+  String get freeBusyHint =>
+      'Busy only shows when you are busy, without event names.';
+
+  @override
+  String get link => 'Link';
+
+  @override
+  String get linkAccess => 'Access by link';
+
+  @override
+  String get copyLink => 'Copy link';
+
+  @override
+  String get off => 'Off';
+
+  @override
+  String get linkCopied => 'Link copied';
+
+  @override
+  String get removeAccess => 'Remove access';
+
+  @override
+  String get emailAddress => 'E-mail address';
+
+  @override
+  String sharesWithYou(String name) {
+    return '$name shares a calendar with you';
+  }
+
+  @override
+  String get yourAccess => 'Your access';
+
+  @override
+  String get marker => 'Marker';
+
+  @override
+  String get shapeNames => 'Dot,Square,Half,Diamond,Ring,Dashed';
+
+  @override
+  String get showInViews => 'Show in views';
+
+  @override
+  String get otherWay => 'The other way';
+
+  @override
+  String get shareYours => 'Share your calendar back';
+
+  @override
+  String get choose => 'Choose';
+
+  @override
+  String get shared => 'Shared';
+
+  @override
+  String get reject => 'Remove';
 }

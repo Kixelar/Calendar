@@ -25,7 +25,12 @@ Screen numbers refer to docs/design/mockup.html.
 - [x] 06.1 Empty day, 06.3 Sync conflict (compares Google's `updated` time when saving)
 
 ## Stage 3: calendars and settings
-- [ ] 04.1 Calendars, 04.2 Add calendar, 04.3 Holidays, 04.4 Share calendar, 04.5 Shared with you
+- [x] 04.1 Calendars, 04.3 Holidays, 04.4 Share calendar, 04.5 Shared with you
+- [x] 04.2 Add calendar: new Google calendar, holidays, Google account
+- [ ] 04.2 "Subscribe to address" (.ics / webcal) and "Import file": the Calendar API cannot add URL subscriptions; needs an in-app .ics importer (owner decision)
+- [ ] 04.3 "Show" filters (days off / religious / name days / special days): Google holiday calendars do not mark these kinds, name days do not exist there (owner decision)
+- [ ] 04.4 "Invited" state for people who have not accepted: the ACL API does not report it
+- [ ] 04.5 "Ask for edit rights": needs sending an e-mail (url_launcher), left out
 - [ ] 05.1–05.8 Settings, appearance, notifications & Glyph, accounts, data & privacy, help, about (top bar settings icon hidden until then)
 - [ ] Terms and privacy policy texts (welcome screen caption from the mockup is left out until they exist)
 - [ ] "Other account — CalDAV, Outlook" (01.2 secondary button, left out for now)

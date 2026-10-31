@@ -595,4 +595,158 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get useSelected => 'Użyj wybranej';
+
+  @override
+  String get visibility => 'Widoczność';
+
+  @override
+  String get mineGoogle => 'Moje · Google';
+
+  @override
+  String get sharedWithMe => 'Udostępnione mi';
+
+  @override
+  String get subscriptions => 'Subskrypcje';
+
+  @override
+  String get addCalendar => 'Dodaj kalendarz';
+
+  @override
+  String get roleOwner => 'Właściciel';
+
+  @override
+  String get roleWriter => 'Edycja';
+
+  @override
+  String get roleReader => 'Podgląd';
+
+  @override
+  String get roleFreeBusy => 'Zajętość';
+
+  @override
+  String shareCalendar(String name) {
+    return 'Udostępnij kalendarz $name';
+  }
+
+  @override
+  String get newCalendar => 'Nowy kalendarz';
+
+  @override
+  String get newCalendarHint => 'Na Twoim koncie Google';
+
+  @override
+  String get holidaysAndDaysOff => 'Święta i dni wolne';
+
+  @override
+  String get holidaysHint => 'Państwowe i religijne';
+
+  @override
+  String get googleAccount => 'Konto Google';
+
+  @override
+  String get googleAccountHint => 'Zaloguj i synchronizuj';
+
+  @override
+  String get calendarName => 'Nazwa kalendarza';
+
+  @override
+  String get holidays => 'Święta';
+
+  @override
+  String get country => 'Kraj';
+
+  @override
+  String get addCountry => '+ Dodaj kraj';
+
+  @override
+  String holidaysInYear(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n świąt w roku',
+      few: '$n święta w roku',
+      one: '1 święto w roku',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get nearest => 'Najbliższe';
+
+  @override
+  String get shareTitle => 'Udostępnij';
+
+  @override
+  String calendarNamed(String name) {
+    return 'Kalendarz $name';
+  }
+
+  @override
+  String get peopleWithAccess => 'Osoby z dostępem';
+
+  @override
+  String get you => 'Ty';
+
+  @override
+  String get addPerson => 'Dodaj osobę';
+
+  @override
+  String get newPeopleAccess => 'Dostęp nowych osób';
+
+  @override
+  String get freeBusyHint =>
+      'Zajętość pokazuje tylko, kiedy masz coś w kalendarzu, bez nazw wydarzeń.';
+
+  @override
+  String get link => 'Link';
+
+  @override
+  String get linkAccess => 'Dostęp przez link';
+
+  @override
+  String get copyLink => 'Kopiuj link';
+
+  @override
+  String get off => 'Wyłączony';
+
+  @override
+  String get linkCopied => 'Skopiowano link';
+
+  @override
+  String get removeAccess => 'Usuń dostęp';
+
+  @override
+  String get emailAddress => 'Adres e-mail';
+
+  @override
+  String sharesWithYou(String name) {
+    return '$name udostępnia Ci swój kalendarz';
+  }
+
+  @override
+  String get yourAccess => 'Twój dostęp';
+
+  @override
+  String get marker => 'Oznaczenie';
+
+  @override
+  String get shapeNames => 'Kropka,Kwadrat,Połówka,Romb,Pierścień,Przerywane';
+
+  @override
+  String get showInViews => 'Pokazuj w widokach';
+
+  @override
+  String get otherWay => 'W drugą stronę';
+
+  @override
+  String get shareYours => 'Udostępnij swój kalendarz';
+
+  @override
+  String get choose => 'Wybierz';
+
+  @override
+  String get shared => 'Udostępniono';
+
+  @override
+  String get reject => 'Odrzuć';
 }
