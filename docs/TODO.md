@@ -47,3 +47,4 @@ Screen numbers refer to docs/design/mockup.html.
 - [ ] Glyph interface on Nothing phones (Glyph Developer Kit)
 - [x] Release signing key
 - [x] App icon
+- [ ] Google Tasks as a "Tasks" calendar (needs the Tasks API: new scope, enabled in Google Cloud; owner decision)

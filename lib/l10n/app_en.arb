@@ -325,5 +325,7 @@
   "weekNumbersHint": "Week number in front of each row of the month view.",
   "showWeekendsHint": "Off: the month and week views show Monday to Friday only.",
   "declinedHint": "Show invitations you declined in the views.",
-  "dimPastHint": "Events and days that are over are shown in grey."
+  "dimPastHint": "Events and days that are over are shown in grey.",
+  "inBackground": "In the background",
+  "notYet": "Not yet"
 }

@@ -1041,4 +1041,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get dimPastHint => 'Events and days that are over are shown in grey.';
+
+  @override
+  String get inBackground => 'In the background';
+
+  @override
+  String get notYet => 'Not yet';
 }

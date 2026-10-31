@@ -1819,6 +1819,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Events and days that are over are shown in grey.'**
   String get dimPastHint;
+
+  /// No description provided for @inBackground.
+  ///
+  /// In en, this message translates to:
+  /// **'In the background'**
+  String get inBackground;
+
+  /// No description provided for @notYet.
+  ///
+  /// In en, this message translates to:
+  /// **'Not yet'**
+  String get notYet;
 }
 
 class _AppLocalizationsDelegate

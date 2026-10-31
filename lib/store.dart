@@ -107,6 +107,23 @@ class Store extends ChangeNotifier {
     }
   }
 
+  /// Last background sync run (SyncJob): when, and "ok" or the error.
+  ({DateTime at, String result})? get lastBackground => switch ((_p.getInt('bgLast'), _p.getString('bgResult'))) {
+        (final ms?, final r?) => (at: DateTime.fromMillisecondsSinceEpoch(ms), result: r),
+        _ => null,
+      };
+
+  /// Re-reads preferences written by the background sync engine (it keeps its own copy).
+  Future<void> reloadPrefs() async {
+    await _p.reload();
+    notifyListeners();
+  }
+
+  Future<void> noteBackground(String result) async {
+    await _p.setInt('bgLast', DateTime.now().millisecondsSinceEpoch);
+    await _p.setString('bgResult', result);
+  }
+
   /// Fetches the current year now and waits for it (background sync job).
   Future<void> syncNow() => _load(DateTime.now().year);
 

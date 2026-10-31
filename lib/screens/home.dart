@@ -92,7 +92,9 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState s) {
-    if (s == AppLifecycleState.resumed) _autoSync();
+    if (s == AppLifecycleState.resumed) {
+      store.reloadPrefs().then((_) => _autoSync()); // the background job may have synced meanwhile
+    }
   }
 
   /// Refreshes when automatic sync is on and the last sync is older than the chosen interval.

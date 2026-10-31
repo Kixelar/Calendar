@@ -191,6 +191,12 @@ class Accounts extends StatefulWidget {
 class _AccountsState extends State<Accounts> {
   bool _syncing = false;
 
+  @override
+  void initState() {
+    super.initState();
+    widget.store.reloadPrefs(); // shows the latest background run
+  }
+
   Future<void> _syncNow() async {
     setState(() => _syncing = true);
     await widget.store.refresh();
@@ -253,6 +259,24 @@ class _AccountsState extends State<Accounts> {
             if (store.signedIn)
               Section(left: l.syncLabel, children: [
                 _switch(l.automatic, store.autoSync, (v) => store.set('autoSync', v)),
+                if (store.autoSync)
+                  Builder(builder: (context) {
+                    final bg = store.lastBackground;
+                    final ok = bg?.result == 'ok';
+                    return RowItem(children: [
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          child: Column(crossAxisAlignment: CrossAxisAlignment.start, spacing: 2, children: [
+                            Text(l.inBackground),
+                            if (bg != null && !ok) Text(bg.result, maxLines: 3, overflow: TextOverflow.ellipsis, style: T.caption(t.secondary)),
+                          ]),
+                        ),
+                      ),
+                      Lbl(bg == null ? l.notYet : '${hm(context, bg.at)} · ${ok ? 'OK' : l.statusFailed}',
+                          color: bg == null ? t.secondary : ok ? t.success : t.accentText),
+                    ]);
+                  }),
                 if (store.autoSync)
                   ValueRow(l.frequency, value: l.everyMinutes(store.syncMinutes), onTap: () async {
                     final p = await pick<int>(context, Pick(

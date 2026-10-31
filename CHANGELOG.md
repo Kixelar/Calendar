@@ -28,6 +28,12 @@
 - Calendars: the primary calendar is called "Personal" instead of the account e-mail; birthdays and other people's calendars have their own sections.
 - Custom reminder (any number of minutes, hours or days, up to 4 weeks) for events and as the default.
 - Background sync every 15–60 min while online, also when the app is closed: reminders, invitation notifications and widgets stay fresh.
+- Calendars as in Google: the primary calendar shows the account name, contacts' birthdays are their own "Birthdays" calendar (Google keeps them as birthday events in the primary calendar), hidden calendars are listed.
+- The repeat of an existing series can be changed; saving an occurrence asks: only this, this and following, or all.
+- Hints under week numbers, weekends, declined invitations and dimming in Appearance.
+- 12-hour times: AM/PM on a small second line so they fit; widgets show 12-hour times too.
+- Widgets switch between light and dark with the system theme; the widget picker shows previews (Polish/English, light/dark).
+- Settings → Accounts shows the last background sync run and its error, if any.
 - Crash report: if the app (or a widget, reminder or background sync) crashes, a separate screen opens at once with the report and a Copy button (works even when the app dies at start).
 ### Fixed
 - Icon: the last dot is white like the others (the grey one was hard to see); the red sixth dot stays.

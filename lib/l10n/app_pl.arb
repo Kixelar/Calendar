@@ -286,5 +286,7 @@
   "weekNumbersHint": "Numer tygodnia przed każdym wierszem widoku miesiąca.",
   "showWeekendsHint": "Wyłączone: widok miesiąca i tygodnia pokazuje tylko poniedziałek–piątek.",
   "declinedHint": "Pokazuj w widokach zaproszenia odrzucone przez Ciebie.",
-  "dimPastHint": "Minione wydarzenia i dni są szare."
+  "dimPastHint": "Minione wydarzenia i dni są szare.",
+  "inBackground": "W tle",
+  "notYet": "Jeszcze nie"
 }

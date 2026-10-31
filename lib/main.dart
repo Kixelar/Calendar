@@ -16,9 +16,16 @@ Future<void> main() async {
   runApp(App(store));
   await store.start();
   // After start: permission prompt and a notification that launched the app need the UI and the Home screen.
-  await store.notifier!.init(await store.timeZone());
-  await store.reschedule();
-  await store.scheduleBackground();
+  // Each step on its own, so a failing one (e.g. a refused permission) does not stop the background sync being set up.
+  for (final step in [
+    () async => store.notifier!.init(await store.timeZone()),
+    store.reschedule,
+    store.scheduleBackground,
+  ]) {
+    try {
+      await step();
+    } catch (_) {}
+  }
 }
 
 /// Run by Android's JobScheduler (SyncJob.kt) without the app on screen: fetch the current year, then reminders,
@@ -27,15 +34,20 @@ Future<void> main() async {
 Future<void> backgroundSync() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting();
+  final store = Store()..notifier = Notifier();
   try {
-    final store = Store()..notifier = Notifier();
     await store.start(background: true);
     if (store.signedIn) {
       await store.notifier!.init(await store.timeZone(), background: true);
       await store.syncNow();
     }
-  } catch (_) {
+    // The result shows in Settings → Accounts, since this run has no screen.
+    await store.noteBackground(store.error ?? (store.signedIn ? 'ok' : 'signed out'));
+  } catch (e) {
     // offline or no silent access: the next run or opening the app tries again
+    try {
+      await store.noteBackground('$e');
+    } catch (_) {}
   }
   await const MethodChannel('calendar/device').invokeMethod<void>('done');
 }

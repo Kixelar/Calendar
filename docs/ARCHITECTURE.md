@@ -43,6 +43,11 @@ and then refetched from Google, which rewrites the file. Without internet the fi
 If Google says access is gone (`restore()` returns false) the app goes back to the welcome screen.
 The `google` preference marks a signed-in install (older installs: a saved calendar list).
 
+## Birthdays
+Google stores contacts' birthdays as events with `eventType: birthday` in the primary calendar and shows them as a
+"Birthdays" calendar. The app adds a virtual calendar (`birthdaysId`, `#birthdays`) and files those events under it;
+it is never queried itself, and the primary calendar is fetched when only the birthdays are shown (`Store._toFetch`).
+
 ## Writing events
 - `GoogleCalendar.save`: new events are inserted; existing ones are fetched (`events.get`), changed and sent back
   with `events.update`, so fields the app does not edit (guests, reminders, conference links) survive. Changing the
@@ -51,6 +56,9 @@ The `google` preference marks a signed-in install (older installs: a saved calen
   the series' RRULE with `UNTIL` just before the occurrence (`endRuleBefore`, tested), or deletes the series if it is
   the first occurrence. "Notify guests" maps to `sendUpdates=all|none`.
 - After any write the per-year cache is cleared and refetched.
+- Editing an occurrence asks for the scope (`_SaveScopeDialog`): "only this" updates the occurrence; "all" updates the
+  series (times shifted by the same amount, new rule if changed, EXDATEs kept); "this and following" ends the old
+  series before the occurrence and inserts a new series from it (`GoogleCalendar.saveSeries`).
 - Repeating events: a new or single event gets `recurrence` (one RRULE line from `Rule.format`); timed events are sent
   with the device's IANA time zone (MainActivity.kt channel `calendar/device`), which Google requires for series.
   Occurrences (`recurringId` set) never carry a rule; their rule text is read from the series (`GoogleCalendar.recurrence`).
@@ -77,7 +85,9 @@ Each widget is an `AppWidgetProvider` that draws one bitmap with Canvas, using t
 `flutter_assets` (NType82 falls back to Space Grotesk for Polish letters on Android 10+). Colours follow the system's
 dark/light mode. Dates are computed natively (updated every 30 min by Android, so the date flips within 30 min after
 midnight); events and strings come from `Store.updateWidgets` (next 14 days, sent after every sync and setting change).
-Tapping a widget opens the app.
+Tapping a widget opens the app. Every update sends a light and a dark bitmap; `layout/widget_image.xml` shows the light
+one and `layout-night/` the dark one, so the launcher follows the system theme. Picker previews are PNGs made by
+`tool/widget_previews.py` (same layout, sample day from the mockup) in `drawable{,-pl}{,-night}-nodpi`.
 
 ## Background sync (05.4)
 `Store.scheduleBackground` asks Android (channel `scheduleSync`) to run `SyncJob` (framework JobScheduler, no
@@ -85,7 +95,8 @@ WorkManager: that library made the app crash at start) every N minutes (min 15) 
 on screen (`MainActivity.visible`). The job starts a Flutter engine without UI and runs `backgroundSync` in main.dart: `Store.start(background:
 true)` (silent Google access only, never signs out), `syncNow()`, which saves the year, reschedules reminders, shows
 invitation notifications and updates widgets; then it calls `done`. `Device.kt` serves the channel on both engines.
-Preferences are reloaded before comparing sync state, since each engine keeps its own copy.
+Preferences are reloaded before comparing sync state, since each engine keeps its own copy. Each run records its time
+and result (`bgLast`, `bgResult`), shown in Settings → Accounts.
 
 ## Crash report
 `CalendarApp` (CrashLog.kt) installs an uncaught-exception handler for the whole process (app, widgets, notification

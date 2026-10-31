@@ -1051,4 +1051,10 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get dimPastHint => 'Minione wydarzenia i dni są szare.';
+
+  @override
+  String get inBackground => 'W tle';
+
+  @override
+  String get notYet => 'Jeszcze nie';
 }
