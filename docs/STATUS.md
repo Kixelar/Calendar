@@ -16,9 +16,7 @@
 - Google sign-in and event sync confirmed working on the owner's phone (2026-10-30), silent restore on reopen confirmed.
 - 03.1 event details, 03.2 new/edit event (+ button in the view tabs bar), 06.2 delete dialog; writes go to Google.
 
-## Waiting for the owner
-- **Try creating, editing and deleting events on the phone** (incl. a repeating one: "only this" / "this and following" / "all").
-  Writes to Google are not tested against the real API yet, only the screens and the RRULE logic.
+- Creating, editing and deleting events (incl. repeating ones) confirmed working on the owner's phone (2026-10-31).
 
 ## Next
 See docs/TODO.md. Proposed order: rest of 03.x (repeat, reminders, guests, invitations), then 01.4 sync screen, search, calendars
