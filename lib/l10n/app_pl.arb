@@ -272,5 +272,9 @@
   "details": "Szczegóły",
   "off2": "Wyłączone",
   "personal": "Osobisty",
-  "birthdays": "Urodziny"
+  "birthdays": "Urodziny",
+  "customReminder": "Własne przypomnienie",
+  "unitMinutes": "Minuty",
+  "unitHours": "Godziny",
+  "reminderLimit": "Najwyżej 4 tygodnie przed."
 }

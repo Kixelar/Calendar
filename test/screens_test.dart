@@ -386,6 +386,13 @@ void main() {
     testWidgets('help', (t) => shot(t, '05_6_help', page: (s) => Help(s)));
     testWidgets('help article', (t) => shot(t, '05_7_article', page: (s) => HelpArticle(s, helpFor('pl').first)));
     testWidgets('about', (t) => shot(t, '05_8_about', page: (s) => About(s)));
+    testWidgets('custom reminder', (t) => shot(t, '03_2_custom_reminder', page: (s) => EventEdit(s), act: (t) async {
+          for (final label in ['Przypomnienie', 'Własne…']) {
+            await t.tap(find.text(label).last);
+            await t.pump();
+            await t.pump(const Duration(milliseconds: 600));
+          }
+        }));
     testWidgets('month light', (t) => shot(t, '02_2_month_light', b: Brightness.light));
   }, skip: _out == null);
 }

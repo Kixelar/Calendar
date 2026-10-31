@@ -1735,6 +1735,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Birthdays'**
   String get birthdays;
+
+  /// No description provided for @customReminder.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom reminder'**
+  String get customReminder;
+
+  /// No description provided for @unitMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'Minutes'**
+  String get unitMinutes;
+
+  /// No description provided for @unitHours.
+  ///
+  /// In en, this message translates to:
+  /// **'Hours'**
+  String get unitHours;
+
+  /// No description provided for @reminderLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'Up to 4 weeks before.'**
+  String get reminderLimit;
 }
 
 class _AppLocalizationsDelegate

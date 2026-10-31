@@ -343,6 +343,70 @@ class EventEdit extends StatefulWidget {
 // Reminder choices; _defaultReminder means "use the calendar's default".
 const _defaultReminder = -1;
 const _reminderChoices = [_defaultReminder, -2, 0, 5, 10, 15, 30, 60, 1440];
+const _customReminder = -3; // opens askReminder
+
+/// "Custom" reminder: a number and a unit (minutes, hours, days). Google allows up to four weeks before.
+Future<int?> askReminder(BuildContext context) => showDialog<int>(
+      context: context,
+      barrierColor: _scrim,
+      builder: (c) => const _ReminderDialog(),
+    );
+
+class _ReminderDialog extends StatefulWidget {
+  const _ReminderDialog();
+  @override
+  State<_ReminderDialog> createState() => _ReminderDialogState();
+}
+
+class _ReminderDialogState extends State<_ReminderDialog> {
+  final _n = TextEditingController(text: '20');
+  int unit = 1; // minutes in one unit: 1, 60 or 1440
+
+  @override
+  void dispose() {
+    _n.dispose();
+    super.dispose();
+  }
+
+  int? get _minutes {
+    final n = int.tryParse(_n.text.trim());
+    if (n == null || n < 0) return null;
+    final m = n * unit;
+    return m <= 40320 ? m : null;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final t = Tok.of(context), l = l10n(context), m = _minutes;
+    return _dialog(context, [
+      Text(l.customReminder, style: T.headlineMd(t.display)),
+      TextField(
+        controller: _n,
+        autofocus: true,
+        keyboardType: TextInputType.number,
+        onChanged: (_) => setState(() {}),
+        style: T.displayMd(t.display),
+        cursorColor: t.display,
+        decoration: InputDecoration(
+          filled: true,
+          fillColor: t.surface,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 13),
+          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(6), borderSide: BorderSide(color: t.borderControl)),
+          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(6), borderSide: BorderSide(color: t.display)),
+        ),
+      ),
+      Wrap(spacing: 8, children: [
+        for (final (u, label) in [(1, l.unitMinutes), (60, l.unitHours), (1440, l.unitDays)])
+          Chip2(label, pressed: unit == u, onTap: () => setState(() => unit = u)),
+      ]),
+      Text(m == null ? l.reminderLimit : reminderText(l, m), style: T.bodySm(m == null ? t.accentText : t.secondary)),
+      Row(spacing: 8, children: [
+        Expanded(child: Btn(l.cancel, kind: BtnKind.secondary, onTap: () => Navigator.pop(context))),
+        Expanded(child: Btn(l.done, onTap: m == null ? null : () => Navigator.pop(context, m))),
+      ]),
+    ]);
+  }
+}
 
 class _EventEditState extends State<EventEdit> {
   late final _title = TextEditingController(text: widget.ev?.title);
@@ -504,9 +568,12 @@ class _EventEditState extends State<EventEdit> {
       selected: reminderChoice,
       options: [
         for (final c in {..._reminderChoices, reminderChoice}) (c, _reminderLabel(l, c)),
+        (_customReminder, '${l.custom}…'),
       ],
     ));
-    if (p != null) setState(() => reminderChoice = p.$1);
+    if (p == null || !mounted) return;
+    final m = p.$1 == _customReminder ? await askReminder(context) : p.$1;
+    if (m != null) setState(() => reminderChoice = m);
   }
 
   Future<void> _pickGuests() async {

@@ -310,5 +310,9 @@
   "details": "Details",
   "off2": "Off",
   "personal": "Personal",
-  "birthdays": "Birthdays"
+  "birthdays": "Birthdays",
+  "customReminder": "Custom reminder",
+  "unitMinutes": "Minutes",
+  "unitHours": "Hours",
+  "reminderLimit": "Up to 4 weeks before."
 }

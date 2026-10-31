@@ -998,4 +998,16 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get birthdays => 'Urodziny';
+
+  @override
+  String get customReminder => 'Własne przypomnienie';
+
+  @override
+  String get unitMinutes => 'Minuty';
+
+  @override
+  String get unitHours => 'Godziny';
+
+  @override
+  String get reminderLimit => 'Najwyżej 4 tygodnie przed.';
 }

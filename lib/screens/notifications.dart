@@ -32,9 +32,14 @@ class Notifications extends StatelessWidget {
                         final r = await pick<int>(context, Pick(
                           title: l.defaultLabel,
                           selected: p.defaultReminder,
-                          options: [for (final m in [-1, 0, 5, 10, 15, 30, 60]) (m, m < 0 ? l.none : reminderText(l, m))],
+                          options: [
+                            for (final m in {-1, 0, 5, 10, 15, 30, 60, p.defaultReminder}) (m, m < 0 ? l.none : reminderText(l, m)),
+                            (-3, '${l.custom}…'),
+                          ],
                         ));
-                        if (r != null) await store.set('defaultReminder', r.$1);
+                        if (r == null || !context.mounted) return;
+                        final m = r.$1 == -3 ? await askReminder(context) : r.$1;
+                        if (m != null) await store.set('defaultReminder', m);
                       }),
                       ValueRow(l.allDayEvents, value: p.allDayAt < 0 ? l.off2 : l.dayBeforeAt(clock(p.allDayAt)), onTap: () async {
                         final r = await pick<int>(context, Pick(

@@ -989,4 +989,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get birthdays => 'Birthdays';
+
+  @override
+  String get customReminder => 'Custom reminder';
+
+  @override
+  String get unitMinutes => 'Minutes';
+
+  @override
+  String get unitHours => 'Hours';
+
+  @override
+  String get reminderLimit => 'Up to 4 weeks before.';
 }
