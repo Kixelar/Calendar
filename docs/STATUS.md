@@ -23,10 +23,10 @@
 ## Open (owner's test, 2026-10-31, build 30437026)
 - **Widget theme switching does not work**: widgets do not change between light and dark with the system theme
   (layout/ vs layout-night/ approach in Widgets.kt). Not investigated yet.
-- **Background sync never ran** on the owner's phone ("Not yet"). Fixed one cause in 30437148: every app start
-  rescheduled the job, which restarts its period. Added diagnostics: the native job writes "started" (or "skipped: app
-  open") before Dart runs, Dart overwrites with "ok"/error; Settings → Accounts → "Check" runs a test in ~1 min.
-  Still "started" = Flutter part failed; still "Not yet" = Android never ran the job.
+- **Background sync**: never ran because scheduling threw `SecurityException: ACCESS_NETWORK_STATE required for jobs
+  with a connectivity constraint` (WorkManager used to add that permission). Added in 30437159; verified over adb:
+  job 31 is scheduled ("waiting") and a forced run started the Flutter engine and ended with jobFinished.
+  Owner still to confirm "In the background" shows a time and OK.
 - Owner asked what happens when an invitation notification is dismissed: nothing is sent; the invitation stays
   unanswered in Google, the app does not notify about it again (`seenInvites`), and it can still be answered from the
   event (03.5 screen).
@@ -44,10 +44,12 @@
 - **Holiday filters / name days**: dropped for now (owner).
 
 ## Traps
+- Diagnose on the phone over USB: `adb shell dumpsys jobscheduler` (job history, constraints), `adb logcat`,
+  `adb shell cmd jobscheduler run -f com.kixelar.calendar 31` (force a background run). Use MSYS_NO_PATHCONV=1 in Git Bash.
 - Gradle/Java does not run in Claude's sandbox: build APKs in the owner's terminal (docs/WORKFLOW.md), and run
   `flutter pub get` there after adding packages (different pub cache).
 - Build numbers must keep growing: 30000000 + minutes since 2026-01-01 UTC, and never below the last one sent
-  (30437148 on 2026-10-31).
+  (30437159 on 2026-10-31).
 - `google_sign_in` 7.x gives no refresh token: always get the token through `GoogleCalendar._authorize` before an API call.
 - Builds are signed with the app's own key in `<keystore folder>/` (docs/WORKFLOW.md); its SHA-1 is in the Android OAuth client.
 - ARB files: append keys as text; re-dumping them with a JSON tool reformats the whole file.

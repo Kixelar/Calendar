@@ -3,6 +3,8 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <uses-permission android:name="android.permission.USE_EXACT_ALARM"/>
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <!-- Background sync (SyncJob) waits for a network; JobScheduler refuses such jobs without this. -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <application
         android:label="@string/app_name"
         android:name=".CalendarApp"
