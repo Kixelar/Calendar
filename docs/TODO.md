@@ -42,7 +42,7 @@ Screen numbers refer to docs/design/mockup.html.
 - [ ] "Other account — CalDAV, Outlook" (01.2 secondary button, left out for now)
 
 ## Stage 4: Android extras
-- [ ] 07.1/07.2 Home screen widgets (dark, light) — native Kotlin
+- [x] 07.1/07.2 Home screen widgets (dark, light) — native Kotlin, drawn as bitmaps with the app fonts (not yet checked on a phone)
 - [x] 07.3 Event notifications (scheduled for the next 7 days at every sync; Glyph countdown waits for the SDK)
 - [ ] Glyph interface on Nothing phones (Glyph Developer Kit)
 - [x] Release signing key

@@ -21,6 +21,7 @@
 - 05.5 data and privacy: hide notification details on the lock screen, clear data on this device.
 - 05.6 / 05.7 help with four how-to articles; 05.8 about: version, build, Android, time zone, licences, typefaces.
 - 07.3 notifications: event reminders with "Snooze 5 min" and "Details", invitations with Yes / Maybe / No, daily summary, changes in shared calendars.
+- 07.1 / 07.2 home screen widgets, dark and light with the system: month (4×4), today (4×2), week (4×1), date (2×2), next event (2×2 and 2×1), date (1×1). Dates update by themselves; events come from the last sync.
 - 06.1 empty day: "Nothing planned." with an add button; weekends and holidays read as days off. Holiday events are labelled "Holiday".
 - 06.3 conflicting changes: if the event changed in Google while you edited it, choose this phone's version, Google's, or keep both.
 ### Fixed

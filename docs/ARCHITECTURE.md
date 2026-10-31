@@ -22,7 +22,9 @@ lib/
   notify.dart              07.3 notifications: plan() (pure, tested) + Notifier (flutter_local_notifications)
   view.dart                `Look`: 05.2 view settings as globals for widgets without a Store (time format, fonts, week layout)
   screens/event.dart       03.1 event details, 03.2 new/edit event, 06.2 delete dialog, calendar picker
-android/app/src/main/res/values*/strings.xml   Launcher name per device language
+android/app/src/main/res/values*/strings.xml   Launcher name and widget names per device language
+android/app/src/main/kotlin/.../MainActivity.kt  Channel `calendar/device`: time zone, version info, widget data
+android/app/src/main/kotlin/.../Widgets.kt       07.1/07.2 home screen widgets (7 sizes), res/xml/widget_*.xml
 test/screens_test.dart   Logic tests + PNG renders of screens with a fake Google account
 ```
 
@@ -69,6 +71,13 @@ has none; nothing when "none" was chosen), all-day events the day before, a dail
 changes in shared calendars are shown at once (the first sync only remembers what exists). "Snooze 5 min" runs in a
 background isolate (`notificationTapBackground`); other actions open the app and Home handles them (`_fromNotification`).
 Notifications are only refreshed while the app runs (no background sync yet).
+
+## Home screen widgets (07.1 / 07.2)
+Each widget is an `AppWidgetProvider` that draws one bitmap with Canvas, using the app's font files from
+`flutter_assets` (NType82 falls back to Space Grotesk for Polish letters on Android 10+). Colours follow the system's
+dark/light mode. Dates are computed natively (updated every 30 min by Android, so the date flips within 30 min after
+midnight); events and strings come from `Store.updateWidgets` (next 14 days, sent after every sync and setting change).
+Tapping a widget opens the app.
 
 ## Settings
 05.x settings live in SharedPreferences (`Store.set`). `App` copies the view ones to `Look` on every change.

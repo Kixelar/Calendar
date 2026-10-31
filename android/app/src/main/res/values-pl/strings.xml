@@ -1,4 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Kalendarz</string>
+    <string name="widget_month">Miesiąc</string>
+    <string name="widget_today">Dziś</string>
+    <string name="widget_week">Tydzień</string>
+    <string name="widget_date">Data</string>
+    <string name="widget_next">Następne</string>
+    <string name="widget_next_small">Następne · mały</string>
+    <string name="widget_day_small">Data · mały</string>
 </resources>

@@ -19,6 +19,11 @@ class MainActivity : FlutterActivity() {
                     val code = if (Build.VERSION.SDK_INT >= 28) p.longVersionCode else @Suppress("DEPRECATION") p.versionCode.toLong()
                     result.success(mapOf("version" to p.versionName, "build" to code.toString(), "android" to Build.VERSION.RELEASE))
                 }
+                // Home screen widgets: events and strings from the app, redrawn at once.
+                "widgets" -> {
+                    Widgets.save(this, call.arguments as String)
+                    result.success(null)
+                }
                 else -> result.notImplemented()
             }
         }

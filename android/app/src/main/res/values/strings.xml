@@ -2,4 +2,11 @@
 <resources>
     <!-- Launcher name; translations in values-<lang>/strings.xml follow the device language. -->
     <string name="app_name">Calendar</string>
+    <string name="widget_month">Month</string>
+    <string name="widget_today">Today</string>
+    <string name="widget_week">Week</string>
+    <string name="widget_date">Date</string>
+    <string name="widget_next">Next</string>
+    <string name="widget_next_small">Next · small</string>
+    <string name="widget_day_small">Date · small</string>
 </resources>

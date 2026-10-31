@@ -74,7 +74,37 @@ class Store extends ChangeNotifier {
     ];
   }
 
-  Future<void> reschedule() async => notifier?.reschedule(plan(_soon, DateTime.now(), notifyPrefs, _l, _lang), _l, notifyPrefs);
+  Future<void> reschedule() async {
+    await notifier?.reschedule(plan(_soon, DateTime.now(), notifyPrefs, _l, _lang), _l, notifyPrefs);
+    await updateWidgets();
+  }
+
+  /// Sends the next 14 days of events and the strings widgets need to Widgets.kt (07.1 / 07.2).
+  Future<void> updateWidgets() async {
+    final now = DateTime.now(), l = _l;
+    final evs = {
+      for (var d = 0; d < 14; d++) ...?_days[DateTime(now.year, now.month, now.day + d).year]?[DateTime(now.year, now.month, now.day + d)],
+    };
+    final json = jsonEncode({
+      'lang': _lang,
+      'weekStart': weekStart,
+      'weekdays': l.weekdays,
+      // Kotlin fills the number in with String.format.
+      'more': l.moreN(999).replaceAll('999', '%d'),
+      'inMin': l.inMin(999).replaceAll('999', '%d'),
+      'today': l.today,
+      'tomorrow': l.tomorrow,
+      'noEvents': l.noEvents,
+      'events': [
+        for (final e in evs) {'t': e.title, 's': e.start.millisecondsSinceEpoch, 'e': e.end.millisecondsSinceEpoch, 'a': e.allDay},
+      ],
+    });
+    try {
+      await const MethodChannel('calendar/device').invokeMethod<void>('widgets', json);
+    } on MissingPluginException {
+      // tests: no Android side
+    }
+  }
 
   /// After a fresh sync: reminders, plus notifications for new invitations and others' changes in shared calendars.
   Future<void> _afterSync(List<Ev> evs, DateTime? previous) async {
