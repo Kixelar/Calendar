@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Every widget is drawn by Widgets.kt in both themes; layout/ shows the light bitmap
+     and this night layout the dark one, so the launcher follows the system theme by itself. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <ImageView android:id="@+id/widget_light" android:layout_width="match_parent" android:layout_height="match_parent"
+        android:scaleType="fitCenter" android:visibility="gone" />
+    <ImageView android:id="@+id/widget_dark" android:layout_width="match_parent" android:layout_height="match_parent"
+        android:scaleType="fitCenter" android:visibility="visible" />
+</FrameLayout>

@@ -1,7 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Every widget is one bitmap drawn by Widgets.kt; it keeps the app's fonts and the mockup's layout. -->
-<ImageView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/widget_image"
+<!-- Every widget is drawn by Widgets.kt in both themes; this light layout shows the light bitmap
+     and layout-night/ the dark one, so the launcher follows the system theme by itself. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:scaleType="fitCenter" />
+    android:layout_height="match_parent">
+    <ImageView android:id="@+id/widget_light" android:layout_width="match_parent" android:layout_height="match_parent"
+        android:scaleType="fitCenter" android:visibility="visible" />
+    <ImageView android:id="@+id/widget_dark" android:layout_width="match_parent" android:layout_height="match_parent"
+        android:scaleType="fitCenter" android:visibility="gone" />
+</FrameLayout>

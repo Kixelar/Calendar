@@ -6,7 +6,6 @@ import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Paint
@@ -41,6 +40,7 @@ object Widgets {
         val today: String = json.optString("today", "Today")
         val tomorrow: String = json.optString("tomorrow", "Tomorrow")
         val noEvents: String = json.optString("noEvents", "No events")
+        val use24h: Boolean = json.optBoolean("use24h", true)
         val events: List<Ev> = json.optJSONArray("events")?.let { a ->
             (0 until a.length()).map { i ->
                 val e = a.getJSONObject(i)
@@ -122,21 +122,24 @@ abstract class CalendarWidget : AppWidgetProvider() {
     }
 
     private fun draw(context: Context, manager: AppWidgetManager, id: Int, options: Bundle) {
-        // Widget bitmaps travel to the launcher through IPC: keep them under ~2 MB by lowering the scale if needed.
+        // Two bitmaps (light and dark) travel to the launcher through IPC: keep each under ~1.5 MB.
         val wanted = context.resources.displayMetrics.density
         // Portrait size: min width, max height (what launchers report for the cell area).
         val wDp = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 160).coerceAtLeast(40)
         val hDp = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, 160).coerceAtLeast(40)
-        val density = minOf(wanted, kotlin.math.sqrt(2_000_000f / 4f / (wDp * hDp)))
+        val density = minOf(wanted, kotlin.math.sqrt(1_500_000f / 4f / (wDp * hDp)))
         val w = (wDp * density).toInt()
         val h = (hDp * density).toInt()
-        val bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
-        val dark = (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
-        draw(Painter(context, Canvas(bmp), w.toFloat(), h.toFloat(), density, Widgets.Colors(dark), Widgets.data(context)))
+        val data = Widgets.data(context)
+        fun bitmap(dark: Boolean) = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888).also {
+            draw(Painter(context, Canvas(it), w.toFloat(), h.toFloat(), density, Widgets.Colors(dark), data))
+        }
+        // Both themes are sent; layout/ and layout-night/ show one of them, so the launcher switches with the system theme.
         val views = RemoteViews(context.packageName, R.layout.widget_image)
-        views.setImageViewBitmap(R.id.widget_image, bmp)
+        views.setImageViewBitmap(R.id.widget_light, bitmap(false))
+        views.setImageViewBitmap(R.id.widget_dark, bitmap(true))
         val open = context.packageManager.getLaunchIntentForPackage(context.packageName)
-        views.setOnClickPendingIntent(R.id.widget_image,
+        views.setOnClickPendingIntent(R.id.widget_root,
             PendingIntent.getActivity(context, 0, open, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT))
         manager.updateAppWidget(id, views)
     }
@@ -206,7 +209,8 @@ class Painter(
 
     fun fmt(pattern: String, d: Date): String = SimpleDateFormat(pattern, locale).format(d)
     fun upper(s: String) = s.uppercase(locale)
-    fun hm(ms: Long) = fmt("HH:mm", Date(ms))
+    // 12-hour widgets show "2:30" without AM/PM: there is no room for it next to the big digits.
+    fun hm(ms: Long) = fmt(if (data.use24h) "HH:mm" else "h:mm", Date(ms))
 
     fun startOfDay(cal: Calendar): Long = (cal.clone() as Calendar).apply {
         set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0); set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
@@ -376,7 +380,7 @@ class NextSmallWidget : CalendarWidget() {
         // Label + gap + time, centred as one block on both axes.
         val lp = label(if (soon) col.accentText else col.secondary)
         val tp = dot(40f, col.display)
-        val gap = dp(6f)
+        val gap = dp(8f)
         val topY = (h - (cap(lp) + gap + cap(tp))) / 2
         top(lbl, w / 2, topY, lp, Paint.Align.CENTER, w - dp(32f))
         top(hm(e.start), w / 2, topY + cap(lp) + gap, tp, Paint.Align.CENTER)
