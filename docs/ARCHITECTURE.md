@@ -88,8 +88,8 @@ Preferences are reloaded before comparing sync state, since each engine keeps it
 
 ## Crash report
 `CalendarApp` (CrashLog.kt) installs an uncaught-exception handler for the whole process (app, widgets, notification
-receivers, SyncWorker) that writes `files/crash.txt`. Home shows it once on the next start (`Store.lastCrash`) with a
-Copy button. Widget drawing errors are recorded the same way without crashing.
+receivers, SyncWorker) that writes `files/crash.txt`. `CrashActivity` (plain Android, own `:crash` process) opens at once with
+the report and a Copy button; Home also shows an unread report on the next start (`Store.lastCrash`). Widget drawing errors are recorded the same way without crashing.
 
 ## Settings
 05.x settings live in SharedPreferences (`Store.set`). `App` copies the view ones to `Look` on every change.

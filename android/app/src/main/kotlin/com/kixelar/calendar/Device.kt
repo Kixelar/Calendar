@@ -37,10 +37,13 @@ object Device {
                     if (minutes <= 0) {
                         wm.cancelUniqueWork(SyncWorker.NAME)
                     } else {
-                        val request = PeriodicWorkRequestBuilder<SyncWorker>(maxOf(15L, minutes.toLong()), TimeUnit.MINUTES)
+                        val every = maxOf(15L, minutes.toLong())
+                        // First run after one interval: the app has just synced itself when it schedules this.
+                        val request = PeriodicWorkRequestBuilder<SyncWorker>(every, TimeUnit.MINUTES)
+                            .setInitialDelay(every, TimeUnit.MINUTES)
                             .setConstraints(Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build())
                             .build()
-                        wm.enqueueUniquePeriodicWork(SyncWorker.NAME, ExistingPeriodicWorkPolicy.UPDATE, request)
+                        wm.enqueueUniquePeriodicWork(SyncWorker.NAME, ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE, request)
                     }
                     result.success(null)
                 }

@@ -20,7 +20,15 @@ class SyncWorker(context: Context, params: WorkerParameters) : Worker(context, p
         const val NAME = "calendar-sync"
     }
 
-    override fun doWork(): Result {
+    // The job must never take the app down: anything unexpected goes to the crash report and the run is dropped.
+    override fun doWork(): Result = try {
+        run()
+    } catch (e: Throwable) {
+        CrashLog.write(applicationContext, Thread.currentThread(), e)
+        Result.failure()
+    }
+
+    private fun run(): Result {
         val done = CountDownLatch(1)
         val main = Handler(Looper.getMainLooper())
         var engine: FlutterEngine? = null
@@ -34,7 +42,8 @@ class SyncWorker(context: Context, params: WorkerParameters) : Worker(context, p
                     Device.attach(it, applicationContext) { done.countDown() }
                     it.dartExecutor.executeDartEntrypoint(DartExecutor.DartEntrypoint(loader.findAppBundlePath(), "backgroundSync"))
                 }
-            } catch (_: Exception) {
+            } catch (e: Throwable) {
+                CrashLog.write(applicationContext, Thread.currentThread(), e)
                 done.countDown()
             }
         }

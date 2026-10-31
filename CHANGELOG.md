@@ -28,9 +28,10 @@
 - Calendars: the primary calendar is called "Personal" instead of the account e-mail; birthdays and other people's calendars have their own sections.
 - Custom reminder (any number of minutes, hours or days, up to 4 weeks) for events and as the default.
 - Background sync every 15–60 min while online, also when the app is closed: reminders, invitation notifications and widgets stay fresh.
-- Crash report: if the app (or a widget, reminder or background sync) crashes, the next start shows the report with a Copy button.
+- Crash report: if the app (or a widget, reminder or background sync) crashes, a separate screen opens at once with the report and a Copy button (works even when the app dies at start).
 ### Fixed
 - Icon: the last dot is white like the others (the grey one was hard to see); the red sixth dot stays.
+- Background sync cannot crash the app (errors go to the crash report); its first run waits one interval instead of starting together with the app.
 - Widgets cannot crash the app any more (errors go to the crash report) and their bitmaps stay under ~2 MB.
 - Invitations from others were treated as own events (Google omits `organizer.self` when false): the reply screen, invitation notifications and the conflict row now work; the notification says how many events it clashes with.
 - Widgets: text and numbers centred by their glyph bounds; blocks centred in the widget.
