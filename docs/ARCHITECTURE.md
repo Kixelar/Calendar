@@ -57,7 +57,7 @@ preference; such calendars are read-only in the app (`writable`, event details).
 
 ## Day clock widget
 `ClockWidget` (Widgets.kt) draws the dial from the events the app sends (`Store.updateWidgets`, strings "free" and
-"until"); `ClockWidget.schedule` sets the next redraw (CLOCK_TICK broadcast). Its tap passes `open=day` to MainActivity,
+"until"); `Widgets.schedule` sets the next redraw of all widgets (`WidgetTick` receiver). Its tap passes `open=day` to MainActivity,
 which Dart reads once via Device "takeOpen" (`Home._widgetOpen`). Preview: `tool/widget_previews.py` `clock`.
 
 ## Holidays

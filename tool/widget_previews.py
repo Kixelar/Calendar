@@ -20,9 +20,9 @@ COLORS = {
 }
 TEXT = {
     'pl': dict(weekday='PIĄTEK', month='PAŹDZIERNIK', month_short='PAŹ', weekdays='PN WT ŚR CZ PT SB ND'.split(),
-               more='JESZCZE 3', soon='ZA 12 MIN', soon15='ZA 15 MIN', events=[('14:00', 'Demo sprintu'), ('17:30', 'Trening'), ('20:00', 'Kolacja u rodziców')]),
+               more='JESZCZE 3', soon='ZA 15 MIN', soon15='ZA 15 MIN', events=[('14:00', 'Demo sprintu'), ('17:30', 'Trening'), ('20:00', 'Kolacja u rodziców')]),
     'en': dict(weekday='FRIDAY', month='OCTOBER', month_short='OCT', weekdays='MO TU WE TH FR SA SU'.split(),
-               more='3 MORE', soon='IN 12 MIN', soon15='IN 15 MIN', events=[('14:00', 'Sprint demo'), ('17:30', 'Workout'), ('20:00', 'Dinner with family')]),
+               more='3 MORE', soon='IN 15 MIN', soon15='IN 15 MIN', events=[('14:00', 'Sprint demo'), ('17:30', 'Workout'), ('20:00', 'Dinner with family')]),
 }
 TODAY, MONTH_DAYS, FIRST_COL = 30, 31, 3  # Friday 30 October 2026; 1 October is a Thursday
 

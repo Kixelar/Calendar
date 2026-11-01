@@ -52,6 +52,26 @@ object Widgets {
         } ?: emptyList()
     }
 
+    /** Countdown shown by widgets: 60, 45, 30 or 15 min before an event (owner, 2026-11-01), null earlier. */
+    fun step(start: Long, now: Long): Int? {
+        val mins = ((start - now + 59_999) / 60_000).toInt()
+        return if (mins in 1..60) (mins + 14) / 15 * 15 else null
+    }
+
+    private fun tickIntent(context: Context) = PendingIntent.getBroadcast(context, 33,
+        Intent(context, WidgetTick::class.java), PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+
+    /** Sets the next redraw of all widgets: a quarter hour, or 60 / 45 / 30 / 15 min before, the start or the end of an event. */
+    fun schedule(context: Context) {
+        val now = System.currentTimeMillis()
+        val quarter = (now / 900_000L + 1) * 900_000L
+        val at = data(context).events.filter { !it.allDay }
+            .flatMap { e -> listOf(60, 45, 30, 15, 0).map { e.start - it * 60_000L } + e.end }
+            .filter { it > now }.plus(quarter).min()
+        // RTC, not RTC_WAKEUP: a sleeping phone is not woken, widgets catch up when the screen comes on.
+        context.getSystemService(android.app.AlarmManager::class.java).setExact(android.app.AlarmManager.RTC, at, tickIntent(context))
+    }
+
     fun save(context: Context, json: String) {
         context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().putString("data", json).apply()
         updateAll(context)
@@ -113,6 +133,7 @@ abstract class CalendarWidget : AppWidgetProvider() {
 
     override fun onUpdate(context: Context, manager: AppWidgetManager, ids: IntArray) {
         for (id in ids) render(context, manager, id, manager.getAppWidgetOptions(id))
+        if (ids.isNotEmpty()) try { Widgets.schedule(context) } catch (e: Exception) { CrashLog.write(context, Thread.currentThread(), e) }
     }
 
     override fun onAppWidgetOptionsChanged(context: Context, manager: AppWidgetManager, id: Int, options: Bundle) {
@@ -234,18 +255,18 @@ class Painter(
         return data.events.filter { !it.allDay && it.end > now.timeInMillis && it.start < end }.sortedBy { it.start }
     }
 
-    /** The next timed event that has not started, its label ("In 12 min", "Today", "Tomorrow", a date) and whether it is soon. */
+    /** The next timed event that has not started, its label ("In 15 min", "Today", "Tomorrow", a date) and whether it is soon. */
     fun next(): Triple<Widgets.Ev, String, Boolean>? {
         val e = data.events.filter { !it.allDay && it.start > now.timeInMillis }.minByOrNull { it.start } ?: return null
-        val mins = ((e.start - now.timeInMillis + 59_999) / 60_000).toInt()
+        val step = Widgets.step(e.start, now.timeInMillis)
         val day = (startOfDay(Calendar.getInstance().apply { timeInMillis = e.start }) - startOfDay(now)) / 86_400_000L
         val label = when {
-            mins <= 60 -> String.format(locale, data.inMin, mins)
+            step != null -> String.format(locale, data.inMin, step)
             day == 0L -> data.today
             day == 1L -> data.tomorrow
             else -> fmt("EEE d", Date(e.start))
         }
-        return Triple(e, upper(label), mins <= 60)
+        return Triple(e, upper(label), step != null)
     }
 
     /** Weekday column of [dow] (Calendar.MONDAY...) for the app's first day of week. */
@@ -412,44 +433,10 @@ class DaySmallWidget : CalendarWidget() {
 
 /**
  * 2x2 and larger: a 24-hour dial of today's timed events (grey past, white to come, yellow clashes) with a red hand
- * for now; the middle shows the next event's time and title, "in 30 / 15 min" before it, "now · until" during it, or
- * "free". Redrawn every quarter hour and at 30 and 15 min before each event, at its start and end (ClockWidget.schedule).
+ * for now; the middle shows the next event's time and title, "in 60 / 45 / 30 / 15 min" before it, "now · until" during it, or
+ * "free". Redrawn with the other widgets (Widgets.schedule).
  */
 class ClockWidget : CalendarWidget() {
-    companion object {
-        private const val TICK = "com.kixelar.calendar.CLOCK_TICK"
-
-        private fun tickIntent(context: Context) = PendingIntent.getBroadcast(context, 33,
-            Intent(context, ClockWidget::class.java).setAction(TICK), PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
-
-        /** The next moment the dial changes: a quarter hour, or 30 / 15 min before, the start or the end of an event. */
-        fun schedule(context: Context) {
-            val now = System.currentTimeMillis()
-            val quarter = (now / 900_000L + 1) * 900_000L
-            val at = Widgets.data(context).events.filter { !it.allDay }
-                .flatMap { listOf(it.start - 1_800_000L, it.start - 900_000L, it.start, it.end) }
-                .filter { it > now }.plus(quarter).min()
-            // RTC, not RTC_WAKEUP: a sleeping phone is not woken, the dial catches up when the screen comes on.
-            context.getSystemService(android.app.AlarmManager::class.java).setExact(android.app.AlarmManager.RTC, at, tickIntent(context))
-        }
-    }
-
-    override fun onReceive(context: Context, intent: Intent) {
-        if (intent.action == TICK) {
-            val m = AppWidgetManager.getInstance(context)
-            onUpdate(context, m, m.getAppWidgetIds(ComponentName(context, ClockWidget::class.java)))
-        } else super.onReceive(context, intent)
-    }
-
-    override fun onUpdate(context: Context, manager: AppWidgetManager, ids: IntArray) {
-        super.onUpdate(context, manager, ids)
-        if (ids.isNotEmpty()) try { schedule(context) } catch (e: Exception) { CrashLog.write(context, Thread.currentThread(), e) }
-    }
-
-    override fun onDisabled(context: Context) {
-        context.getSystemService(android.app.AlarmManager::class.java).cancel(tickIntent(context))
-    }
-
     // Opens today's day view, not an event (owner, 2026-11-01).
     // CLEAR_TOP + SINGLE_TOP hand the extra to a running app through onNewIntent.
     override fun tap(context: Context): Intent? = super.tap(context)?.putExtra("open", "day")
@@ -521,13 +508,8 @@ class ClockWidget : CalendarWidget() {
         }
         val big = dot(24f * k, col.display)
         val title = body(col.primary).apply { textSize *= k * 12f / 14f }
-        val mins = ((e.start - nowMs + 59_999) / 60_000).toInt()
-        val note = when {
-            onNow != null -> String.format(locale, data.until, hm(e.end))
-            mins <= 15 -> String.format(locale, data.inMin, 15)
-            mins <= 30 -> String.format(locale, data.inMin, 30)
-            else -> null
-        }
+        val note = if (onNow != null) String.format(locale, data.until, hm(e.end))
+            else Widgets.step(e.start, nowMs)?.let { String.format(locale, data.inMin, it) }
         val sub = small(if (onNow != null) col.secondary else col.accentText)
         val g1 = dp(6f) * k
         val g2 = dp(7f) * k
@@ -542,4 +524,9 @@ class ClockWidget : CalendarWidget() {
         }
         top(e.title, cx, y + g2, title, Paint.Align.CENTER, inner * 0.92f)
     }
+}
+
+/** Alarm from [Widgets.schedule]: redraws every widget, which sets the next alarm. */
+class WidgetTick : android.content.BroadcastReceiver() {
+    override fun onReceive(context: Context, intent: Intent) = Widgets.updateAll(context)
 }
