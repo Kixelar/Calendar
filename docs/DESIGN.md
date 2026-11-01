@@ -4,6 +4,17 @@ The source of truth is the owner's mockup [design/mockup.html](design/mockup.htm
 01 onboarding, 02 views, 03 events, 04 calendars, 05 settings, 06 states, 07 widgets and notifications.
 UI must match it; the owner decides look and behaviour changes.
 
+The month, week and day views were reworked from a second mockup, [design/views.html](design/views.html) (2026-11-01),
+which replaces 02.2–02.4 of the first one:
+- Month: day numbers with a strip under each day (where its events fall between 08 and 22, yellow when they clash);
+  the grid stays put and the list of the selected day scrolls under it.
+- Week: hour × day grid (08–22, widened for earlier/later events) with the selected day's list below; day names and the
+  list header stay pinned while scrolling.
+- Day: timeline with cards (side by side when they overlap, solid white/yellow for clashes), free time as dotted lines
+  with its length, red now line with "in N min", empty day message in the middle of the axis.
+- Tap a day to select it, tap it again to open its day view. Today is red, the selected day white.
+- Year (owner, 2026-11-01): the "A dot is a day" caption is gone; "Year" sits on its line next to the big number.
+
 ## Tokens
 Copied 1:1 from the mockup's CSS into `lib/theme.dart` (`Tok` colours for dark and light, `T` text styles).
 - True black background (OLED) in dark, `#F4F4F4` in light; theme follows the system.

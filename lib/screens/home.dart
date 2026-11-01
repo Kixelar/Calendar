@@ -14,6 +14,7 @@ import 'calendars.dart';
 import 'event.dart';
 import 'search.dart';
 import 'settings.dart';
+import 'views.dart';
 
 /// Main screen with the four views from the mockup: 02.1 year, 02.2 month, 02.3 week, 02.4 day.
 class Home extends StatefulWidget {
@@ -166,17 +167,40 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
               ),
             ),
             Expanded(
-              child: RefreshIndicator(
-                onRefresh: store.refresh,
-                color: t.display,
-                backgroundColor: t.surfaceRaised,
-                child: ListView(
-                  padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
-                  children: [
-                    ...switch (tab) { 0 => _year(context), 1 => _month(context), 2 => _week(context), _ => _day(context) },
-                  ],
+              child: Stack(children: [
+                Positioned.fill(
+                  child: RefreshIndicator(
+                    onRefresh: store.refresh,
+                    color: t.display,
+                    backgroundColor: t.surfaceRaised,
+                    child: tab == 1
+                        ? _month(context)
+                        : CustomScrollView(slivers: [
+                            ...switch (tab) { 0 => _year(context), 2 => _week(context), _ => _day(context) },
+                            const SliverToBoxAdapter(child: SizedBox(height: 54)),
+                          ]),
+                  ),
                 ),
-              ),
+                // Content fades out above the bottom bar (.fade).
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  height: 54,
+                  child: IgnorePointer(
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          stops: const [0, .85],
+                          colors: [t.bg.withValues(alpha: 0), t.bg],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ]),
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(14, 8, 24, 32),
@@ -214,234 +238,188 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
 
   bool _holiday(Ev e) => store.cal(e.calId)?.holiday ?? false;
 
-  /// Day number circle shared by month and week views (.num).
-  Widget _num(BuildContext c, DateTime d, {bool out = false}) {
-    final t = Tok.of(c), today = dayOf(DateTime.now());
-    final evs = store.on(d) ?? const [];
-    final isToday = d == today, hol = evs.any(_holiday);
-    return Container(
-      width: 36,
-      height: 36,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: isToday ? t.display : null,
-        border: hol && !isToday ? Border.all(color: t.borderControl) : null,
-      ),
-      child: Text('${d.day}',
-          style: T.displayMd(isToday ? t.bg : out ? t.disabled : Look.dimPast && d.isBefore(today) ? t.secondary : t.display)),
+  /// Tapping a day selects it; tapping the selected day again opens its day view.
+  void _pick(DateTime d) => d == focus ? go(d, 3) : setState(() => focus = d);
+
+  /// Header line and rows of the selected day, shared by the month and week views.
+  (Widget, List<Widget>) _list(BuildContext c, DateTime now) {
+    final l = l10n(c), today = dayOf(now), evs = store.on(focus);
+    final slots = slotsOf(focus, evs ?? const []);
+    final name = DateFormat.EEEE(loc(c)).format(focus);
+    final left = switch (focus) {
+      _ when focus == today => '${l.today} · $name',
+      _ when focus == DateTime(today.year, today.month, today.day + 1) => '${l.tomorrow} · $name',
+      _ => '${l.weekdays.split(',')[focus.weekday - 1]} ${focus.day}',
+    };
+    return (
+      ListBar(left, dayCounts(c, focus, slots, now)),
+      evs == null ? const [_Loading()] : evs.isEmpty ? [_empty(c)] : dayRows(c, store, focus, evs, slots, now),
     );
   }
 
-  List<Widget> _month(BuildContext c) {
-    final t = Tok.of(c), l = l10n(c), now = DateTime.now(), today = dayOf(now);
+  Widget _month(BuildContext c) {
+    final t = Tok.of(c), now = DateTime.now(), today = dayOf(now);
     final m = DateTime(focus.year, focus.month);
     final last = DateTime(m.year, m.month + 1, 0);
-    final names = l.weekdays.split(','), cols = Look.days;
+    final names = l10n(c).weekdays.split(','), cols = Look.days;
     final weeks = [for (var w = Look.weekOf(m); !w.isAfter(last); w = DateTime(w.year, w.month, w.day + 7)) w];
-    final todays = store.on(today);
-    final rest = todays?.where((e) => e.end.isAfter(now)).toList() ?? const <Ev>[];
-    return [
+    final (bar, rows) = _list(c, now);
+    final fixed = <Widget>[
       Hero2(
         big: '${m.month}',
         title: DateFormat.LLLL(loc(c)).format(m),
         caption: '${m.year}',
-        onMove: (d) => go(DateTime(m.year, m.month + d), 1),
+        onMove: (d) {
+          final n = DateTime(m.year, m.month + d);
+          go(n.year == today.year && n.month == today.month ? today : n, 1);
+        },
       ),
-      const SizedBox(height: 24),
-      Row(children: [
-        if (Look.weekNumbers) const SizedBox(width: 24),
-        for (final wd in cols)
-          Expanded(child: SizedBox(height: 24, child: Center(child: Text(names[wd - 1], style: T.labelSm(t.secondary))))),
-      ]),
-      for (final w in weeks)
-        Row(children: [
-          if (Look.weekNumbers)
-            SizedBox(
-              width: 24,
-              child: Text('${isoWeek(DateTime(w.year, w.month, w.day + Look.col(DateTime.monday)))}', style: T.labelSm(t.disabled)),
-            ),
+      Padding(
+        padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
+        child: Row(children: [
+          if (Look.weekNumbers) const SizedBox(width: 24),
           for (final wd in cols)
-            Expanded(
-              child: Builder(builder: (c) {
-                final d = DateTime(w.year, w.month, w.day + Look.col(wd));
-                final out = d.month != m.month;
-                final has = !out && (store.on(d) ?? const []).any((e) => !_holiday(e));
-                return InkWell(
-                  onTap: () => go(d, 3),
-                  child: SizedBox(
-                    height: 48,
-                    child: Column(mainAxisAlignment: MainAxisAlignment.center, spacing: 3, children: [
-                      _num(c, d, out: out),
-                      Container(
-                        width: 4,
-                        height: 4,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: !has ? null : Look.dimPast && d.isBefore(today) ? t.secondary : t.display,
-                        ),
-                      ),
-                    ]),
-                  ),
-                );
-              }),
-            ),
+            Expanded(child: Center(child: Text(names[wd - 1], style: T.labelSm(t.secondary).copyWith(fontSize: 10, letterSpacing: 1.4)))),
         ]),
-      Section(
-        left: '${l.today} · ${DateFormat.EEEE(loc(c)).format(now)}',
-        right: rest.isEmpty ? null : l.moreN(rest.length),
-        children: [
-          if (todays == null) const _Loading() else if (rest.isEmpty) _empty(c),
-          for (final e in rest) EventRow(e, store, now: now),
-        ],
       ),
+      Padding(
+        padding: const EdgeInsets.fromLTRB(16, 6, 16, 12),
+        child: Column(spacing: 2, children: [
+          for (final w in weeks)
+            Row(children: [
+              if (Look.weekNumbers)
+                SizedBox(
+                  width: 24,
+                  child: Text('${isoWeek(DateTime(w.year, w.month, w.day + Look.col(DateTime.monday)))}', style: T.labelSm(t.disabled)),
+                ),
+              for (final wd in cols)
+                Expanded(
+                  child: Builder(builder: (c) {
+                    final d = DateTime(w.year, w.month, w.day + Look.col(wd));
+                    final evs = store.on(d) ?? const <Ev>[];
+                    return GestureDetector(
+                      onTap: () => _pick(d),
+                      behavior: HitTestBehavior.opaque,
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 5, bottom: 6),
+                        child: Column(spacing: 9, children: [
+                          dayNum(c, d, sel: d == focus, out: d.month != m.month, hol: evs.any(_holiday)),
+                          DayStrip(slotsOf(d, evs), now),
+                        ]),
+                      ),
+                    );
+                  }),
+                ),
+            ]),
+        ]),
+      ),
+      bar,
+    ];
+    return LayoutBuilder(builder: (c, box) {
+      // The grid stays put and only the list scrolls; on short screens everything scrolls together.
+      if (box.maxHeight < 360 + 59.0 * weeks.length) return ListView(children: [...fixed, ...rows, const SizedBox(height: 54)]);
+      return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        ...fixed,
+        Expanded(child: ListView(padding: const EdgeInsets.only(bottom: 54), children: rows)),
+      ]);
+    });
+  }
+
+  List<Widget> _week(BuildContext c) {
+    final l = l10n(c), now = DateTime.now();
+    final first = Look.weekOf(focus), lastDay = DateTime(first.year, first.month, first.day + 6);
+    final days = [for (final wd in Look.days) DateTime(first.year, first.month, first.day + Look.col(wd))];
+    final perDay = [for (final d in days) store.on(d) ?? const <Ev>[]];
+    final slots = [for (final (i, d) in days.indexed) slotsOf(d, perDay[i])];
+    final hol = [for (final evs in perDay) evs.any(_holiday)];
+    final f = DateFormat('dd.MM', loc(c));
+    final week = isoWeek(DateTime(first.year, first.month, first.day + Look.col(DateTime.monday)));
+    final (bar, rows) = _list(c, now);
+    return [
+      SliverToBoxAdapter(
+        child: Hero2(
+          big: '$week',
+          title: l.weekN(week),
+          caption: '${f.format(first)}–${f.format(lastDay)}',
+          onMove: (d) => go(DateTime(focus.year, focus.month, focus.day + 7 * d), 2),
+        ),
+      ),
+      SliverPersistentHeader(pinned: true, delegate: _Pinned(76, WeekDays(days: days, hol: hol, sel: focus, onTap: _pick))),
+      SliverToBoxAdapter(
+        child: WeekGrid(days: days, slots: slots, hol: hol, hours: hourRange(slots.expand((s) => s)), sel: focus, onTap: _pick),
+      ),
+      const SliverToBoxAdapter(child: SizedBox(height: 14)),
+      SliverPersistentHeader(pinned: true, delegate: _Pinned(41, bar)),
+      SliverList.list(children: rows),
     ];
   }
 
   List<Widget> _day(BuildContext c) {
-    final l = l10n(c), now = DateTime.now();
+    final t = Tok.of(c), l = l10n(c), now = DateTime.now();
     final evs = store.on(focus);
-    final (all, timed) = splitAllDay(evs ?? const []);
-    final isToday = focus == dayOf(now);
-    // The now line goes before the first event that has not started yet.
-    var nowAt = isToday ? timed.indexWhere((e) => e.start.isAfter(now)) : -1;
-    if (isToday && nowAt < 0) nowAt = timed.length;
-    return [
-      Hero2(
-        xl: true,
-        big: '${focus.day}'.padLeft(2, '0'),
-        title: DateFormat.EEEE(loc(c)).format(focus),
-        caption: DateFormat('LLLL y', loc(c)).format(focus).toUpperCase(),
-        onMove: (d) => go(DateTime(focus.year, focus.month, focus.day + d), 3),
-      ),
-      if (all.isNotEmpty) Section(left: l.allDay, children: [for (final e in all) EventRow(e, store, now: now)]),
-      Section(
-        left: l.schedule,
-        right: evs == null ? null : l.eventsN(timed.length),
-        children: [
-          if (evs == null) const _Loading() else if (timed.isEmpty) _emptyDay(c, free: focus.weekday >= 6 || all.any(_holiday)),
-          for (var i = 0; i < timed.length; i++) ...[
-            if (i == nowAt) _nowLine(c, now),
-            EventRow(timed[i], store, now: now, red: false, border: i + 1 != nowAt),
-          ],
-          if (nowAt == timed.length && timed.isNotEmpty) _nowLine(c, now),
-        ],
-      ),
+    final all = (evs ?? const <Ev>[]).where((e) => e.allDay).toList();
+    final slots = slotsOf(focus, evs ?? const []);
+    final coll = slots.where((x) => x.coll).length;
+    final next = evs != null && slots.isEmpty ? _nextAfter(focus) : null;
+    final right = <(String, Color?)>[
+      if (coll > 0) (l.clashesN(coll), t.warning),
+      if (focus == dayOf(now)) (l.moreN(slots.where((x) => x.e.end.isAfter(now)).length), null),
+      if (next != null) ('${l.next} · ${l.weekdays.split(',')[next.start.weekday - 1]} ${hm(c, next.start)}', null),
     ];
-  }
-
-  Widget _nowLine(BuildContext c, DateTime now) {
-    final t = Tok.of(c);
-    return SizedBox(
-      height: 24,
-      child: Row(children: [
-        SizedBox(width: 48, child: Text(hmShort(c, now), softWrap: false, style: T.labelSm(t.accentText))),
-        const SizedBox(width: 8),
-        Container(width: 6, height: 6, decoration: BoxDecoration(color: t.accent, shape: BoxShape.circle)),
-        const SizedBox(width: 8),
-        Expanded(child: Container(height: 1, color: t.accent)),
-      ]),
-    );
-  }
-
-  List<Widget> _week(BuildContext c) {
-    final t = Tok.of(c), l = l10n(c), now = DateTime.now(), today = dayOf(now);
-    final first = Look.weekOf(focus), lastDay = DateTime(first.year, first.month, first.day + 6);
-    final days = [for (final wd in Look.days) DateTime(first.year, first.month, first.day + Look.col(wd))];
-    final names = l.weekdays.split(',');
-    final perDay = [for (final d in days) store.on(d)];
-    final count = {for (final e in perDay) ...?e}.length;
-    final thisWeek = !today.isBefore(first) && !today.isAfter(lastDay);
-    final upcoming = [for (var i = 0; i < days.length; i++) if (!thisWeek || !days[i].isBefore(today)) i];
-    final next = !thisWeek
-        ? null
-        : [for (final i in upcoming) ...?perDay[i]].where((e) => !e.allDay && e.start.isAfter(now)).firstOrNull;
-    final f = DateFormat('dd.MM', loc(c));
-    final tomorrow = DateTime(today.year, today.month, today.day + 1);
-    final week = isoWeek(DateTime(first.year, first.month, first.day + Look.col(DateTime.monday)));
-    String dayName(DateTime d) => switch (d) {
-          _ when d == today => '${l.today} · ${names[d.weekday - 1]} ${d.day}',
-          _ when d == tomorrow => '${l.tomorrow} · ${names[d.weekday - 1]} ${d.day}',
-          _ => '${names[d.weekday - 1]} ${d.day}',
-        };
     return [
-      Hero2(
-        big: '$week',
-        title: l.weekN(week),
-        caption: '${f.format(first)}–${f.format(lastDay)} · ${l.eventsN(count)}',
-        onMove: (d) => go(DateTime(focus.year, focus.month, focus.day + 7 * d), 2),
+      SliverToBoxAdapter(
+        child: Hero2(
+          big: '${focus.day}',
+          title: DateFormat.EEEE(loc(c)).format(focus),
+          caption: DateFormat('LLLL y', loc(c)).format(focus),
+          onMove: (d) => go(DateTime(focus.year, focus.month, focus.day + d), 3),
+        ),
       ),
-      const SizedBox(height: 24),
-      Row(children: [
-        for (var i = 0; i < days.length; i++)
-          Expanded(
-            child: InkWell(
-              onTap: () => go(days[i], 3),
-              child: Column(spacing: 6, children: [
-                Text(names[days[i].weekday - 1], style: T.labelSm(days[i] == today ? t.display : t.secondary)),
-                _num(c, days[i]),
-                _load(c, perDay[i], days[i].isBefore(today) ? 0.3 : days[i] == today ? 1 : 0.6),
+      SliverList.list(children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(24, 2, 24, 10),
+          child: Row(spacing: 10, children: [Lbl(l.eventsN(slots.length)), Expanded(child: counts(c, right))]),
+        ),
+        for (final (i, e) in all.indexed)
+          GestureDetector(
+            onTap: () => openEvent(c, e, store),
+            child: Container(
+              margin: EdgeInsets.fromLTRB(24, 0, 24, i == all.length - 1 ? 26 : 8),
+              height: 28,
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              decoration: BoxDecoration(border: Border.all(color: t.borderSubtle), borderRadius: BorderRadius.circular(8)),
+              child: Row(spacing: 10, children: [
+                Marker(store.cal(e.calId)?.shape ?? Shape.dot),
+                Expanded(child: Text(e.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: T.caption(t.display).copyWith(letterSpacing: 1.2))),
+                Lbl(_holiday(e) ? l.holiday : l.allDay),
               ]),
             ),
           ),
-      ]),
-      if (next != null) _nextCard(c, next, now),
-      for (final i in upcoming)
-        if ((perDay[i] ?? const []).where((e) => e != next && e.end.isAfter(now)).toList() case final evs when evs.isNotEmpty)
-          Section(
-            left: dayName(days[i]),
-            leftColor: days[i] == today ? t.display : null,
-            right: '${evs.length}',
-            children: [for (final e in evs) EventRow(e, store, now: now, red: next == null)],
+        if (all.isEmpty) const SizedBox(height: 16),
+        if (evs == null)
+          const _Loading()
+        else
+          DayTimeline(
+            day: focus,
+            slots: slots,
+            store: store,
+            off: focus.weekday >= 6 || all.any(_holiday),
+            onAdd: store.signedIn && store.writable.isNotEmpty
+                ? () => Navigator.push(c, MaterialPageRoute(builder: (_) => EventEdit(store, day: focus)))
+                : null,
           ),
-      if (perDay.any((e) => e == null)) const _Loading(),
+      ]),
     ];
   }
 
-  /// Day load bar: share of an 8-hour day taken by timed events.
-  Widget _load(BuildContext c, List<Ev>? evs, double opacity) {
-    final t = Tok.of(c);
-    final hours = (evs ?? const []).where((e) => !e.allDay).fold(0.0, (s, e) => s + e.end.difference(e.start).inMinutes / 60);
-    return Container(
-      width: 24,
-      height: 3,
-      alignment: Alignment.centerLeft,
-      decoration: BoxDecoration(color: t.dotOff, borderRadius: BorderRadius.circular(2)),
-      clipBehavior: Clip.antiAlias,
-      child: FractionallySizedBox(
-        widthFactor: (hours / 8).clamp(0, 1),
-        child: Container(color: t.display.withValues(alpha: opacity)),
-      ),
-    );
-  }
-
-  Widget _nextCard(BuildContext c, Ev e, DateTime now) {
-    final t = Tok.of(c), l = l10n(c);
-    final when = dayOf(e.start) == dayOf(now) ? l.today : DateFormat.EEEE(loc(c)).format(e.start);
-    final mins = (e.start.difference(now).inSeconds + 59) ~/ 60;
-    final info = ['${hm(c, e.start)}–${hm(c, e.end)}', if (e.location?.isNotEmpty ?? false) e.location!].join(' · ');
-    return Padding(
-      padding: const EdgeInsets.only(top: 24),
-      child: GestureDetector(
-        onTap: () => openEvent(c, e, store),
-        child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(color: t.surface, border: Border.all(color: t.borderControl), borderRadius: BorderRadius.circular(8)),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, spacing: 4, children: [
-          Row(children: [
-            Expanded(child: Lbl('${l.next} · $when ${hm(c, e.start)}')),
-            if (mins <= 60) Lbl(l.inMin(mins), color: t.accentText),
-          ]),
-          const SizedBox(height: 8),
-          Text(e.title, style: T.headlineMd(t.display), maxLines: 2, overflow: TextOverflow.ellipsis),
-          Row(spacing: 8, children: [
-            Marker(store.cal(e.calId)?.shape ?? Shape.dot),
-            Expanded(child: Text(info.toUpperCase(), style: T.caption(t.secondary), maxLines: 1, overflow: TextOverflow.ellipsis)),
-          ]),
-        ]),
-        ),
-      ),
-    );
+  /// First timed event after [d] within a month, for "Next · Mon 08:30" on an empty day.
+  Ev? _nextAfter(DateTime d) {
+    for (var i = 1; i <= 31; i++) {
+      final evs = store.on(DateTime(d.year, d.month, d.day + i));
+      if (evs == null) return null;
+      if (evs.where((e) => !e.allDay).firstOrNull case final e?) return e;
+    }
+    return null;
   }
 
   List<Widget> _year(BuildContext c) {
@@ -486,43 +464,24 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
     }
 
     return [
-      Hero2(big: '$y', title: l.year, caption: l.yearHint, onMove: (d) => go(DateTime(y + d), 0)),
-      const SizedBox(height: 8),
-      for (var r = 0; r < 4; r++)
-        Padding(
-          padding: const EdgeInsets.only(top: 24),
-          child: Row(crossAxisAlignment: CrossAxisAlignment.start, spacing: 24, children: [
-            for (var m = r * 3 + 1; m <= r * 3 + 3; m++) Expanded(child: month(m)),
-          ]),
-        ),
+      SliverToBoxAdapter(child: Hero2(big: '$y', caption: l.year, onMove: (d) => go(DateTime(y + d), 0))),
+      SliverPadding(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        sliver: SliverList.list(children: [
+          for (var r = 0; r < 4; r++)
+            Padding(
+              padding: EdgeInsets.only(top: r == 0 ? 8 : 24),
+              child: Row(crossAxisAlignment: CrossAxisAlignment.start, spacing: 24, children: [
+                for (var m = r * 3 + 1; m <= r * 3 + 3; m++) Expanded(child: month(m)),
+              ]),
+            ),
+        ]),
+      ),
     ];
   }
 
-  /// 06.1: an empty day says so and offers to add something; weekends and holidays read as days off.
-  Widget _emptyDay(BuildContext c, {required bool free}) {
-    final t = Tok.of(c), l = l10n(c);
-    return Padding(
-      padding: const EdgeInsets.only(top: 48),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, spacing: 8, children: [
-        Text(l.nothingPlanned, style: T.headlineMd(t.display)),
-        Text(free ? l.freeDay : l.openDay, style: T.bodySm(t.secondary)),
-        if (store.signedIn && store.writable.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.only(top: 16),
-            child: IntrinsicWidth(
-              child: Btn(l.addEvent, kind: BtnKind.secondary, icon: Icons.add, onTap: () {
-                Navigator.push(c, MaterialPageRoute(builder: (_) => EventEdit(store, day: focus)));
-              }),
-            ),
-          ),
-      ]),
-    );
-  }
-
-  Widget _empty(BuildContext c) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        child: Text(l10n(c).noEvents, style: T.body(Tok.of(c).secondary)),
-      );
+  Widget _empty(BuildContext c) =>
+      Padding(padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 28), child: Lbl(l10n(c).noEvents));
 }
 
 class _Loading extends StatelessWidget {
@@ -541,4 +500,20 @@ int isoWeek(DateTime d) {
   final u = DateTime.utc(d.year, d.month, d.day);
   final thu = u.add(Duration(days: 4 - d.weekday));
   return thu.difference(DateTime.utc(thu.year)).inDays ~/ 7 + 1;
+}
+
+/// Header that stays at the top while the week scrolls (.dayrow, .listbar.stick).
+class _Pinned extends SliverPersistentHeaderDelegate {
+  _Pinned(this.height, this.child);
+  final double height;
+  final Widget child;
+  @override
+  double get minExtent => height;
+  @override
+  double get maxExtent => height;
+  @override
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) =>
+      SizedBox.expand(child: ColoredBox(color: Tok.of(context).bg, child: child));
+  @override
+  bool shouldRebuild(_Pinned old) => true;
 }

@@ -115,9 +115,6 @@ class AppLocalizationsPl extends AppLocalizations {
   String get day => 'Dzień';
 
   @override
-  String get yearHint => 'Kropka to dzień';
-
-  @override
   String weekN(int n) {
     return 'Tydzień $n';
   }
@@ -1064,4 +1061,34 @@ class AppLocalizationsPl extends AppLocalizations {
   @override
   String get testBackgroundHint =>
       'Zamknij aplikację na 1–2 minuty, potem wróć tutaj.';
+
+  @override
+  String clashesN(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n kolizji',
+      few: '$n kolizje',
+      one: '1 kolizja',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String inH(int h) {
+    return 'Za $h h';
+  }
+
+  @override
+  String inHM(int h, int m) {
+    return 'Za $h h $m min';
+  }
+
+  @override
+  String get dayOff => 'Dzień wolny';
+
+  @override
+  String hoursFree(int h) {
+    return '${h}h wolne';
+  }
 }

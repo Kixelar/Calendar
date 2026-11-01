@@ -282,42 +282,39 @@ class ValueRow extends StatelessWidget {
       ]);
 }
 
-/// Big number + label/caption with prev/next arrows (.hero).
+/// Big number + title and caption with prev/next arrows (.title).
+/// Without a title the caption takes the title's look on the lower line (year view).
 class Hero2 extends StatelessWidget {
-  const Hero2({super.key, required this.big, required this.title, required this.caption, required this.onMove, this.xl = false});
-  final String big, title, caption;
+  const Hero2({super.key, required this.big, this.title, required this.caption, required this.onMove});
+  final String big, caption;
+  final String? title;
   final ValueChanged<int> onMove;
-  final bool xl;
   @override
   Widget build(BuildContext context) {
     final t = Tok.of(context);
+    final head = T.labelSm(t.display).copyWith(fontSize: 12, height: 18 / 12, letterSpacing: 1.2);
+    final sub = T.labelSm(t.secondary).copyWith(height: 16 / 11);
     return Padding(
-      padding: const EdgeInsets.only(top: 24),
-      child: SizedBox(
-        height: 56,
-        child: Row(children: [
-          Text(big, style: xl ? T.displayXl(t.display) : T.displayLg(t.display)),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.start, spacing: 4, children: [
-              Semantics(header: true, child: Lbl(title, color: t.display)),
-              Text(caption, style: T.caption(t.secondary), maxLines: 2, overflow: TextOverflow.ellipsis),
-            ]),
-          ),
-          // margin-right: -10px from the mockup: the arrows' touch area runs into the gutter, leaving room for the caption.
-          SizedBox(
-            width: 78,
-            child: OverflowBox(
-              maxWidth: 88,
-              alignment: Alignment.centerLeft,
-              child: Row(children: [
-              IconBtn(Icons.chevron_left, onTap: () => onMove(-1), label: l10n(context).previous),
-              IconBtn(Icons.chevron_right, onTap: () => onMove(1), label: l10n(context).following),
-              ]),
+      padding: const EdgeInsets.fromLTRB(20, 22, 10, 14),
+      child: Row(children: [
+        ConstrainedBox(
+          constraints: const BoxConstraints(minWidth: 68),
+          child: Text(big, style: T.displayLg(t.display).copyWith(fontSize: 44, height: 1, letterSpacing: .9)),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            if (title == null) SizedBox(height: head.fontSize! * head.height!),
+            Semantics(
+              header: true,
+              child: Text((title ?? caption).toUpperCase(), style: head, maxLines: 1, softWrap: false, overflow: TextOverflow.fade),
             ),
-          ),
-        ]),
-      ),
+            if (title != null) Text(caption.toUpperCase(), style: sub, maxLines: 1, overflow: TextOverflow.ellipsis),
+          ]),
+        ),
+        IconBtn(Icons.chevron_left, onTap: () => onMove(-1), label: l10n(context).previous),
+        IconBtn(Icons.chevron_right, onTap: () => onMove(1), label: l10n(context).following),
+      ]),
     );
   }
 }

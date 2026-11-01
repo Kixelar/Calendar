@@ -33,7 +33,6 @@
   "month": "Month",
   "week": "Week",
   "day": "Day",
-  "yearHint": "A dot is a day",
   "weekN": "Week {n}",
   "@weekN": {"placeholders": {"n": {"type": "int"}}},
   "eventsN": "{n, plural, =1{1 event} other{{n} events}}",
@@ -329,5 +328,14 @@
   "inBackground": "In the background",
   "notYet": "Not yet",
   "check": "Check",
-  "testBackgroundHint": "Close the app for 1–2 minutes, then come back here."
+  "testBackgroundHint": "Close the app for 1–2 minutes, then come back here.",
+  "clashesN": "{n, plural, =1{1 clash} other{{n} clashes}}",
+  "@clashesN": {"placeholders": {"n": {"type": "int"}}},
+  "inH": "In {h} h",
+  "@inH": {"placeholders": {"h": {"type": "int"}}},
+  "inHM": "In {h} h {m} min",
+  "@inHM": {"placeholders": {"h": {"type": "int"}, "m": {"type": "int"}}},
+  "dayOff": "Day off",
+  "hoursFree": "{h}h free",
+  "@hoursFree": {"placeholders": {"h": {"type": "int"}}}
 }

@@ -18,6 +18,7 @@ import 'package:calendar/screens/onboarding.dart';
 import 'package:calendar/screens/notifications.dart';
 import 'package:calendar/screens/search.dart';
 import 'package:calendar/screens/settings.dart';
+import 'package:calendar/screens/views.dart';
 import 'package:calendar/store.dart';
 import 'package:calendar/view.dart';
 import 'package:calendar/ui.dart';
@@ -179,6 +180,24 @@ void main() {
     expect(organizes(ev({'email': 'anna@gmail.com', 'self': true}), 'anna@gmail.com'), isTrue); // own event
     expect(organizes(ev({'email': 'team@group.calendar.google.com'}), 'team@group.calendar.google.com'), isTrue); // shared calendar's own event
     expect(organizes(gcal.Event(), 'anna@gmail.com'), isTrue);
+  });
+
+  test('day slots: clashes, overlaps, clipping and the hour range', () {
+    final d = DateTime(2026, 10, 30);
+    DateTime at(double h) => DateTime(2026, 10, 30).add(Duration(minutes: (h * 60).round()));
+    final xs = slotsOf(d, [
+      Ev('demo', 'w', at(14), at(15)),
+      Ev('review', 'w', at(14.5), at(15.5)),
+      Ev('call', 'w', at(15.25), at(16.5)),
+      Ev('late', 'p', at(22.25), at(24.5)),
+      Ev('all day', 'p', d, at(24), allDay: true),
+    ]);
+    expect(xs.map((x) => x.e.title), ['demo', 'review', 'call', 'late']);
+    expect(xs.map((x) => x.coll), [false, true, true, false]);
+    expect(xs.map((x) => x.base), [true, false, false, false]);
+    expect(xs.last.end, 1440); // clipped at midnight
+    expect(hourRange(xs), (8, 24));
+    expect(hourRange(const []), (8, 22));
   });
 
   test('ISO week numbers', () {

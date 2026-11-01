@@ -278,12 +278,6 @@ abstract class AppLocalizations {
   /// **'Day'**
   String get day;
 
-  /// No description provided for @yearHint.
-  ///
-  /// In en, this message translates to:
-  /// **'A dot is a day'**
-  String get yearHint;
-
   /// No description provided for @weekN.
   ///
   /// In en, this message translates to:
@@ -1843,6 +1837,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Close the app for 1–2 minutes, then come back here.'**
   String get testBackgroundHint;
+
+  /// No description provided for @clashesN.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{1 clash} other{{n} clashes}}'**
+  String clashesN(int n);
+
+  /// No description provided for @inH.
+  ///
+  /// In en, this message translates to:
+  /// **'In {h} h'**
+  String inH(int h);
+
+  /// No description provided for @inHM.
+  ///
+  /// In en, this message translates to:
+  /// **'In {h} h {m} min'**
+  String inHM(int h, int m);
+
+  /// No description provided for @dayOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Day off'**
+  String get dayOff;
+
+  /// No description provided for @hoursFree.
+  ///
+  /// In en, this message translates to:
+  /// **'{h}h free'**
+  String hoursFree(int h);
 }
 
 class _AppLocalizationsDelegate

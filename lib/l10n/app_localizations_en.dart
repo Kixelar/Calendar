@@ -114,9 +114,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get day => 'Day';
 
   @override
-  String get yearHint => 'A dot is a day';
-
-  @override
   String weekN(int n) {
     return 'Week $n';
   }
@@ -1054,4 +1051,33 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get testBackgroundHint =>
       'Close the app for 1–2 minutes, then come back here.';
+
+  @override
+  String clashesN(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n clashes',
+      one: '1 clash',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String inH(int h) {
+    return 'In $h h';
+  }
+
+  @override
+  String inHM(int h, int m) {
+    return 'In $h h $m min';
+  }
+
+  @override
+  String get dayOff => 'Day off';
+
+  @override
+  String hoursFree(int h) {
+    return '${h}h free';
+  }
 }

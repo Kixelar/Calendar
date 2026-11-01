@@ -13,6 +13,7 @@ lib/
   l10n/app_pl.arb        Polish strings
   screens/onboarding.dart  01.1 Welcome, 01.2 Connect, 01.3 Choose (also used as the calendar picker later)
   screens/home.dart        02.1 year, 02.2 month, 02.3 week, 02.4 day views + bottom view tabs and + button
+  screens/views.dart       parts of those views (docs/design/views.html): Slot/slotsOf (clash flags), month strip, day rows, week grid, day timeline
   screens/repeat.dart      03.3 custom repeat; rules live in lib/rrule.dart (parse, format, Polish/English sentence; tested)
   screens/invite.dart      03.4 invite guests (suggestions = guests of loaded events, Store.people)
   screens/search.dart      02.5 search in the events on the phone (`Store.search`: substrings, Polish letters folded, two years back and ahead)

@@ -30,7 +30,6 @@
   "month": "Miesiąc",
   "week": "Tydzień",
   "day": "Dzień",
-  "yearHint": "Kropka to dzień",
   "weekN": "Tydzień {n}",
   "eventsN": "{n, plural, =1{1 wydarzenie} few{{n} wydarzenia} other{{n} wydarzeń}}",
   "moreN": "Jeszcze {n}",
@@ -290,5 +289,10 @@
   "inBackground": "W tle",
   "notYet": "Jeszcze nie",
   "check": "Sprawdź",
-  "testBackgroundHint": "Zamknij aplikację na 1–2 minuty, potem wróć tutaj."
+  "testBackgroundHint": "Zamknij aplikację na 1–2 minuty, potem wróć tutaj.",
+  "clashesN": "{n, plural, =1{1 kolizja} few{{n} kolizje} other{{n} kolizji}}",
+  "inH": "Za {h} h",
+  "inHM": "Za {h} h {m} min",
+  "dayOff": "Dzień wolny",
+  "hoursFree": "{h}h wolne"
 }
