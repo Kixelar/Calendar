@@ -216,7 +216,7 @@
   "@sharesWithYou": {"placeholders": {"name": {"type": "String"}}},
   "yourAccess": "Your access",
   "marker": "Marker",
-  "shapeNames": "Dot,Square,Half,Diamond,Ring,Dashed",
+  "shapeNames": "Dot,Square,Half,Diamond,Ring,Dashed,Triangle,Triangle down,Open square,Open diamond,Plus,Cross,Star,Hexagon,Heart,Target,Square with dot,Slice,Diagonal,Bar,Pillar,Two dots,Open triangle,Top half",
   "showInViews": "Show in views",
   "otherWay": "The other way",
   "shareYours": "Share your calendar back",

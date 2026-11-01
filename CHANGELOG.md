@@ -2,6 +2,7 @@
 
 ## 2026.11.01-dev
 ### Added
+- 18 more calendar marker shapes (24 in all, approved by the owner); new calendars cycle through 8 filled ones.
 - Calendars: own calendars (not the primary one) can be deleted, after a confirmation.
 - 04.2 Subscribe to address (.ics or webcal://): the app copies the file into a new read-only Google calendar and refreshes it every hour (also in background sync); events that leave the file are deleted. Subscriptions are listed under Calendars → Subscriptions, with Unsubscribe. The address is typed in a dialog, like a place or a guest.
 - Holidays: every country Google has a holiday calendar for (244, names in the phone's language); a country can be removed. Names sort the Polish way (Łotwa after Luksemburg, not after Zimbabwe).

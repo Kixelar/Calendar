@@ -30,3 +30,7 @@
 - **One Google account**: "Add account" only appears when signed out (owner, 2026-11-01).
 - **Holiday countries**: all ISO countries whose Google holiday calendar exists (checked against the public .ics URLs on
   2026-11-01); ids use the app language prefix (pl./en.) and Google's older names where the ISO code does not work.
+- **Marker shapes** (owner, 2026-11-01): 24 shapes (`Shape` in google.dart, drawn in ui.dart `_MarkerPainter`); saved by
+  index, so new shapes are only ever appended.
+- **Feeds with unknown kick-off times**: sports-calendar.com puts matches without a fixed time at 00:00–02:00 local
+  (23:00Z); the app shows what the file says, as Google Calendar would.

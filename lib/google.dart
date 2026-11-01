@@ -9,7 +9,12 @@ const serverClientId = String.fromEnvironment('GOOGLE_SERVER_CLIENT_ID');
 const _scopes = [gcal.CalendarApi.calendarScope];
 
 /// Calendars are told apart by marker shape, not colour (mockup design).
-enum Shape { dot, square, half, diamond, ring, dash }
+/// Calendar markers (owner approved the 18 added on 2026-11-01). Saved by index: only ever append.
+enum Shape {
+  dot, square, half, diamond, ring, dash,
+  triangle, triangleDown, openSquare, openDiamond, plus, cross, star, hexagon, heart,
+  target, squareDot, slice, diagonal, bar, pillar, twoDots, openTriangle, topHalf,
+}
 
 class Cal {
   final String id, name;
@@ -201,7 +206,7 @@ class GoogleCalendar {
       page = r.nextPageToken;
     } while (page != null);
     items.sort((a, b) => (b.primary == true ? 1 : 0) - (a.primary == true ? 1 : 0));
-    const own = [Shape.dot, Shape.square, Shape.half, Shape.diamond];
+    const own = [Shape.dot, Shape.square, Shape.half, Shape.diamond, Shape.triangle, Shape.star, Shape.hexagon, Shape.heart];
     var i = 0;
     return [
       for (final e in items.where((e) => !e.id!.contains('#contacts@')))

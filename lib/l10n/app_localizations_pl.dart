@@ -707,7 +707,8 @@ class AppLocalizationsPl extends AppLocalizations {
   String get marker => 'Oznaczenie';
 
   @override
-  String get shapeNames => 'Kropka,Kwadrat,Połówka,Romb,Pierścień,Przerywane';
+  String get shapeNames =>
+      'Kropka,Kwadrat,Połówka,Romb,Pierścień,Przerywane,Trójkąt,Trójkąt w dół,Pusty kwadrat,Pusty romb,Plus,Krzyżyk,Gwiazda,Sześciokąt,Serce,Tarcza,Kwadrat z kropką,Wycinek,Skos,Pasek,Słupek,Dwie kropki,Pusty trójkąt,Górna połowa';
 
   @override
   String get showInViews => 'Pokazuj w widokach';

@@ -701,7 +701,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get marker => 'Marker';
 
   @override
-  String get shapeNames => 'Dot,Square,Half,Diamond,Ring,Dashed';
+  String get shapeNames =>
+      'Dot,Square,Half,Diamond,Ring,Dashed,Triangle,Triangle down,Open square,Open diamond,Plus,Cross,Star,Hexagon,Heart,Target,Square with dot,Slice,Diagonal,Bar,Pillar,Two dots,Open triangle,Top half';
 
   @override
   String get showInViews => 'Show in views';

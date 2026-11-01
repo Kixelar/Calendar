@@ -537,6 +537,13 @@ void main() {
         }));
     testWidgets('calendars', (t) => shot(t, '04_1_calendars', page: (s) => Calendars(s, backLabel: 'Miesiąc')));
     testWidgets('add calendar', (t) => shot(t, '04_2_add_calendar', page: (s) => AddCalendar(s)));
+    testWidgets('markers', (t) => shot(t, 'markers', page: (s) => Scaffold(
+          body: Center(
+            child: Wrap(spacing: 36, runSpacing: 36, children: [
+              for (final m in Shape.values) Transform.scale(scale: 3, child: Marker(m)),
+            ]),
+          ),
+        )));
     testWidgets('subscribe dialog', (t) => shot(t, '04_2_subscribe', page: (s) => AddCalendar(s), tapText: 'Subskrybuj adres'));
     testWidgets('holidays', (t) => shot(t, '04_3_holidays', page: (s) => Holidays(s)));
     testWidgets('share', (t) => shot(t, '04_4_share', page: (s) => Share(s, s.cal('w')!)));

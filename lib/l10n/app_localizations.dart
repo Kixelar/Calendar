@@ -1223,7 +1223,7 @@ abstract class AppLocalizations {
   /// No description provided for @shapeNames.
   ///
   /// In en, this message translates to:
-  /// **'Dot,Square,Half,Diamond,Ring,Dashed'**
+  /// **'Dot,Square,Half,Diamond,Ring,Dashed,Triangle,Triangle down,Open square,Open diamond,Plus,Cross,Star,Hexagon,Heart,Target,Square with dot,Slice,Diagonal,Bar,Pillar,Two dots,Open triangle,Top half'**
   String get shapeNames;
 
   /// No description provided for @showInViews.

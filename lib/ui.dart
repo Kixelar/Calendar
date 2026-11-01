@@ -79,7 +79,85 @@ class _MarkerPainter extends CustomPainter {
         for (var i = 0; i < 8; i++) {
           canvas.drawArc(Rect.fromCircle(center: c, radius: 4.25), i * 0.7854, 0.45, false, line);
         }
+      case Shape.triangle:
+        canvas.drawPath(_poly([5, 0.6, 9.8, 9.2, 0.2, 9.2]), fill);
+      case Shape.triangleDown:
+        canvas.drawPath(_poly([5, 9.4, 9.8, 0.8, 0.2, 0.8]), fill);
+      case Shape.openSquare:
+        canvas.drawRRect(_box, line);
+      case Shape.openDiamond:
+        canvas.drawPath(_poly([5, 0.8, 9.2, 5, 5, 9.2, 0.8, 5]), line..strokeJoin = StrokeJoin.round);
+      case Shape.plus:
+        _cross(canvas, c, 0, fill);
+      case Shape.cross:
+        _cross(canvas, c, 0.7854, fill);
+      case Shape.star:
+        canvas.drawPath(_poly([5, 0.3, 6.3, 3.6, 9.8, 3.8, 7.1, 6, 8, 9.5, 5, 7.6, 2, 9.5, 2.9, 6, 0.2, 3.8, 3.7, 3.6]), fill);
+      case Shape.hexagon:
+        canvas.drawPath(_poly([5, 0.2, 9.2, 2.6, 9.2, 7.4, 5, 9.8, 0.8, 7.4, 0.8, 2.6]), fill);
+      case Shape.heart:
+        canvas.drawPath(
+            Path()
+              ..moveTo(5, 9.3)
+              ..cubicTo(2.8, 7.6, 0.3, 5.8, 0.3, 3.4)
+              ..cubicTo(0.3, 1.8, 1.5, 0.7, 2.9, 0.7)
+              ..cubicTo(3.9, 0.7, 4.6, 1.3, 5, 2)
+              ..cubicTo(5.4, 1.3, 6.1, 0.7, 7.1, 0.7)
+              ..cubicTo(8.5, 0.7, 9.7, 1.8, 9.7, 3.4)
+              ..cubicTo(9.7, 5.8, 7.2, 7.6, 5, 9.3)
+              ..close(),
+            fill);
+      case Shape.target:
+        canvas.drawCircle(c, 4.25, line);
+        canvas.drawCircle(c, 1.7, fill);
+      case Shape.squareDot:
+        canvas.drawRRect(_box, line);
+        canvas.drawCircle(c, 1.7, fill);
+      case Shape.slice:
+        canvas.drawPath(
+            Path()
+              ..moveTo(5, 5)
+              ..lineTo(5, 0)
+              ..arcTo(Rect.fromCircle(center: c, radius: 5), -1.5708, -4.7124, false)
+              ..close(),
+            fill);
+      case Shape.diagonal:
+        canvas.drawRRect(_box, line);
+        canvas.drawPath(_poly([1, 2.5, 1, 9, 7.5, 9]), fill);
+      case Shape.bar:
+        canvas.drawRRect(RRect.fromLTRBR(0, 3, 10, 7, const Radius.circular(2)), fill);
+      case Shape.pillar:
+        canvas.drawRRect(RRect.fromLTRBR(3, 0, 7, 10, const Radius.circular(2)), fill);
+      case Shape.twoDots:
+        canvas.drawCircle(const Offset(2.4, 5), 2.3, fill);
+        canvas.drawCircle(const Offset(7.6, 5), 2.3, fill);
+      case Shape.openTriangle:
+        canvas.drawPath(_poly([5, 1.6, 9, 8.6, 1, 8.6]), line..strokeJoin = StrokeJoin.round);
+      case Shape.topHalf:
+        canvas.drawRRect(_box, line);
+        canvas.drawRRect(RRect.fromLTRBAndCorners(1, 1, 9, 5, topLeft: const Radius.circular(1.3), topRight: const Radius.circular(1.3)), fill);
     }
+  }
+
+  static final _box = RRect.fromLTRBR(0.75, 0.75, 9.25, 9.25, const Radius.circular(1.5));
+
+  /// Closed polygon from x, y pairs in the 10×10 marker box.
+  static Path _poly(List<double> p) {
+    final path = Path()..moveTo(p[0], p[1]);
+    for (var i = 2; i < p.length; i += 2) {
+      path.lineTo(p[i], p[i + 1]);
+    }
+    return path..close();
+  }
+
+  static void _cross(Canvas canvas, Offset c, double angle, Paint fill) {
+    canvas.save();
+    canvas.translate(c.dx, c.dy);
+    canvas.rotate(angle);
+    final long = angle == 0 ? 5.0 : 5.6;
+    canvas.drawRRect(RRect.fromLTRBR(-1.5, -long, 1.5, long, const Radius.circular(0.6)), fill);
+    canvas.drawRRect(RRect.fromLTRBR(-long, -1.5, long, 1.5, const Radius.circular(0.6)), fill);
+    canvas.restore();
   }
 
   @override
