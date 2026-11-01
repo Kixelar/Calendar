@@ -43,7 +43,8 @@ Widget _twoLine(BuildContext c, String title, String caption, {Color? titleColor
     );
 
 /// Simple one-field dialog styled like the mockup's .dlg.
-Future<String?> askText(BuildContext context, String title, {String? hint, TextInputType? type}) => showDialog<String>(
+/// One-field dialog; [note] is a grey line under the field, [action] the confirm button (default "Done").
+Future<String?> askText(BuildContext context, String title, {String? hint, TextInputType? type, String? note, String? action}) => showDialog<String>(
       context: context,
       barrierColor: const Color(0xA3000000),
       builder: (c) {
@@ -73,9 +74,10 @@ Future<String?> askText(BuildContext context, String title, {String? hint, TextI
                   focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(6), borderSide: BorderSide(color: t.display)),
                 ),
               ),
+              if (note != null) Text(note, style: T.bodySm(t.secondary)),
               Row(spacing: 8, children: [
                 Expanded(child: Btn(l.cancel, kind: BtnKind.secondary, onTap: () => Navigator.pop(c))),
-                Expanded(child: Btn(l.done, onTap: () => Navigator.pop(c, ctl.text.trim()))),
+                Expanded(child: Btn(action ?? l.done, onTap: () => Navigator.pop(c, ctl.text.trim()))),
               ]),
             ]),
           ),
@@ -258,28 +260,16 @@ class Calendars extends StatelessWidget {
 }
 
 /// 04.2: ways to add a calendar that the Google Calendar API supports.
-class AddCalendar extends StatefulWidget {
+class AddCalendar extends StatelessWidget {
   const AddCalendar(this.store, {super.key});
   final Store store;
-  @override
-  State<AddCalendar> createState() => _AddCalendarState();
-}
-
-class _AddCalendarState extends State<AddCalendar> {
-  final _url = TextEditingController(), _focus = FocusNode();
-  Store get store => widget.store;
-
-  @override
-  void dispose() {
-    _url.dispose();
-    _focus.dispose();
-    super.dispose();
-  }
 
   /// 04.2 "Subscribe to address": copies the file into a new calendar, refreshed every hour.
   Future<void> _subscribe(BuildContext context) async {
-    final l = l10n(context), t = Tok.of(context), url = _url.text.trim();
-    if (url.isEmpty) return _focus.requestFocus();
+    final l = l10n(context), t = Tok.of(context);
+    final url = await askText(context, l.subscribeUrl,
+        hint: 'webcal://… .ics', type: TextInputType.url, note: l.subscribeNote, action: l.subscribe);
+    if (url == null || url.isEmpty || !context.mounted) return;
     _busy(context, Row(spacing: 16, children: [
       SizedBox.square(dimension: 16, child: CircularProgressIndicator(strokeWidth: 1.5, color: t.display)),
       Expanded(child: Text(l.subscribing, style: T.body(t.display))),
@@ -319,30 +309,9 @@ class _AddCalendarState extends State<AddCalendar> {
           }
         }),
         option(Icons.wb_sunny_outlined, l.holidaysAndDaysOff, l.holidaysHint, () => _go(context, Holidays(store))),
-        option(Icons.link, l.subscribeUrl, l.subscribeUrlHint, () => _focus.requestFocus()),
+        option(Icons.link, l.subscribeUrl, l.subscribeUrlHint, () => _subscribe(context)),
         option(Icons.file_download_outlined, l.importFile, l.importFileHint, () => importIcsFile(context, store)),
         option(Icons.person_outline, l.googleAccount, l.googleAccountHint, () => _go(context, Connect(store))),
-      ]),
-      Section(left: l.subscribeUrl, children: [
-        Padding(
-          padding: const EdgeInsets.only(top: 16),
-          child: TextField(
-            controller: _url,
-            focusNode: _focus,
-            keyboardType: TextInputType.url,
-            autocorrect: false,
-            style: T.body(t.display),
-            decoration: InputDecoration(
-              hintText: 'webcal://… .ics',
-              hintStyle: T.body(t.disabled),
-              enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: t.borderControl)),
-              focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: t.display)),
-              suffixIcon: IconBtn(Icons.arrow_forward, label: l.subscribe, onTap: () => _subscribe(context)),
-            ),
-            onSubmitted: (_) => _subscribe(context),
-          ),
-        ),
-        Padding(padding: const EdgeInsets.only(top: 8), child: Text(l.subscribeNote, style: T.bodySm(t.secondary))),
       ]),
     ]);
   }

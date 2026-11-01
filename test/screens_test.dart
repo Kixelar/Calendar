@@ -537,6 +537,7 @@ void main() {
         }));
     testWidgets('calendars', (t) => shot(t, '04_1_calendars', page: (s) => Calendars(s, backLabel: 'Miesiąc')));
     testWidgets('add calendar', (t) => shot(t, '04_2_add_calendar', page: (s) => AddCalendar(s)));
+    testWidgets('subscribe dialog', (t) => shot(t, '04_2_subscribe', page: (s) => AddCalendar(s), tapText: 'Subskrybuj adres'));
     testWidgets('holidays', (t) => shot(t, '04_3_holidays', page: (s) => Holidays(s)));
     testWidgets('share', (t) => shot(t, '04_4_share', page: (s) => Share(s, s.cal('w')!)));
     testWidgets('shared with you', (t) => shot(t, '04_5_shared_with_you', page: (s) => SharedWithYou(s, s.cal('ola.zielinska@gmail.com')!)));
