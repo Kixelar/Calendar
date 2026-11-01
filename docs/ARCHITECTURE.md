@@ -46,9 +46,12 @@ If Google says access is gone (`restore()` returns false) the app goes back to t
 The `google` preference marks a signed-in install (older installs: a saved calendar list).
 
 ## Birthdays
-Google stores contacts' birthdays as events with `eventType: birthday` in the primary calendar and shows them as a
-"Birthdays" calendar. The app adds a virtual calendar (`birthdaysId`, `#birthdays`) and files those events under it;
-it is never queried itself, and the primary calendar is fetched when only the birthdays are shown (`Store._toFetch`).
+Not shown (owner, 2026-11-01): `GoogleCalendar._ev` drops events with `eventType: birthday` (Google keeps contacts'
+birthdays in the primary calendar) and `calendars()` leaves out the old `#contacts@` calendar.
+
+## Holidays
+`holidayCodes` (calendars.dart) lists ISO countries with a Google holiday calendar; `holidayId(code, lang)` builds the
+calendar id, `holidayCode(id)` reads it back. Country names come from Android (`Device.kt` "countries").
 
 ## Writing events
 - `GoogleCalendar.save`: new events are inserted; existing ones are fetched (`events.get`), changed and sent back

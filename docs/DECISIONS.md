@@ -22,3 +22,7 @@
 - **.ics export** "Export all": shown calendars except holidays, one file, saved where the user picks (`file_picker`,
   also used for opening the file to import). Times keep their zone (TZID) so repeats follow daylight saving time.
 - **Subscribe to address** (webcal): postponed (owner).
+- **No birthdays** (owner, 2026-11-01): contacts' birthdays (Google's birthday events and the old contacts calendar) are not shown.
+- **One Google account**: "Add account" only appears when signed out (owner, 2026-11-01).
+- **Holiday countries**: all ISO countries whose Google holiday calendar exists (checked against the public .ics URLs on
+  2026-11-01); ids use the app language prefix (pl./en.) and Google's older names where the ISO code does not work.

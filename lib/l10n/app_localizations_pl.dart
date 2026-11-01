@@ -523,9 +523,6 @@ class AppLocalizationsPl extends AppLocalizations {
   String get shareEvent => 'Udostępnij wydarzenie';
 
   @override
-  String get moreOptions => 'Więcej opcji';
-
-  @override
   String invitationFrom(String name) {
     return 'Zaproszenie od: $name';
   }
@@ -744,9 +741,6 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get notificationsGlyph => 'Powiadomienia';
-
-  @override
-  String get accountsSync => 'Konta i synchronizacja';
 
   @override
   String get calendarsSharing => 'Kalendarze i udostępnianie';
@@ -981,9 +975,6 @@ class AppLocalizationsPl extends AppLocalizations {
   String get personal => 'Osobisty';
 
   @override
-  String get birthdays => 'Urodziny';
-
-  @override
   String get customReminder => 'Własne przypomnienie';
 
   @override
@@ -1140,4 +1131,10 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get fileSaved => 'Zapisano plik';
+
+  @override
+  String get notSignedIn => 'Nie zalogowano';
+
+  @override
+  String get removeCountry => 'Usuń kraj';
 }

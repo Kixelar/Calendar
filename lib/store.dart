@@ -319,7 +319,7 @@ class Store extends ChangeNotifier {
 
   Future<void> loadCalendars() async {
     final saved = _p.getStringList('calendars');
-    cals = await g.calendars(saved?.toSet(), shapes: _shapes, primaryName: name ?? _l.personal, birthdaysName: _l.birthdays);
+    cals = await g.calendars(saved?.toSet(), shapes: _shapes, primaryName: name ?? _l.personal);
     error = null; // Google answered: online again
     _write('calendars', [for (final c in cals) c.toJson()]);
     notifyListeners();
@@ -339,13 +339,8 @@ class Store extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Calendars to ask Google for: the shown ones, plus the primary when only its birthdays are shown.
-  List<Cal> get _toFetch {
-    final on = [for (final c in cals) if (c.on) c];
-    final primary = cals.where((c) => !c.shared && !c.holiday && !c.birthdays && c.role == 'owner').firstOrNull;
-    if (on.any((c) => c.id == birthdaysId) && primary != null && !primary.on) on.add(primary);
-    return on;
-  }
+  /// Calendars to ask Google for: the shown ones.
+  List<Cal> get _toFetch => [for (final c in cals) if (c.on) c];
 
   List<Ev> _visible(Iterable<Ev> evs) {
     final on = {for (final c in cals) if (c.on) c.id};
@@ -514,6 +509,15 @@ class Store extends ChangeNotifier {
     await loadCalendars();
     for (final c in cals.where((c) => !before.contains(c.id))) {
       await toggle(c, true);
+    }
+  }
+
+  /// Country names for ISO [codes] in [lang], from Android; empty in tests (the codes are shown instead).
+  Future<Map<String, String>> countryNames(List<String> codes, String lang) async {
+    try {
+      return await const MethodChannel('calendar/device').invokeMapMethod<String, String>('countries', {'codes': codes, 'lang': lang}) ?? const {};
+    } on MissingPluginException {
+      return const {};
     }
   }
 

@@ -136,7 +136,6 @@ class EventDetails extends StatelessWidget {
         child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
           BackBar(label: shortDay(context, e.start), actions: [
             if (canInvite) IconBtn(Icons.ios_share, label: l.shareEvent, onTap: () => _inviteAndSave(context, e, store)),
-            if (writable) IconBtn(Icons.more_horiz, label: l.moreOptions, onTap: () => _delete(context)),
           ]),
           Expanded(
             child: ListView(padding: const EdgeInsets.fromLTRB(24, 0, 24, 24), children: [

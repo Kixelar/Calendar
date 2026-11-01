@@ -7,6 +7,7 @@ import '../theme.dart';
 import '../ui.dart';
 import 'calendars.dart';
 import 'notifications.dart';
+import 'onboarding.dart';
 
 /// Mockup screens 05.1 settings, 05.2 appearance, 05.4 accounts, 05.5 data, 05.6 help, 05.7 article, 05.8 about.
 /// 05.3 notifications lives in notifications.dart.
@@ -91,41 +92,38 @@ class Settings extends StatelessWidget {
   Widget build(BuildContext context) => ListenableBuilder(
         listenable: store,
         builder: (context, _) {
-          final t = Tok.of(context), l = l10n(context), pl = loc(context).startsWith('pl');
-          final countries = [
-            for (final c in store.cals)
-              if (c.holiday) holidayCountries.where((h) => holidayId(h.$1) == c.id).map((h) => pl ? h.$3 : h.$2).firstOrNull ?? c.name,
-          ];
+          final t = Tok.of(context), l = l10n(context);
+          final countries = [for (final c in store.cals) if (c.holiday) c.name];
           return _page(context, backLabel, [
             _head(context, l.appTitle, l.settings),
-            if (store.signedIn)
-              Group(children: [
-                RowItem(onTap: () => _go(context, Accounts(store)), children: [
-                  Avatar(store.name ?? store.email ?? '', filled: true),
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      child: Column(crossAxisAlignment: CrossAxisAlignment.start, spacing: 2, children: [
-                        Text(store.name ?? store.email ?? '', maxLines: 1, overflow: TextOverflow.ellipsis, style: T.body(t.display)),
-                        if (store.name != null) Text(store.email ?? '', maxLines: 1, overflow: TextOverflow.ellipsis, style: T.caption(t.secondary)),
-                      ]),
-                    ),
+            // The account row leads to accounts and sync (05.4); there is no separate row for it (owner, 2026-11-01).
+            Group(children: [
+              RowItem(onTap: () => _go(context, Accounts(store)), children: [
+                store.signedIn ? Avatar(store.name ?? store.email ?? '', filled: true) : const Avatar('', icon: Icons.person_outline),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    child: Column(crossAxisAlignment: CrossAxisAlignment.start, spacing: 2, children: [
+                      Text(store.signedIn ? store.name ?? store.email ?? '' : l.notSignedIn,
+                          maxLines: 1, overflow: TextOverflow.ellipsis, style: T.body(t.display)),
+                      if (store.signedIn && store.name != null)
+                        Text(store.email ?? '', maxLines: 1, overflow: TextOverflow.ellipsis, style: T.caption(t.secondary)),
+                    ]),
                   ),
-                  Lbl(store.error == null ? l.upToDate : l.offline, color: store.error == null ? t.success : t.warning),
-                  Icon(Icons.chevron_right, size: 20, color: t.secondary),
-                ]),
+                ),
+                if (store.signedIn) Lbl(store.error == null ? l.upToDate : l.offline, color: store.error == null ? t.success : t.warning),
+                Icon(Icons.chevron_right, size: 20, color: t.secondary),
               ]),
+            ]),
             Group(children: [
               ValueRow(l.appearance, value: _themeName(l, store.theme), onTap: () => _go(context, Appearance(store))),
               ValueRow(l.notificationsGlyph, onTap: () => _go(context, Notifications(store))),
             ]),
-            Group(children: [
-              ValueRow(l.accountsSync, value: store.signedIn ? 'Google' : l.none, onTap: () => _go(context, Accounts(store))),
-              if (store.signedIn) ...[
+            if (store.signedIn)
+              Group(children: [
                 ValueRow(l.calendarsSharing, value: '${store.cals.length}', onTap: () => _go(context, Calendars(store, backLabel: l.settings))),
                 ValueRow(l.holidays, value: countries.isEmpty ? l.none : countries.join(', '), onTap: () => _go(context, Holidays(store))),
-              ],
-            ]),
+              ]),
             Group(children: [
               ValueRow(l.dataPrivacy, onTap: () => _go(context, DataPrivacy(store))),
               ValueRow(l.help, onTap: () => _go(context, Help(store))),
@@ -251,10 +249,12 @@ class _AccountsState extends State<Accounts> {
                   ),
                   Lbl(store.error == null ? l.active : l.offline, color: store.error == null ? t.success : t.warning),
                 ]),
-              RowItem(onTap: () => _go(context, AddCalendar(store)), children: [
-                const Avatar('', icon: Icons.add),
-                Expanded(child: Text(l.addAccount, style: T.body(t.display))),
-              ]),
+              // One Google account at a time: adding is offered only when signed out (owner, 2026-11-01).
+              if (!store.signedIn)
+                RowItem(onTap: () => _go(context, Connect(store)), children: [
+                  const Avatar('', icon: Icons.add),
+                  Expanded(child: Text(l.addAccount, style: T.body(t.display))),
+                ]),
             ]),
             if (store.signedIn)
               Section(left: l.syncLabel, children: [

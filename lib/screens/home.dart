@@ -130,6 +130,15 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
     openEvent(context, e, store);
   }
 
+  DateTime? _lastTap;
+
+  /// A view tab; tapped twice quickly it jumps to today's day, week, month or year.
+  void _tab(int i) {
+    final now = DateTime.now(), quick = i == tab && _lastTap != null && now.difference(_lastTap!) < const Duration(milliseconds: 400);
+    _lastTap = now;
+    go(quick ? now : focus, i);
+  }
+
   void go(DateTime d, int t) => setState(() {
         focus = dayOf(d);
         tab = t;
@@ -209,7 +218,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
               child: Row(children: [
                 for (final (i, s) in [l.year, l.month, l.week, l.day].indexed)
                   InkWell(
-                    onTap: () => go(focus, i),
+                    onTap: () => _tab(i),
                     child: Container(
                       height: 48,
                       padding: const EdgeInsets.symmetric(horizontal: 10),

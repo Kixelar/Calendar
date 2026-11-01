@@ -31,6 +31,11 @@ object Device {
                 }
                 // "Wi-Fi only": in-app automatic sync waits while the phone is on a metered network.
                 "metered" -> result.success(context.getSystemService(android.net.ConnectivityManager::class.java).isActiveNetworkMetered)
+                // 04.3 holiday countries: names of ISO codes in the app's language.
+                "countries" -> {
+                    val lang = java.util.Locale(call.argument<String>("lang")!!)
+                    result.success(call.argument<List<String>>("codes")!!.associateWith { java.util.Locale("", it).getDisplayCountry(lang) })
+                }
                 "testSync" -> {
                     SyncJob.testSoon(context)
                     result.success(null)

@@ -518,9 +518,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get shareEvent => 'Share event';
 
   @override
-  String get moreOptions => 'More options';
-
-  @override
   String invitationFrom(String name) {
     return 'Invitation from $name';
   }
@@ -738,9 +735,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get notificationsGlyph => 'Notifications';
-
-  @override
-  String get accountsSync => 'Accounts and sync';
 
   @override
   String get calendarsSharing => 'Calendars and sharing';
@@ -973,9 +967,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get personal => 'Personal';
 
   @override
-  String get birthdays => 'Birthdays';
-
-  @override
   String get customReminder => 'Custom reminder';
 
   @override
@@ -1128,4 +1119,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get fileSaved => 'File saved';
+
+  @override
+  String get notSignedIn => 'Not signed in';
+
+  @override
+  String get removeCountry => 'Remove country';
 }

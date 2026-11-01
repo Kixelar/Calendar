@@ -197,9 +197,8 @@ class Calendars extends StatelessWidget {
         listenable: store,
         builder: (context, _) {
           final t = Tok.of(context), l = l10n(context);
-          final mine = [for (final c in store.cals) if (!c.shared && !c.holiday && !c.birthdays) c];
+          final mine = [for (final c in store.cals) if (!c.shared && !c.holiday) c];
           final shared = [for (final c in store.cals) if (c.shared) c];
-          final birthdays = [for (final c in store.cals) if (c.birthdays) c];
           final subs = [for (final c in store.cals) if (c.holiday) c];
           Widget toggle(Cal c) => Toggle(value: c.on, label: c.name, onChanged: (v) => store.toggle(c, v));
           return _page(context, top: BackBar(label: backLabel), body: [
@@ -223,15 +222,6 @@ class Calendars extends StatelessWidget {
                   RowItem(onTap: () => _go(context, SharedWithYou(store, c)), children: [
                     Marker(c.shape),
                     Expanded(child: _twoLine(context, c.name, roleText(l, c.role))),
-                    toggle(c),
-                  ]),
-              ]),
-            if (birthdays.isNotEmpty)
-              Section(left: l.birthdays, children: [
-                for (final c in birthdays)
-                  RowItem(onTap: () => _go(context, SharedWithYou(store, c)), children: [
-                    Marker(c.shape),
-                    Expanded(child: Text(c.name, maxLines: 1, overflow: TextOverflow.ellipsis)),
                     toggle(c),
                   ]),
               ]),
@@ -285,26 +275,31 @@ class AddCalendar extends StatelessWidget {
   }
 }
 
-/// Google's public holiday calendars this screen offers; names follow the app language.
-const holidayCountries = <(String id, String en, String pl)>[
-  ('pl.polish', 'Poland', 'Polska'),
-  ('en.uk', 'United Kingdom', 'Wielka Brytania'),
-  ('en.usa', 'United States', 'Stany Zjednoczone'),
-  ('de.german', 'Germany', 'Niemcy'),
-  ('cs.czech', 'Czechia', 'Czechy'),
-  ('sk.slovak', 'Slovakia', 'Słowacja'),
-  ('uk.ukrainian', 'Ukraine', 'Ukraina'),
-  ('lt.lithuanian', 'Lithuania', 'Litwa'),
-  ('fr.french', 'France', 'Francja'),
-  ('es.spain', 'Spain', 'Hiszpania'),
-  ('it.italian', 'Italy', 'Włochy'),
-  ('nl.dutch', 'Netherlands', 'Holandia'),
-  ('en.irish', 'Ireland', 'Irlandia'),
-  ('no.norwegian', 'Norway', 'Norwegia'),
-  ('sv.swedish', 'Sweden', 'Szwecja'),
-];
+/// Countries with a Google holiday calendar: ISO codes, each checked against Google on 2026-11-01.
+/// Country names come from Android in the app's language (Store.countryNames).
+final holidayCodes = '''
+    ad ae af ag ai al am ao ar as at au aw ax az ba bb bd be bf bg bh bi bj bl bm bn bo bq br bs bt bw by bz ca cc
+    cd cf cg ch ci ck cl cm cn co cr cu cv cw cx cy cz de dj dk dm do dz ec ee eg er es et fi fj fk fm fo fr ga gb
+    gd ge gf gg gh gi gl gm gn gp gq gr gt gu gw gy hk hn hr ht hu id ie il im in io iq ir is it je jm jo jp ke kg
+    kh ki km kn kp kr kw ky kz la lb lc li lk lr ls lt lu lv ly ma mc md me mf mg mh mk ml mm mn mo mp mq mr ms mt
+    mu mv mw mx my mz na nc ne nf ng ni nl no np nr nu nz om pa pe pf pg ph pk pl pm pn pr ps pt pw py qa re ro rs
+    ru rw sa sb sc sd se sg sh si sj sk sl sm sn so sr ss st sv sx sy sz tc td tg th tj tk tl tm tn to tr tt tv tw
+    tz ua ug um us uy uz va vc ve vg vi vn vu wf ws xk ye yt za zm zw'''
+    .split(RegExp(r'\s+'))
+    .where((c) => c.isNotEmpty)
+    .toList();
 
-String holidayId(String code) => '$code#holiday@group.v.calendar.google.com';
+// Most calendars are named after the ISO code; these keep Google's older names.
+const _holidayNames = {'at': 'austrian', 'au': 'australian', 'bg': 'bulgarian', 'br': 'brazilian', 'ca': 'canadian', 'cn': 'china', 'cz': 'czech', 'de': 'german', 'dk': 'danish', 'es': 'spain', 'fi': 'finnish', 'fr': 'french', 'gb': 'uk', 'gr': 'greek', 'hk': 'hong_kong', 'hr': 'croatian', 'hu': 'hungarian', 'id': 'indonesian', 'ie': 'irish', 'il': 'jewish', 'in': 'indian', 'it': 'italian', 'jp': 'japanese', 'kr': 'south_korea', 'lt': 'lithuanian', 'lv': 'latvian', 'mx': 'mexican', 'my': 'malaysia', 'nl': 'dutch', 'no': 'norwegian', 'nz': 'new_zealand', 'ph': 'philippines', 'pl': 'polish', 'pt': 'portuguese', 'ro': 'romanian', 'ru': 'russian', 'sa': 'saudiarabian', 'se': 'swedish', 'sg': 'singapore', 'si': 'slovenian', 'sk': 'slovak', 'tr': 'turkish', 'tw': 'taiwan', 'ua': 'ukrainian', 'us': 'usa', 'vn': 'vietnamese', 'za': 'sa'};
+
+/// Holiday calendar of [code] with holiday names in [lang] (pl or en).
+String holidayId(String code, String lang) => '$lang.${_holidayNames[code] ?? code}#holiday@group.v.calendar.google.com';
+
+/// Country code of a holiday calendar id in any language, e.g. "pl.polish#holiday@..." → "pl".
+String? holidayCode(String calId) {
+  final name = calId.split('#').first.split('.').last;
+  return _holidayNames.entries.where((e) => e.value == name).firstOrNull?.key ?? (holidayCodes.contains(name) ? name : null);
+}
 
 /// 04.3: holiday calendars by country and the next holidays.
 class Holidays extends StatelessWidget {
@@ -315,10 +310,9 @@ class Holidays extends StatelessWidget {
   Widget build(BuildContext context) => ListenableBuilder(
         listenable: store,
         builder: (context, _) {
-          final t = Tok.of(context), l = l10n(context), pl = loc(context).startsWith('pl');
+          final t = Tok.of(context), l = l10n(context), lang = loc(context).startsWith('pl') ? 'pl' : 'en';
           final now = DateTime.now(), today = dayOf(now);
           final mine = [for (final c in store.cals) if (c.holiday) c];
-          String name(Cal c) => holidayCountries.where((h) => holidayId(h.$1) == c.id).map((h) => pl ? h.$3 : h.$2).firstOrNull ?? c.name;
           int count(Cal c) {
             final seen = <String>{};
             for (var d = DateTime(now.year); d.year == now.year; d = DateTime(d.year, d.month, d.day + 1)) {
@@ -341,15 +335,15 @@ class Holidays extends StatelessWidget {
               left: l.country,
               trailing: InkWell(
                 onTap: () async {
-                  final have = {for (final c in mine) c.id};
-                  final p = await pick<String>(context, Pick(
-                    title: l.country,
-                    selected: '',
-                    options: [for (final h in holidayCountries) if (!have.contains(holidayId(h.$1))) (h.$1, pl ? h.$3 : h.$2)],
-                  ));
+                  final have = {for (final c in mine) holidayCode(c.id)};
+                  final names = await store.countryNames(holidayCodes, lang);
+                  if (!context.mounted) return;
+                  final options = [for (final c in holidayCodes) if (!have.contains(c)) (c, names[c] ?? c.toUpperCase())]
+                    ..sort((a, b) => a.$2.toLowerCase().compareTo(b.$2.toLowerCase()));
+                  final p = await pick<String>(context, Pick(title: l.country, selected: '', options: options));
                   if (p == null || !context.mounted) return;
                   try {
-                    await store.addCalendar(holidayId(p.$1));
+                    await store.addCalendar(holidayId(p.$1, lang));
                   } catch (e) {
                     if (context.mounted) _fail(context, e);
                   }
@@ -360,8 +354,15 @@ class Holidays extends StatelessWidget {
                 for (final c in mine)
                   RowItem(onTap: () => store.toggle(c, !c.on), children: [
                     Marker(c.shape),
-                    Expanded(child: _twoLine(context, name(c), l.holidaysInYear(count(c)))),
+                    Expanded(child: _twoLine(context, c.name, l.holidaysInYear(count(c)))),
                     if (c.on) Icon(Icons.check, size: 20, color: t.display),
+                    IconBtn(Icons.delete_outline, label: l.removeCountry, onTap: () async {
+                      try {
+                        await store.removeCalendar(c);
+                      } catch (e) {
+                        if (context.mounted) _fail(context, e);
+                      }
+                    }),
                   ]),
               ],
             ),
@@ -583,7 +584,7 @@ class SharedWithYou extends StatelessWidget {
             if (who != null)
               Section(left: l.otherWay, children: [
                 ValueRow(l.shareYours, value: l.choose, onTap: () async {
-                  final own = [for (final x in store.cals) if (x.role == 'owner' && !x.holiday && !x.birthdays) x];
+                  final own = [for (final x in store.cals) if (x.role == 'owner' && !x.holiday) x];
                   final p = await pick<String>(context, Pick(
                     title: l.shareYours,
                     selected: '',

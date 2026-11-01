@@ -133,7 +133,6 @@
   "inviteNote": "Zaproszenie wyślemy e-mailem z Twojego konta Google.",
   "inviteMore": "Zaproś więcej osób",
   "shareEvent": "Udostępnij wydarzenie",
-  "moreOptions": "Więcej opcji",
   "invitationFrom": "Zaproszenie od: {name}",
   "organizerLabel": "Organizator",
   "conflict": "Kolizja",
@@ -200,7 +199,6 @@
   "offline": "Offline",
   "appearance": "Wygląd",
   "notificationsGlyph": "Powiadomienia",
-  "accountsSync": "Konta i synchronizacja",
   "calendarsSharing": "Kalendarze i udostępnianie",
   "dataPrivacy": "Dane i prywatność",
   "help": "Pomoc",
@@ -267,7 +265,6 @@
   "details": "Szczegóły",
   "off2": "Wyłączone",
   "personal": "Osobisty",
-  "birthdays": "Urodziny",
   "customReminder": "Własne przypomnienie",
   "unitMinutes": "Minuty",
   "unitHours": "Godziny",
@@ -303,5 +300,7 @@
   "failedN": "{n} się nie udało",
   "icsEmpty": "W pliku nie ma wydarzeń",
   "exporting": "Eksportowanie…",
-  "fileSaved": "Zapisano plik"
+  "fileSaved": "Zapisano plik",
+  "notSignedIn": "Nie zalogowano",
+  "removeCountry": "Usuń kraj"
 }

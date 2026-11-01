@@ -155,7 +155,6 @@
   "inviteNote": "We will e-mail the invitation from your Google account.",
   "inviteMore": "Invite more people",
   "shareEvent": "Share event",
-  "moreOptions": "More options",
   "invitationFrom": "Invitation from {name}",
   "@invitationFrom": {"placeholders": {"name": {"type": "String"}}},
   "organizerLabel": "Organizer",
@@ -229,7 +228,6 @@
   "offline": "Offline",
   "appearance": "Appearance",
   "notificationsGlyph": "Notifications",
-  "accountsSync": "Accounts and sync",
   "calendarsSharing": "Calendars and sharing",
   "dataPrivacy": "Data and privacy",
   "help": "Help",
@@ -305,7 +303,6 @@
   "details": "Details",
   "off2": "Off",
   "personal": "Personal",
-  "birthdays": "Birthdays",
   "customReminder": "Custom reminder",
   "unitMinutes": "Minutes",
   "unitHours": "Hours",
@@ -350,5 +347,7 @@
   "@failedN": {"placeholders": {"n": {"type": "int"}}},
   "icsEmpty": "No events in this file",
   "exporting": "Exporting…",
-  "fileSaved": "File saved"
+  "fileSaved": "File saved",
+  "notSignedIn": "Not signed in",
+  "removeCountry": "Remove country"
 }

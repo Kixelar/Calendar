@@ -896,12 +896,6 @@ abstract class AppLocalizations {
   /// **'Share event'**
   String get shareEvent;
 
-  /// No description provided for @moreOptions.
-  ///
-  /// In en, this message translates to:
-  /// **'More options'**
-  String get moreOptions;
-
   /// No description provided for @invitationFrom.
   ///
   /// In en, this message translates to:
@@ -1297,12 +1291,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Notifications'**
   String get notificationsGlyph;
-
-  /// No description provided for @accountsSync.
-  ///
-  /// In en, this message translates to:
-  /// **'Accounts and sync'**
-  String get accountsSync;
 
   /// No description provided for @calendarsSharing.
   ///
@@ -1700,12 +1688,6 @@ abstract class AppLocalizations {
   /// **'Personal'**
   String get personal;
 
-  /// No description provided for @birthdays.
-  ///
-  /// In en, this message translates to:
-  /// **'Birthdays'**
-  String get birthdays;
-
   /// No description provided for @customReminder.
   ///
   /// In en, this message translates to:
@@ -1921,6 +1903,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'File saved'**
   String get fileSaved;
+
+  /// No description provided for @notSignedIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Not signed in'**
+  String get notSignedIn;
+
+  /// No description provided for @removeCountry.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove country'**
+  String get removeCountry;
 }
 
 class _AppLocalizationsDelegate

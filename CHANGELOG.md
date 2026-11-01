@@ -2,12 +2,18 @@
 
 ## 2026.11.01-dev
 ### Added
+- Holidays: every country Google has a holiday calendar for (244, names in the phone's language); a country can be removed.
+- Tapping a view tab (year, month, week, day) twice quickly jumps back to today.
 - Import an .ics file into a Google calendar (Add calendar → Import file, Settings → Data and privacy); importing the same file again updates its events.
 - Export all shown calendars to one .ics file (Settings → Data and privacy → Export all).
 - Settings → Accounts → "Wi-Fi only": automatic and background sync wait for Wi-Fi (pull to refresh always syncs).
 ### Fixed
 - Widgets follow the app's theme setting (Appearance → Dark / Light); "System" keeps following the phone's dark mode.
 ### Changed
+- Contacts' birthdays are no longer shown: the Birthdays calendar and birthday events are gone (owner).
+- Settings: the account row at the top opens accounts and sync (the separate "Accounts and sync" row is gone); without an account it says "Not signed in".
+- Accounts: "Add account" only when no Google account is signed in.
+- Event details: the "more" button (it only deleted) is gone; Delete stays at the bottom.
 - Month, week and day views redesigned after the new mockup (docs/design/views.html): event strips under month days,
   hour grid in the week, timeline with cards, free time and clashes in the day; tap a day to select it, again to open it.
 - Year view: "A dot is a day" removed; "Year" moved to its line next to the big number.

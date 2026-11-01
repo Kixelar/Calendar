@@ -22,7 +22,8 @@
 - Owner asked what happens when an invitation notification is dismissed: nothing is sent; the invitation stays
   unanswered in Google, the app does not notify about it again (`seenInvites`), and it can still be answered from the
   event (03.5 screen).
-- .ics import and export (04.2, 05.5): built 2026-11-01, waiting for the owner's check on the phone.
+- .ics import and export (04.2, 05.5), Wi-Fi only: built 2026-11-01, waiting for the owner's check on the phone.
+- Owner's list of 2026-11-01 (no birthdays, account row, one account, all holiday countries, no "more" button, double tap = today): built, waiting for the owner's check.
 
 ## Resolved
 - Crash at start (2026-10-31) was caused by WorkManager (it initialises before app code); removed in 30436952,
@@ -49,7 +50,7 @@
 - Gradle/Java does not run in Claude's sandbox: build APKs in the owner's terminal (docs/WORKFLOW.md), and run
   `flutter pub get` there after adding packages (different pub cache).
 - Build numbers must keep growing: 30000000 + minutes since 2026-01-01 UTC, and never below the last one sent
-  (30438641 on 2026-11-01).
+  (30438676 on 2026-11-01).
 - `google_sign_in` 7.x gives no refresh token: always get the token through `GoogleCalendar._authorize` before an API call.
 - Builds are signed with the app's own key in `<keystore folder>/` (docs/WORKFLOW.md); its SHA-1 is in the Android OAuth client.
 - ARB files: append keys as text; re-dumping them with a JSON tool reformats the whole file.

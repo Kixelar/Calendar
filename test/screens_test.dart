@@ -30,6 +30,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:intl/intl.dart' show DateFormat;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest.dart' as tzdata;
 
@@ -72,15 +73,13 @@ class _FakeGoogle extends GoogleCalendar {
   Future<bool> restore({bool silentOnly = false}) async => true;
   @override
   Future<List<Cal>> calendars(Set<String>? enabled,
-          {Map<String, Shape> shapes = const {}, String? primaryName, String birthdaysName = 'Birthdays'}) async =>
+          {Map<String, Shape> shapes = const {}, String? primaryName}) async =>
       [
         Cal('p', 'Osobisty', shared: false, holiday: false, shape: Shape.dot, on: true),
         Cal('w', 'Praca', shared: false, holiday: false, shape: Shape.square, on: true),
         Cal('f', 'Rodzina', shared: false, holiday: false, shape: Shape.half, on: true),
         Cal('ola.zielinska@gmail.com', 'Ola Zielińska', shared: true, holiday: false, shape: Shape.dash, on: true, writable: false, role: 'reader'),
         Cal('design', 'Zespół Design', shared: true, holiday: false, shape: Shape.dash, on: false, role: 'writer'),
-        Cal(birthdaysId, 'Urodziny', shared: false, holiday: false, birthdays: true,
-            shape: Shape.diamond, on: true, writable: false, role: 'reader'),
         Cal('h', 'Święta w Polsce', shared: false, holiday: true, shape: Shape.ring, on: true),
       ];
   @override
@@ -344,6 +343,36 @@ void main() {
     await t.pump();
     expect(find.byType(Transform), findsNothing);
     expect(t.hasRunningAnimations, isFalse);
+  });
+
+  testWidgets('tapping a view tab twice quickly jumps back to today', (t) async {
+    await _fonts();
+    await initializeDateFormatting();
+    SharedPreferences.setMockInitialValues({'onboarded': true, 'google': true});
+    t.view.physicalSize = const Size(390, 844);
+    t.view.devicePixelRatio = 1;
+    t.platformDispatcher.localesTestValue = const [Locale('pl')];
+    addTearDown(t.view.reset);
+    addTearDown(t.platformDispatcher.clearAllTestValues);
+    final store = Store(_FakeGoogle(), Directory.systemTemp.createTempSync());
+    await t.runAsync(store.start);
+    await t.pumpWidget(App(store));
+    await t.pump();
+    await t.tap(find.text('DZIEŃ'));
+    await t.pump();
+    final weekday = DateFormat.EEEE('pl').format(DateTime.now()).toUpperCase();
+    expect(find.text(weekday), findsOneWidget);
+    for (var i = 0; i < 2; i++) {
+      await t.tap(find.byTooltip('Następny'));
+      await t.pump(const Duration(seconds: 1));
+    }
+    expect(find.text(weekday), findsNothing);
+    await t.tap(find.text('DZIEŃ'));
+    await t.pump(const Duration(milliseconds: 100));
+    await t.tap(find.text('DZIEŃ'));
+    await t.pump();
+    expect(find.text(weekday), findsOneWidget);
+    await t.pumpWidget(const SizedBox()); // stops the minute ticker
   });
 
   group('screens', () {
