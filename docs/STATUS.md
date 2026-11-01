@@ -23,10 +23,6 @@
 ## Open (owner's test, 2026-10-31, build 30437026)
 - **Widget theme switching does not work**: widgets do not change between light and dark with the system theme
   (layout/ vs layout-night/ approach in Widgets.kt). Not investigated yet.
-- **Background sync**: never ran because scheduling threw `SecurityException: ACCESS_NETWORK_STATE required for jobs
-  with a connectivity constraint` (WorkManager used to add that permission). Added in 30437159; verified over adb:
-  job 31 is scheduled ("waiting") and a forced run started the Flutter engine and ended with jobFinished.
-  Owner still to confirm "In the background" shows a time and OK.
 - Owner asked what happens when an invitation notification is dismissed: nothing is sent; the invitation stays
   unanswered in Google, the app does not notify about it again (`seenInvites`), and it can still be answered from the
   event (03.5 screen).
@@ -35,6 +31,9 @@
 ## Resolved
 - Crash at start (2026-10-31) was caused by WorkManager (it initialises before app code); removed in 30436952,
   background sync moved to JobScheduler. Confirmed working on the owner's phone.
+- Background sync never ran: scheduling threw `SecurityException: ACCESS_NETWORK_STATE required for jobs with a
+  connectivity constraint` (WorkManager used to add that permission). Added in 30437159; confirmed on the owner's phone
+  (widgets update with the app closed, 2026-11-01).
 
 ## Waiting for the owner (decisions or material)
 - **Glyph Interface** (05.3 section, 07.3 countdown): yes, later (owner, 2026-10-31).

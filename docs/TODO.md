@@ -48,5 +48,5 @@ Screen numbers refer to docs/design/mockup.html.
 - [x] Release signing key
 - [x] App icon
 - [ ] Widgets do not switch light/dark with the system theme (owner, 2026-10-31)
-- [ ] Owner to test background sync (Settings → Accounts → "In the background")
+- [x] Background sync confirmed on the phone (2026-11-01)
 - Google Tasks: dropped (owner, 2026-10-31)
