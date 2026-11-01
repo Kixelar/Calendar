@@ -20,8 +20,7 @@ Screen numbers refer to docs/design/mockup.html; the month, week and day views f
 - [x] 05.4 background sync when the app is closed (JobScheduler, SyncJob.kt), "Wi-Fi only"
 - [x] 04.2 / 05.5 import an .ics file into a Google calendar (2026-11-01)
 - [x] 05.5 export the shown calendars to an .ics file (2026-11-01)
-- [ ] 04.2 "Subscribe to address" (.ics / webcal): later; the Calendar API cannot add URL subscriptions, so it would be a
-      periodic download into a chosen calendar
+- [x] 04.2 "Subscribe to address" (.ics / webcal): own calendar refreshed hourly by the app (2026-11-01)
 - [ ] 04.5 "Ask for edit rights": the API cannot ask; only an e-mail to the owner from the user's mail app (owner thinks it over)
 - [ ] 05.5 app lock (later), daily backup (owner decision)
 - [ ] 05.8 update check (later)

@@ -131,7 +131,10 @@ class Store extends ChangeNotifier {
   }
 
   /// Fetches the current year now and waits for it (background sync job).
-  Future<void> syncNow() => _load(DateTime.now().year);
+  Future<void> syncNow() async {
+    await refreshSubscriptions();
+    await _load(DateTime.now().year);
+  }
 
   /// True on mobile data (or another metered network), where "Wi-Fi only" holds automatic sync back.
   Future<bool> metered() async {
@@ -426,7 +429,10 @@ class Store extends ChangeNotifier {
         ];
 
   /// Calendars a new event can go to: shown and writable, holidays excluded.
-  List<Cal> get writable => [for (final c in cals) if (c.on && c.writable && !c.holiday) c];
+  List<Cal> get writable => [
+        for (final c in cals)
+          if (c.on && c.writable && !c.holiday && !subscriptions.containsKey(c.id)) c, // subscriptions are read-only copies
+      ];
 
   /// Device time zone as an IANA id (MainActivity.kt); UTC where the channel is missing (tests).
   Future<String> timeZone() async {
@@ -512,6 +518,81 @@ class Store extends ChangeNotifier {
     }
   }
 
+  /// Address subscriptions (04.2): calendar id → .ics address. The Calendar API cannot subscribe to an address, so the
+  /// app creates its own Google calendar and copies the file into it every hour (refreshSubscriptions).
+  Map<String, String> get subscriptions => {...?(jsonDecode(_p.getString('subs') ?? '{}') as Map?)?.cast<String, String>()};
+
+  /// Subscribes to an .ics / webcal:// address and returns the new calendar's name.
+  Future<String> subscribe(String address) async {
+    final url = address.trim().replaceFirst(RegExp('^webcal://', caseSensitive: false), 'https://');
+    final text = await _download(url);
+    if (!tz.timeZoneDatabase.isInitialized) tzdata.initializeTimeZones();
+    if (parseIcs(text, local: 'UTC').isEmpty && !text.contains('BEGIN:VCALENDAR')) throw FormatException(_l.notIcs);
+    final name = icsName(text) ?? Uri.parse(url).host;
+    final id = await g.createCalendar(name, await timeZone());
+    await _p.setString('subs', jsonEncode({...subscriptions, id: url}));
+    await _copyFeed(id, text);
+    await loadCalendars();
+    if (cal(id) case final c? when !c.on) await toggle(c, true);
+    _days.clear();
+    notifyListeners();
+    return name;
+  }
+
+  /// Deletes a subscription's calendar.
+  Future<void> unsubscribe(Cal c) async {
+    await g.deleteCalendar(c.id);
+    await _p.setString('subs', jsonEncode({...subscriptions}..remove(c.id)));
+    await _p.remove('subHash.${c.id}');
+    await loadCalendars();
+    _days.clear();
+    notifyListeners();
+  }
+
+  /// Copies every subscription's file again when the last check is an hour old (or [force]); errors wait for the next try.
+  Future<void> refreshSubscriptions({bool force = false}) async {
+    final last = _p.getInt('subAt');
+    if (!signedIn || subscriptions.isEmpty) return;
+    if (!force && last != null && DateTime.now().millisecondsSinceEpoch - last < 55 * 60000) return;
+    await _p.setInt('subAt', DateTime.now().millisecondsSinceEpoch);
+    for (final MapEntry(key: id, value: url) in subscriptions.entries) {
+      try {
+        await _copyFeed(id, await _download(url));
+      } catch (_) {
+        // offline or the address is gone for now
+      }
+    }
+  }
+
+  /// Puts the file's events into calendar [id] and deletes events that left the file. Skipped when the file is unchanged.
+  Future<void> _copyFeed(String id, String text) async {
+    final hash = '${text.length}:${fnv(text)}';
+    if (_p.getString('subHash.$id') == hash) return;
+    if (!tz.timeZoneDatabase.isInitialized) tzdata.initializeTimeZones();
+    final evs = parseIcs(text, local: await timeZone());
+    // shortcut: a changed file is sent again event by event; for big feeds (thousands of events) compare per event first.
+    for (final e in evs) {
+      await g.importEvent(id, e);
+    }
+    final keep = {for (final e in evs) e.iCalUID};
+    for (final e in await g.allEvents(id)) {
+      if (e.recurringEventId == null && e.status != 'cancelled' && !keep.contains(e.iCalUID)) await g.deleteEvent(id, e.id!);
+    }
+    await _p.setString('subHash.$id', hash);
+    _days.clear();
+  }
+
+  Future<String> _download(String url) async {
+    final client = HttpClient()..connectionTimeout = const Duration(seconds: 20);
+    try {
+      final res = await (await client.getUrl(Uri.parse(url))).close().timeout(const Duration(seconds: 60));
+      if (res.statusCode != 200) throw HttpException('HTTP ${res.statusCode}', uri: Uri.parse(url));
+      return await res.transform(const Utf8Decoder(allowMalformed: true)).join();
+    } finally {
+      client.close();
+    }
+  }
+
   /// Country names for ISO [codes] in [lang], from Android; empty in tests (the codes are shown instead).
   Future<Map<String, String>> countryNames(List<String> codes, String lang) async {
     try {
@@ -565,11 +646,21 @@ class Store extends ChangeNotifier {
     _days.clear();
     try {
       if (signedIn) await loadCalendars();
+      await refreshSubscriptions();
     } catch (e) {
       error = '$e'; // offline pull-to-refresh: the cache stays on screen
     }
     notifyListeners();
   }
+}
+
+/// FNV-1a hash of [s] (stable between app runs, unlike String.hashCode), to tell whether a subscribed file changed.
+int fnv(String s) {
+  var h = 0x811c9dc5;
+  for (final b in utf8.encode(s)) {
+    h = ((h ^ b) * 0x01000193) & 0xffffffff;
+  }
+  return h;
 }
 
 /// Lower case without Polish diacritics, so "zielinska" finds "Zielińska".

@@ -349,5 +349,16 @@
   "exporting": "Exporting…",
   "fileSaved": "File saved",
   "notSignedIn": "Not signed in",
-  "removeCountry": "Remove country"
+  "removeCountry": "Remove country",
+  "subscribeUrl": "Subscribe to address",
+  "subscribeUrlHint": ".ics link or webcal://",
+  "subscribe": "Subscribe",
+  "subscribeNote": "Refreshed every hour. The calendar is read-only.",
+  "subscribing": "Subscribing…",
+  "subscribed": "Subscribed: {name}",
+  "@subscribed": {"placeholders": {"name": {"type": "String"}}},
+  "unsubscribe": "Unsubscribe",
+  "unsubscribeBody": "The {name} calendar and its events are deleted from Google. You can subscribe again later.",
+  "@unsubscribeBody": {"placeholders": {"name": {"type": "String"}}},
+  "notIcs": "This address is not an .ics calendar"
 }

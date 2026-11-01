@@ -523,3 +523,30 @@ class Pick<V> extends StatelessWidget {
 }
 
 Future<(V,)?> pick<V>(BuildContext c, Pick<V> page) => Navigator.push<(V,)>(c, MaterialPageRoute(builder: (_) => page));
+
+/// Yes/no dialog for a destructive [action] (red button).
+Future<bool> confirm(BuildContext context, String title, String body, String action) async =>
+    await showDialog<bool>(
+      context: context,
+      barrierColor: const Color(0xA3000000),
+      builder: (c) {
+        final t = Tok.of(c), l = l10n(c);
+        return Dialog(
+          backgroundColor: t.surfaceRaised,
+          insetPadding: const EdgeInsets.symmetric(horizontal: 24),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8), side: BorderSide(color: t.borderSubtle)),
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, spacing: 16, children: [
+              Text(title, style: T.headlineMd(t.display)),
+              Text(body, style: T.bodySm(t.secondary)),
+              Row(spacing: 8, children: [
+                Expanded(child: Btn(l.cancel, kind: BtnKind.secondary, onTap: () => Navigator.pop(c, false))),
+                Expanded(child: Btn(action, kind: BtnKind.danger, onTap: () => Navigator.pop(c, true))),
+              ]),
+            ]),
+          ),
+        );
+      },
+    ) ??
+    false;

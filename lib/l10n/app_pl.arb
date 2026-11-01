@@ -302,5 +302,14 @@
   "exporting": "Eksportowanie…",
   "fileSaved": "Zapisano plik",
   "notSignedIn": "Nie zalogowano",
-  "removeCountry": "Usuń kraj"
+  "removeCountry": "Usuń kraj",
+  "subscribeUrl": "Subskrybuj adres",
+  "subscribeUrlHint": "Link .ics lub webcal://",
+  "subscribe": "Subskrybuj",
+  "subscribeNote": "Odświeżamy co godzinę. Kalendarz tylko do odczytu.",
+  "subscribing": "Subskrybowanie…",
+  "subscribed": "Subskrybujesz: {name}",
+  "unsubscribe": "Anuluj subskrypcję",
+  "unsubscribeBody": "Kalendarz {name} i jego wydarzenia zostaną usunięte z Google. Możesz go później subskrybować ponownie.",
+  "notIcs": "Pod tym adresem nie ma kalendarza .ics"
 }

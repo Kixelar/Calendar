@@ -1137,4 +1137,36 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get removeCountry => 'Usuń kraj';
+
+  @override
+  String get subscribeUrl => 'Subskrybuj adres';
+
+  @override
+  String get subscribeUrlHint => 'Link .ics lub webcal://';
+
+  @override
+  String get subscribe => 'Subskrybuj';
+
+  @override
+  String get subscribeNote =>
+      'Odświeżamy co godzinę. Kalendarz tylko do odczytu.';
+
+  @override
+  String get subscribing => 'Subskrybowanie…';
+
+  @override
+  String subscribed(String name) {
+    return 'Subskrybujesz: $name';
+  }
+
+  @override
+  String get unsubscribe => 'Anuluj subskrypcję';
+
+  @override
+  String unsubscribeBody(String name) {
+    return 'Kalendarz $name i jego wydarzenia zostaną usunięte z Google. Możesz go później subskrybować ponownie.';
+  }
+
+  @override
+  String get notIcs => 'Pod tym adresem nie ma kalendarza .ics';
 }

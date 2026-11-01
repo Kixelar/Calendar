@@ -1125,4 +1125,36 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get removeCountry => 'Remove country';
+
+  @override
+  String get subscribeUrl => 'Subscribe to address';
+
+  @override
+  String get subscribeUrlHint => '.ics link or webcal://';
+
+  @override
+  String get subscribe => 'Subscribe';
+
+  @override
+  String get subscribeNote =>
+      'Refreshed every hour. The calendar is read-only.';
+
+  @override
+  String get subscribing => 'Subscribing…';
+
+  @override
+  String subscribed(String name) {
+    return 'Subscribed: $name';
+  }
+
+  @override
+  String get unsubscribe => 'Unsubscribe';
+
+  @override
+  String unsubscribeBody(String name) {
+    return 'The $name calendar and its events are deleted from Google. You can subscribe again later.';
+  }
+
+  @override
+  String get notIcs => 'This address is not an .ics calendar';
 }

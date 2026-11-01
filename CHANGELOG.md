@@ -2,6 +2,7 @@
 
 ## 2026.11.01-dev
 ### Added
+- 04.2 Subscribe to address (.ics or webcal://): the app copies the file into a new read-only Google calendar and refreshes it every hour (also in background sync); events that leave the file are deleted. Subscriptions are listed under Calendars → Subscriptions, with Unsubscribe.
 - Holidays: every country Google has a holiday calendar for (244, names in the phone's language); a country can be removed. Names sort the Polish way (Łotwa after Luksemburg, not after Zimbabwe).
 - Tapping a view tab (year, month, week, day) twice quickly jumps back to today.
 - Import an .ics file into a Google calendar (Add calendar → Import file, Settings → Data and privacy); importing the same file again updates its events.

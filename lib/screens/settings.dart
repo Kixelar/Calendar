@@ -296,7 +296,7 @@ class _AccountsState extends State<Accounts> {
                 if (store.autoSync) _switch(l.wifiOnly, store.wifiOnly, (v) => store.set('wifiOnly', v), hint: l.wifiOnlyHint),
                 RowItem(
                   onTap: () async {
-                    if (await _confirm(context, l.disconnectGoogle, l.disconnectBody, l.disconnect) && context.mounted) {
+                    if (await confirm(context, l.disconnectGoogle, l.disconnectBody, l.disconnect) && context.mounted) {
                       Navigator.of(context).popUntil((r) => r.isFirst);
                       await store.forget();
                     }
@@ -308,32 +308,6 @@ class _AccountsState extends State<Accounts> {
         },
       );
 }
-
-Future<bool> _confirm(BuildContext context, String title, String body, String action) async =>
-    await showDialog<bool>(
-      context: context,
-      barrierColor: const Color(0xA3000000),
-      builder: (c) {
-        final t = Tok.of(c), l = l10n(c);
-        return Dialog(
-          backgroundColor: t.surfaceRaised,
-          insetPadding: const EdgeInsets.symmetric(horizontal: 24),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8), side: BorderSide(color: t.borderSubtle)),
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, spacing: 16, children: [
-              Text(title, style: T.headlineMd(t.display)),
-              Text(body, style: T.bodySm(t.secondary)),
-              Row(spacing: 8, children: [
-                Expanded(child: Btn(l.cancel, kind: BtnKind.secondary, onTap: () => Navigator.pop(c, false))),
-                Expanded(child: Btn(action, kind: BtnKind.danger, onTap: () => Navigator.pop(c, true))),
-              ]),
-            ]),
-          ),
-        );
-      },
-    ) ??
-    false;
 
 /// 05.5: privacy switches and clearing this phone's data.
 class DataPrivacy extends StatelessWidget {
@@ -358,7 +332,7 @@ class DataPrivacy extends StatelessWidget {
             Section(left: l.device, children: [
               RowItem(
                 onTap: () async {
-                  if (await _confirm(context, l.clearData, l.clearDataBody, l.clear) && context.mounted) {
+                  if (await confirm(context, l.clearData, l.clearDataBody, l.clear) && context.mounted) {
                     Navigator.of(context).popUntil((r) => r.isFirst);
                     await store.forget();
                   }

@@ -21,7 +21,11 @@
   (e.g. Outlook's Windows names) are read in the phone's zone.
 - **.ics export** "Export all": shown calendars except holidays, one file, saved where the user picks (`file_picker`,
   also used for opening the file to import). Times keep their zone (TZID) so repeats follow daylight saving time.
-- **Subscribe to address** (webcal): postponed (owner).
+- **Subscribe to address** (04.2, owner 2026-11-01): the Calendar API cannot subscribe to a URL, so the app creates its
+  own Google calendar, imports the file into it (events.import, by UID) and every hour checks the file again; unchanged
+  files (FNV hash) are skipped, events that left the file are deleted. The calendar is read-only in the app (Google
+  itself would allow edits, which the next refresh may overwrite). The address list lives on the phone only (`subs`
+  preference): on another phone the calendar stays but stops refreshing.
 - **No birthdays** (owner, 2026-11-01): contacts' birthdays (Google's birthday events and the old contacts calendar) are not shown.
 - **One Google account**: "Add account" only appears when signed out (owner, 2026-11-01).
 - **Holiday countries**: all ISO countries whose Google holiday calendar exists (checked against the public .ics URLs on

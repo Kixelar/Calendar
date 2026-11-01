@@ -197,9 +197,10 @@ class Calendars extends StatelessWidget {
         listenable: store,
         builder: (context, _) {
           final t = Tok.of(context), l = l10n(context);
-          final mine = [for (final c in store.cals) if (!c.shared && !c.holiday) c];
+          final feeds = store.subscriptions;
+          final mine = [for (final c in store.cals) if (!c.shared && !c.holiday && !feeds.containsKey(c.id)) c];
           final shared = [for (final c in store.cals) if (c.shared) c];
-          final subs = [for (final c in store.cals) if (c.holiday) c];
+          final subs = [for (final c in store.cals) if (c.holiday || feeds.containsKey(c.id)) c];
           Widget toggle(Cal c) => Toggle(value: c.on, label: c.name, onChanged: (v) => store.toggle(c, v));
           return _page(context, top: BackBar(label: backLabel), body: [
             _head(context, l.visibility, l.calendars),
@@ -228,11 +229,26 @@ class Calendars extends StatelessWidget {
             if (subs.isNotEmpty)
               Section(left: l.subscriptions, children: [
                 for (final c in subs)
-                  RowItem(onTap: () => _go(context, c.holiday ? Holidays(store) : SharedWithYou(store, c)), children: [
-                    Marker(c.shape),
-                    Expanded(child: _twoLine(context, c.name, c.holiday ? l.holidays : roleText(l, c.role))),
-                    toggle(c),
-                  ]),
+                  if (feeds[c.id] case final url?)
+                    RowItem(children: [
+                      Marker(c.shape),
+                      Expanded(child: _twoLine(context, c.name, Uri.tryParse(url)?.host ?? url)),
+                      toggle(c),
+                      IconBtn(Icons.delete_outline, label: l.unsubscribe, onTap: () async {
+                        if (!await confirm(context, l.unsubscribe, l.unsubscribeBody(c.name), l.unsubscribe) || !context.mounted) return;
+                        try {
+                          await store.unsubscribe(c);
+                        } catch (e) {
+                          if (context.mounted) _fail(context, e);
+                        }
+                      }),
+                    ])
+                  else
+                    RowItem(onTap: () => _go(context, c.holiday ? Holidays(store) : SharedWithYou(store, c)), children: [
+                      Marker(c.shape),
+                      Expanded(child: _twoLine(context, c.name, c.holiday ? l.holidays : roleText(l, c.role))),
+                      toggle(c),
+                    ]),
               ]),
           ], foot: [
             Btn(l.addCalendar, kind: BtnKind.secondary, icon: Icons.add, onTap: () => _go(context, AddCalendar(store))),
@@ -242,9 +258,44 @@ class Calendars extends StatelessWidget {
 }
 
 /// 04.2: ways to add a calendar that the Google Calendar API supports.
-class AddCalendar extends StatelessWidget {
+class AddCalendar extends StatefulWidget {
   const AddCalendar(this.store, {super.key});
   final Store store;
+  @override
+  State<AddCalendar> createState() => _AddCalendarState();
+}
+
+class _AddCalendarState extends State<AddCalendar> {
+  final _url = TextEditingController(), _focus = FocusNode();
+  Store get store => widget.store;
+
+  @override
+  void dispose() {
+    _url.dispose();
+    _focus.dispose();
+    super.dispose();
+  }
+
+  /// 04.2 "Subscribe to address": copies the file into a new calendar, refreshed every hour.
+  Future<void> _subscribe(BuildContext context) async {
+    final l = l10n(context), t = Tok.of(context), url = _url.text.trim();
+    if (url.isEmpty) return _focus.requestFocus();
+    _busy(context, Row(spacing: 16, children: [
+      SizedBox.square(dimension: 16, child: CircularProgressIndicator(strokeWidth: 1.5, color: t.display)),
+      Expanded(child: Text(l.subscribing, style: T.body(t.display))),
+    ]));
+    try {
+      final name = await store.subscribe(url);
+      if (!context.mounted) return;
+      Navigator.pop(context); // busy dialog
+      Navigator.pop(context);
+      _say(context, l.subscribed(name));
+    } catch (e) {
+      if (!context.mounted) return;
+      Navigator.pop(context);
+      _fail(context, e);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -268,8 +319,30 @@ class AddCalendar extends StatelessWidget {
           }
         }),
         option(Icons.wb_sunny_outlined, l.holidaysAndDaysOff, l.holidaysHint, () => _go(context, Holidays(store))),
-        option(Icons.person_outline, l.googleAccount, l.googleAccountHint, () => _go(context, Connect(store))),
+        option(Icons.link, l.subscribeUrl, l.subscribeUrlHint, () => _focus.requestFocus()),
         option(Icons.file_download_outlined, l.importFile, l.importFileHint, () => importIcsFile(context, store)),
+        option(Icons.person_outline, l.googleAccount, l.googleAccountHint, () => _go(context, Connect(store))),
+      ]),
+      Section(left: l.subscribeUrl, children: [
+        Padding(
+          padding: const EdgeInsets.only(top: 16),
+          child: TextField(
+            controller: _url,
+            focusNode: _focus,
+            keyboardType: TextInputType.url,
+            autocorrect: false,
+            style: T.body(t.display),
+            decoration: InputDecoration(
+              hintText: 'webcal://… .ics',
+              hintStyle: T.body(t.disabled),
+              enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: t.borderControl)),
+              focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: t.display)),
+              suffixIcon: IconBtn(Icons.arrow_forward, label: l.subscribe, onTap: () => _subscribe(context)),
+            ),
+            onSubmitted: (_) => _subscribe(context),
+          ),
+        ),
+        Padding(padding: const EdgeInsets.only(top: 8), child: Text(l.subscribeNote, style: T.bodySm(t.secondary))),
       ]),
     ]);
   }

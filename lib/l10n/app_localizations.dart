@@ -1915,6 +1915,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Remove country'**
   String get removeCountry;
+
+  /// No description provided for @subscribeUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscribe to address'**
+  String get subscribeUrl;
+
+  /// No description provided for @subscribeUrlHint.
+  ///
+  /// In en, this message translates to:
+  /// **'.ics link or webcal://'**
+  String get subscribeUrlHint;
+
+  /// No description provided for @subscribe.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscribe'**
+  String get subscribe;
+
+  /// No description provided for @subscribeNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Refreshed every hour. The calendar is read-only.'**
+  String get subscribeNote;
+
+  /// No description provided for @subscribing.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscribing…'**
+  String get subscribing;
+
+  /// No description provided for @subscribed.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscribed: {name}'**
+  String subscribed(String name);
+
+  /// No description provided for @unsubscribe.
+  ///
+  /// In en, this message translates to:
+  /// **'Unsubscribe'**
+  String get unsubscribe;
+
+  /// No description provided for @unsubscribeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The {name} calendar and its events are deleted from Google. You can subscribe again later.'**
+  String unsubscribeBody(String name);
+
+  /// No description provided for @notIcs.
+  ///
+  /// In en, this message translates to:
+  /// **'This address is not an .ics calendar'**
+  String get notIcs;
 }
 
 class _AppLocalizationsDelegate

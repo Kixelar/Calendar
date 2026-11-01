@@ -49,6 +49,12 @@ The `google` preference marks a signed-in install (older installs: a saved calen
 Not shown (owner, 2026-11-01): `GoogleCalendar._ev` drops events with `eventType: birthday` (Google keeps contacts'
 birthdays in the primary calendar) and `calendars()` leaves out the old `#contacts@` calendar.
 
+## Address subscriptions (04.2)
+`Store.subscribe` downloads the .ics (dart:io HttpClient, webcal:// read as https://), creates a Google calendar and
+copies the events (`_copyFeed`: events.import, then deletes events whose UID left the file). `refreshSubscriptions`
+repeats it at most hourly from `refresh()` and the background job (`syncNow`). Calendar id → address is the `subs`
+preference; such calendars are read-only in the app (`writable`, event details).
+
 ## Holidays
 `holidayCodes` (calendars.dart) lists ISO countries with a Google holiday calendar; `holidayId(code, lang)` builds the
 calendar id, `holidayCode(id)` reads it back. Country names come from Android (`Device.kt` "countries").

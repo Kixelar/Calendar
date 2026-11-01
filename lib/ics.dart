@@ -84,6 +84,13 @@ gcal.Event? _event(List<(String, Map<String, String>, String)> props, String loc
   );
 }
 
+/// The calendar's own name (X-WR-CALNAME), if the file gives one.
+String? icsName(String text) {
+  final m = RegExp(r'^X-WR-CALNAME[^:\r\n]*:(.*)$', multiLine: true).firstMatch(text);
+  final name = m == null ? '' : _unescape(m[1]!.trim());
+  return name.isEmpty ? null : name;
+}
+
 /// DATE ("20261101"), UTC ("20261101T090000Z"), zoned (TZID=Europe/Warsaw) or floating (taken as [local]) time.
 gcal.EventDateTime? _time(String v, Map<String, String> params, String local) {
   final m = RegExp(r'^(\d{4})(\d{2})(\d{2})(?:T(\d{2})(\d{2})(\d{2})?(Z)?)?$').firstMatch(v.trim());

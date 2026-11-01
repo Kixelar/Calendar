@@ -125,7 +125,7 @@ class EventDetails extends StatelessWidget {
     if (e.isInvitation) return _Invitation(e, store);
     final t = Tok.of(context), l = l10n(context), now = DateTime.now();
     final cal = store.cal(e.calId);
-    final writable = cal?.writable ?? false;
+    final writable = (cal?.writable ?? false) && !store.subscriptions.containsKey(e.calId); // subscriptions are read-only
     final canEdit = writable && e.organizer; // invitations from others are edited by their organizer
     final canInvite = canEdit || (writable && e.guestsInvite);
     final soon = (e.start.difference(now).inSeconds + 59) ~/ 60;

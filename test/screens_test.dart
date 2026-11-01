@@ -121,6 +121,22 @@ class _FakeGoogle extends GoogleCalendar {
       ];
 }
 
+/// Records what an address subscription sends to Google.
+class _SubGoogle extends _FakeGoogle {
+  final imported = <String>[], deleted = <String>[];
+  @override
+  Future<String> createCalendar(String name, String timeZone) async => 'sub1';
+  @override
+  Future<void> importEvent(String calId, gcal.Event e) async => imported.add(e.iCalUID!);
+  @override
+  Future<List<gcal.Event>> allEvents(String calId) async => [for (final u in imported.toSet()) gcal.Event(id: 'id-$u', iCalUID: u)];
+  @override
+  Future<void> deleteEvent(String calId, String id) async {
+    deleted.add(id);
+    imported.removeWhere((u) => 'id-$u' == id);
+  }
+}
+
 /// No network: every Google call fails, as on a phone without internet.
 class _OfflineGoogle extends GoogleCalendar {
   @override
@@ -271,6 +287,41 @@ void main() {
     await Future<void>.delayed(const Duration(milliseconds: 100));
     expect(offline.on(today)!.map((e) => e.title), fetched.map((e) => e.title));
     expect(offline.error, isNotNull);
+  });
+
+  test('address subscription: copies the file, skips it unchanged, drops events that left it', () async {
+    SharedPreferences.setMockInitialValues({'onboarded': true, 'google': true});
+    String feed(List<String> uids) => [
+          'BEGIN:VCALENDAR', 'X-WR-CALNAME:Liga', //
+          for (final u in uids) ...['BEGIN:VEVENT', 'UID:$u', 'DTSTART:20261107T150000Z', 'SUMMARY:Mecz $u', 'END:VEVENT'],
+          'END:VCALENDAR',
+        ].join('\r\n');
+    // The test binding answers every HttpClient request with 400; this test talks to its own local server.
+    final overrides = HttpOverrides.current;
+    HttpOverrides.global = null;
+    addTearDown(() => HttpOverrides.global = overrides);
+    var body = feed(['a', 'b']);
+    final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+    server.listen((r) => r.response
+      ..write(body)
+      ..close());
+    addTearDown(server.close);
+    final g = _SubGoogle();
+    final store = Store(g, Directory.systemTemp.createTempSync());
+    await store.start();
+
+    expect(await store.subscribe('http://127.0.0.1:${server.port}/liga.ics'), 'Liga');
+    expect(store.subscriptions, {'sub1': 'http://127.0.0.1:${server.port}/liga.ics'});
+    expect(g.imported, ['a', 'b']);
+    expect(store.writable.map((c) => c.id), isNot(contains('sub1')));
+
+    await store.refreshSubscriptions(force: true); // same file: nothing sent to Google
+    expect(g.imported, ['a', 'b']);
+
+    body = feed(['b']);
+    await store.refreshSubscriptions(force: true);
+    expect(g.imported, ['b', 'b']); // 'a' left the file and was deleted
+    expect(g.deleted, ['id-a']);
   });
 
   test('repeat rules round-trip and read like the mockup', () async {

@@ -222,9 +222,22 @@ class GoogleCalendar {
   }
 
   /// 04.2: a new secondary Google calendar.
-  Future<void> createCalendar(String name, String timeZone) async {
+  /// Returns the new calendar's id.
+  Future<String> createCalendar(String name, String timeZone) async {
     await _authorize(interactive: false);
-    await _api!.calendars.insert(gcal.Calendar(summary: name, timeZone: timeZone));
+    return (await _api!.calendars.insert(gcal.Calendar(summary: name, timeZone: timeZone))).id!;
+  }
+
+  /// Deletes an own calendar with all its events (an address subscription, 04.2).
+  Future<void> deleteCalendar(String id) async {
+    await _authorize(interactive: false);
+    await _api!.calendars.delete(id);
+  }
+
+  /// Deletes one event by id, without notifying anyone (address subscriptions drop what left the feed).
+  Future<void> deleteEvent(String calId, String id) async {
+    await _authorize(interactive: false);
+    await _api!.events.delete(calId, id);
   }
 
   /// Adds an existing calendar (e.g. a holiday calendar, 04.3) to the user's list.
