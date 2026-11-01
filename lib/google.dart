@@ -9,6 +9,19 @@ const serverClientId = String.fromEnvironment('GOOGLE_SERVER_CLIENT_ID');
 const _scopes = [gcal.CalendarApi.calendarScope];
 
 /// Calendars are told apart by marker shape, not colour (mockup design).
+/// Order in which own calendars get shapes: filled ones first. Ring and dash are kept for holidays and shared calendars.
+final ownShapes = [
+  Shape.dot, Shape.square, Shape.half, Shape.diamond, Shape.triangle, Shape.star, Shape.hexagon, Shape.heart,
+  ...Shape.values.where((s) => s.index > Shape.dash.index && !const {Shape.triangle, Shape.star, Shape.hexagon, Shape.heart}.contains(s)),
+];
+
+/// The first own shape not in [used] (added to it), so calendars differ; the [n]th in order once all are taken.
+Shape freeShape(Set<Shape> used, int n) {
+  final s = ownShapes.where((s) => !used.contains(s)).firstOrNull ?? ownShapes[n % ownShapes.length];
+  used.add(s);
+  return s;
+}
+
 /// Calendar markers (owner approved the 18 added on 2026-11-01). Saved by index: only ever append.
 enum Shape {
   dot, square, half, diamond, ring, dash,
@@ -206,8 +219,10 @@ class GoogleCalendar {
       page = r.nextPageToken;
     } while (page != null);
     items.sort((a, b) => (b.primary == true ? 1 : 0) - (a.primary == true ? 1 : 0));
-    const own = [Shape.dot, Shape.square, Shape.half, Shape.diamond, Shape.triangle, Shape.star, Shape.hexagon, Shape.heart];
+    final used = {...shapes.values};
     var i = 0;
+    Shape next() => freeShape(used, i++);
+
     return [
       for (final e in items.where((e) => !e.id!.contains('#contacts@')))
         () {
@@ -220,7 +235,7 @@ class GoogleCalendar {
               writable: e.accessRole == 'owner' || e.accessRole == 'writer',
               role: e.accessRole ?? 'reader',
               defaultReminder: e.defaultReminders?.where((r) => r.method == 'popup').firstOrNull?.minutes,
-              shape: shapes[e.id] ?? (holiday ? Shape.ring : shared ? Shape.dash : own[i++ % own.length]),
+              shape: shapes[e.id] ?? (holiday ? Shape.ring : shared ? Shape.dash : next()),
               on: enabled?.contains(e.id) ?? e.selected == true);
         }(),
     ];

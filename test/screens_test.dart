@@ -254,6 +254,15 @@ void main() {
     expect(names, ['Luksemburg', 'Łotwa', 'Macedonia', 'Szwecja', 'Święta Lucia', 'Tajlandia', 'Zimbabwe']);
   });
 
+  test('own calendars get different shapes until all 22 are used', () {
+    final used = {Shape.square}; // picked by the user for another calendar
+    final shapes = [for (var n = 0; n < 23; n++) freeShape(used, n)];
+    expect(ownShapes.length, 22);
+    expect(shapes.take(21).toSet().length, 21);
+    expect(shapes.take(21), isNot(contains(Shape.square)));
+    expect(shapes.take(21).any((s) => s == Shape.ring || s == Shape.dash), isFalse);
+  });
+
   test('ISO week numbers', () {
     expect(isoWeek(DateTime(2026, 10, 30)), 44);
     expect(isoWeek(DateTime(2027, 1, 1)), 53); // Friday: belongs to the last week of 2026
