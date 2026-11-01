@@ -100,6 +100,8 @@ class Store extends ChangeNotifier {
       'today': l.today,
       'tomorrow': l.tomorrow,
       'noEvents': l.noEvents,
+      'free': l.freeNow,
+      'until': l.ongoingUntil('%s'),
       'use24h': use24h,
       'theme': theme,
       'events': [
@@ -134,6 +136,15 @@ class Store extends ChangeNotifier {
   Future<void> syncNow() async {
     await refreshSubscriptions();
     await _load(DateTime.now().year);
+  }
+
+  /// A view a widget tap asked for ("day"), once; null when none or in tests.
+  Future<String?> takeOpen() async {
+    try {
+      return await const MethodChannel('calendar/device').invokeMethod<String>('takeOpen');
+    } on MissingPluginException {
+      return null;
+    }
   }
 
   /// True on mobile data (or another metered network), where "Wi-Fi only" holds automatic sync back.
@@ -544,6 +555,7 @@ class Store extends ChangeNotifier {
     await deleteCalendar(c);
     await _p.setString('subs', jsonEncode({...subscriptions}..remove(c.id)));
     await _p.remove('subHash.${c.id}');
+    await _p.remove('subEv.${c.id}');
   }
 
   /// Deletes an own calendar and all its events from Google (not the primary one).
@@ -575,16 +587,30 @@ class Store extends ChangeNotifier {
     if (_p.getString('subHash.$id') == hash) return;
     if (!tz.timeZoneDatabase.isInitialized) tzdata.initializeTimeZones();
     final evs = parseIcs(text, local: await timeZone());
-    // shortcut: a changed file is sent again event by event; for big feeds (thousands of events) compare per event first.
-    for (final e in evs) {
-      await g.importEvent(id, e);
+    // Only events that changed since the last copy are sent (UID -> hash of the event), 8 at a time.
+    final sent = {...?(jsonDecode(_p.getString('subEv.$id') ?? '{}') as Map?)?.cast<String, String>()};
+    final now = {for (final e in evs) e.iCalUID!: '${fnv(jsonEncode(e))}'};
+    await _each([for (final e in evs) if (sent[e.iCalUID] != now[e.iCalUID]) e], (e) => g.importEvent(id, e));
+    final gone = sent.keys.where((u) => !now.containsKey(u)).toSet();
+    if (gone.isNotEmpty) {
+      final drop = [for (final e in await g.allEvents(id)) if (e.recurringEventId == null && gone.contains(e.iCalUID)) e.id!];
+      await _each(drop, (e) => g.deleteEvent(id, e));
     }
-    final keep = {for (final e in evs) e.iCalUID};
-    for (final e in await g.allEvents(id)) {
-      if (e.recurringEventId == null && e.status != 'cancelled' && !keep.contains(e.iCalUID)) await g.deleteEvent(id, e.id!);
-    }
+    await _p.setString('subEv.$id', jsonEncode(now));
     await _p.setString('subHash.$id', hash);
     _days.clear();
+  }
+
+  /// Runs [f] on every item, [at] at a time.
+  static Future<void> _each<T>(List<T> items, Future<void> Function(T) f, {int at = 8}) async {
+    var next = 0;
+    Future<void> worker() async {
+      while (next < items.length) {
+        await f(items[next++]);
+      }
+    }
+
+    await Future.wait([for (var i = 0; i < at; i++) worker()]);
   }
 
   Future<String> _download(String url) async {

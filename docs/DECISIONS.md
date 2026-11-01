@@ -34,3 +34,6 @@
   index, so new shapes are only ever appended.
 - **Feeds with unknown kick-off times**: sports-calendar.com puts matches without a fixed time at 00:00–02:00 local
   (23:00Z); the app shows what the file says, as Google Calendar would.
+- **Day clock widget** (owner, 2026-11-01): today only (no all-day, no tomorrow), "Free" when nothing is left; countdown
+  only as "in 30 min" / "in 15 min"; refresh by AlarmManager RTC (does not wake the phone) at quarter hours and at
+  30 / 15 min before, start and end of events; tap opens today's day view (intent extra "open"="day").

@@ -8,6 +8,20 @@ class MainActivity : FlutterActivity() {
         /** True while the app is on screen; the background sync job then stays out of the way. */
         @Volatile
         var visible = false
+
+        /** A view to open, asked for by a widget tap ("day"); read once by the app (Device "takeOpen"). */
+        @Volatile
+        var open: String? = null
+    }
+
+    override fun onCreate(savedInstanceState: android.os.Bundle?) {
+        open = intent?.getStringExtra("open")
+        super.onCreate(savedInstanceState)
+    }
+
+    override fun onNewIntent(intent: android.content.Intent) {
+        super.onNewIntent(intent)
+        open = intent.getStringExtra("open") ?: open
     }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {

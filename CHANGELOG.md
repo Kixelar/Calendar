@@ -2,6 +2,7 @@
 
 ## 2026.11.01-dev
 ### Added
+- Day clock widget (2×2, resizable): 24-hour dial with today's timed events (grey past, white to come, yellow clashes) and a red hand for now; the middle shows the next event's time and title, "in 30 / 15 min" before it, "now · until" during it, or "Free". Redrawn every quarter hour and at 30 and 15 min before, at the start and end of each event. A tap opens today's day view.
 - 18 more calendar marker shapes (24 in all, approved by the owner); each own calendar gets a shape no other calendar uses (22 for own calendars, filled ones first).
 - Calendars: own calendars (not the primary one) can be deleted, after a confirmation.
 - 04.2 Subscribe to address (.ics or webcal://): the app copies the file into a new read-only Google calendar and refreshes it every hour (also in background sync); events that leave the file are deleted. Subscriptions are listed under Calendars → Subscriptions, with Unsubscribe. The address is typed in a dialog, like a place or a guest.
@@ -13,6 +14,7 @@
 ### Fixed
 - Widgets follow the app's theme setting (Appearance → Dark / Light); "System" keeps following the phone's dark mode.
 ### Changed
+- Address subscriptions are much faster: events go to Google 8 at a time, and a refresh sends only events that changed.
 - Contacts' birthdays are no longer shown: the Birthdays calendar and birthday events are gone (owner).
 - Settings: the account row at the top opens accounts and sync (the separate "Accounts and sync" row is gone); without an account it says "Not signed in".
 - Accounts: "Add account" only when no Google account is signed in.

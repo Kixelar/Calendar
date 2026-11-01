@@ -40,6 +40,8 @@ object Widgets {
         val today: String = json.optString("today", "Today")
         val tomorrow: String = json.optString("tomorrow", "Tomorrow")
         val noEvents: String = json.optString("noEvents", "No events")
+        val free: String = json.optString("free", "Free")
+        val until: String = json.optString("until", "Now · until %s")
         val use24h: Boolean = json.optBoolean("use24h", true)
         val theme: String = json.optString("theme", "system") // the app's Appearance setting: dark, light or system
         val events: List<Ev> = json.optJSONArray("events")?.let { a ->
@@ -61,7 +63,7 @@ object Widgets {
     fun updateAll(context: Context) {
         val m = AppWidgetManager.getInstance(context)
         for (cls in listOf(MonthWidget::class.java, TodayWidget::class.java, WeekWidget::class.java, DateWidget::class.java,
-            NextWidget::class.java, NextSmallWidget::class.java, DaySmallWidget::class.java)) {
+            NextWidget::class.java, NextSmallWidget::class.java, DaySmallWidget::class.java, ClockWidget::class.java)) {
             val ids = m.getAppWidgetIds(ComponentName(context, cls))
             if (ids.isNotEmpty()) context.sendBroadcast(Intent(context, cls).setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE)
                 .putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids))
@@ -78,6 +80,10 @@ object Widgets {
         val secondary = if (dark) 0xFF999999.toInt() else 0xFF666666.toInt()
         val accentText = if (dark) 0xFFFF4D55.toInt() else 0xFFD71921.toInt()
         val dotOff = if (dark) 0xFF333333.toInt() else 0xFFD0D0D0.toInt()
+        val accent = 0xFFD71921.toInt()
+        val disabled = if (dark) 0xFF666666.toInt() else 0xFF999999.toInt()
+        val warning = if (dark) 0xFFD4A843.toInt() else 0xFF8A6500.toInt()
+        val raised = if (dark) 0xFF1A1A1A.toInt() else 0xFFE8E8E8.toInt()
     }
 
     private val fonts = HashMap<String, Typeface>()
@@ -122,6 +128,9 @@ abstract class CalendarWidget : AppWidgetProvider() {
         }
     }
 
+    /** Where a tap goes: the app as it was, or a view named by the "open" extra (MainActivity). */
+    open fun tap(context: Context): Intent? = context.packageManager.getLaunchIntentForPackage(context.packageName)
+
     private fun draw(context: Context, manager: AppWidgetManager, id: Int, options: Bundle) {
         // Two bitmaps (light and dark) travel to the launcher through IPC: keep each under ~1.5 MB.
         val wanted = context.resources.displayMetrics.density
@@ -142,9 +151,8 @@ abstract class CalendarWidget : AppWidgetProvider() {
         val dark = if (data.theme == "light") light else if (data.theme == "dark") light else bitmap(true)
         views.setImageViewBitmap(R.id.widget_light, light)
         views.setImageViewBitmap(R.id.widget_dark, dark)
-        val open = context.packageManager.getLaunchIntentForPackage(context.packageName)
-        views.setOnClickPendingIntent(R.id.widget_root,
-            PendingIntent.getActivity(context, 0, open, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT))
+        views.setOnClickPendingIntent(R.id.widget_root, PendingIntent.getActivity(context, javaClass.name.hashCode(), tap(context),
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT))
         manager.updateAppWidget(id, views)
     }
 }
@@ -398,5 +406,140 @@ class DaySmallWidget : CalendarWidget() {
         circle(w / 2, h / 2, r, col.surface)
         c.drawCircle(w / 2, h / 2, r - dp(0.5f), Paint(Paint.ANTI_ALIAS_FLAG).apply { color = col.border; style = Paint.Style.STROKE; strokeWidth = dp(1f) })
         mid("${now.get(Calendar.DAY_OF_MONTH)}", w / 2, h / 2, dot(40f, col.display), Paint.Align.CENTER)
+    }
+}
+
+
+/**
+ * 2x2 and larger: a 24-hour dial of today's timed events (grey past, white to come, yellow clashes) with a red hand
+ * for now; the middle shows the next event's time and title, "in 30 / 15 min" before it, "now · until" during it, or
+ * "free". Redrawn every quarter hour and at 30 and 15 min before each event, at its start and end (ClockWidget.schedule).
+ */
+class ClockWidget : CalendarWidget() {
+    companion object {
+        private const val TICK = "com.kixelar.calendar.CLOCK_TICK"
+
+        private fun tickIntent(context: Context) = PendingIntent.getBroadcast(context, 33,
+            Intent(context, ClockWidget::class.java).setAction(TICK), PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+
+        /** The next moment the dial changes: a quarter hour, or 30 / 15 min before, the start or the end of an event. */
+        fun schedule(context: Context) {
+            val now = System.currentTimeMillis()
+            val quarter = (now / 900_000L + 1) * 900_000L
+            val at = Widgets.data(context).events.filter { !it.allDay }
+                .flatMap { listOf(it.start - 1_800_000L, it.start - 900_000L, it.start, it.end) }
+                .filter { it > now }.plus(quarter).min()
+            // RTC, not RTC_WAKEUP: a sleeping phone is not woken, the dial catches up when the screen comes on.
+            context.getSystemService(android.app.AlarmManager::class.java).setExact(android.app.AlarmManager.RTC, at, tickIntent(context))
+        }
+    }
+
+    override fun onReceive(context: Context, intent: Intent) {
+        if (intent.action == TICK) {
+            val m = AppWidgetManager.getInstance(context)
+            onUpdate(context, m, m.getAppWidgetIds(ComponentName(context, ClockWidget::class.java)))
+        } else super.onReceive(context, intent)
+    }
+
+    override fun onUpdate(context: Context, manager: AppWidgetManager, ids: IntArray) {
+        super.onUpdate(context, manager, ids)
+        if (ids.isNotEmpty()) try { schedule(context) } catch (e: Exception) { CrashLog.write(context, Thread.currentThread(), e) }
+    }
+
+    override fun onDisabled(context: Context) {
+        context.getSystemService(android.app.AlarmManager::class.java).cancel(tickIntent(context))
+    }
+
+    // Opens today's day view, not an event (owner, 2026-11-01).
+    // CLEAR_TOP + SINGLE_TOP hand the extra to a running app through onNewIntent.
+    override fun tap(context: Context): Intent? = super.tap(context)?.putExtra("open", "day")
+        ?.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+
+    override fun draw(p: Painter) = with(p) {
+        card(24f)
+        val s = minOf(w, h)
+        val k = s / dp(170f) // drawn for a 170dp square; text and strokes scale with the widget
+        val cx = w / 2
+        val cy = h / 2
+        val outer = s / 2 - dp(8f) * k
+        val ring = outer - dp(25f) * k
+        val stroke = dp(9f) * k
+        val day0 = startOfDay(now)
+        val nowMs = now.timeInMillis
+        fun angle(ms: Long) = ((ms - day0).coerceIn(0L, 86_400_000L) / 86_400_000f) * 360f - 90f
+        fun at(r: Float, deg: Float) = Pair(cx + r * kotlin.math.cos(Math.toRadians(deg.toDouble())).toFloat(),
+            cy + r * kotlin.math.sin(Math.toRadians(deg.toDouble())).toFloat())
+        fun small(color: Int) = label(color).apply { textSize *= k * 10f / 11f }
+
+        // Hour dots, bigger at 00 / 06 / 12 / 18 with their labels inside.
+        val tick = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = col.dotOff }
+        val tickMain = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = col.secondary }
+        for (hr in 0 until 24) {
+            val (x, y) = at(outer, hr * 15f - 90f)
+            val main = hr % 6 == 0
+            c.drawCircle(x, y, dp(if (main) 2f else 1.2f) * k, if (main) tickMain else tick)
+            if (main) {
+                val (lx, ly) = at(outer - dp(11f) * k, hr * 15f - 90f)
+                val text = if (data.use24h) "%02d".format(hr) else "${if (hr % 12 == 0) 12 else hr % 12}${if (hr < 12) "A" else "P"}"
+                mid(text, lx, ly, small(col.secondary), Paint.Align.CENTER)
+            }
+        }
+
+        // Track and today's timed events; an event that starts while another is on is a clash.
+        val oval = RectF(cx - ring, cy - ring, cx + ring, cy + ring)
+        val arc = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE; strokeWidth = stroke; color = col.raised }
+        c.drawArc(oval, 0f, 360f, false, arc)
+        val today = data.events.filter { !it.allDay && it.end > day0 && it.start < day0 + 86_400_000L }.sortedBy { it.start }
+        val gap = 1.2f
+        for ((i, e) in today.withIndex()) {
+            val clash = today.take(i).any { it.end > e.start }
+            val past = e.end <= nowMs
+            arc.color = when {
+                clash && past -> (col.warning and 0x00FFFFFF) or (0x99 shl 24)
+                clash -> col.warning
+                past -> col.disabled
+                else -> col.display
+            }
+            val a = angle(e.start)
+            c.drawArc(oval, a + gap / 2, maxOf(angle(e.end) - a - gap, 2f), false, arc)
+        }
+
+        // Red hand for now: from inside the ring to a dot just outside it.
+        val red = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = col.accent; strokeWidth = dp(1.5f) * k }
+        val (x1, y1) = at(ring - stroke * 1.6f, angle(nowMs))
+        val (x2, y2) = at(ring + stroke * 0.9f, angle(nowMs))
+        c.drawLine(x1, y1, x2, y2, red)
+        c.drawCircle(x2, y2, dp(3f) * k, red)
+
+        // Middle: the event on now, else the next one today, else "free".
+        val inner = (ring - stroke / 2) * 2 * 0.86f
+        val onNow = today.lastOrNull { it.start <= nowMs && it.end > nowMs }
+        val e = onNow ?: today.firstOrNull { it.start > nowMs }
+        if (e == null) {
+            mid(upper(data.free), cx, cy, small(col.secondary), Paint.Align.CENTER, inner)
+            return@with
+        }
+        val big = dot(24f * k, col.display)
+        val title = body(col.primary).apply { textSize *= k * 12f / 14f }
+        val mins = ((e.start - nowMs + 59_999) / 60_000).toInt()
+        val note = when {
+            onNow != null -> String.format(locale, data.until, hm(e.end))
+            mins <= 15 -> String.format(locale, data.inMin, 15)
+            mins <= 30 -> String.format(locale, data.inMin, 30)
+            else -> null
+        }
+        val sub = small(if (onNow != null) col.secondary else col.accentText)
+        val g1 = dp(6f) * k
+        val g2 = dp(7f) * k
+        val blockH = cap(big) + (if (note != null) g1 + cap(sub) else 0f) + g2 + cap(title)
+        var y = cy - blockH / 2
+        top(hm(e.start), cx, y, big, Paint.Align.CENTER, inner)
+        y += cap(big)
+        if (note != null) {
+            y += g1
+            top(upper(note), cx, y, sub, Paint.Align.CENTER, inner)
+            y += cap(sub)
+        }
+        top(e.title, cx, y + g2, title, Paint.Align.CENTER, inner * 0.92f)
     }
 }

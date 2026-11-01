@@ -12,15 +12,17 @@ FONTS = 'assets/fonts'
 
 COLORS = {
     False: dict(surface='#FFFFFF', border='#E2E2E2', display='#000000', primary='#1A1A1A', secondary='#666666',
-                accent='#D71921', dot_off='#D0D0D0', bg='#F4F4F4'),
+                accent='#D71921', dot_off='#D0D0D0', bg='#F4F4F4', red='#D71921', disabled='#999999', warning='#8A6500',
+                raised='#E8E8E8'),
     True: dict(surface='#111111', border='#222222', display='#FFFFFF', primary='#E8E8E8', secondary='#999999',
-               accent='#FF4D55', dot_off='#333333', bg='#000000'),
+               accent='#FF4D55', dot_off='#333333', bg='#000000', red='#D71921', disabled='#666666', warning='#D4A843',
+               raised='#1A1A1A'),
 }
 TEXT = {
     'pl': dict(weekday='PIĄTEK', month='PAŹDZIERNIK', month_short='PAŹ', weekdays='PN WT ŚR CZ PT SB ND'.split(),
-               more='JESZCZE 3', soon='ZA 12 MIN', events=[('14:00', 'Demo sprintu'), ('17:30', 'Trening'), ('20:00', 'Kolacja u rodziców')]),
+               more='JESZCZE 3', soon='ZA 12 MIN', soon15='ZA 15 MIN', events=[('14:00', 'Demo sprintu'), ('17:30', 'Trening'), ('20:00', 'Kolacja u rodziców')]),
     'en': dict(weekday='FRIDAY', month='OCTOBER', month_short='OCT', weekdays='MO TU WE TH FR SA SU'.split(),
-               more='3 MORE', soon='IN 12 MIN', events=[('14:00', 'Sprint demo'), ('17:30', 'Workout'), ('20:00', 'Dinner with family')]),
+               more='3 MORE', soon='IN 12 MIN', soon15='IN 15 MIN', events=[('14:00', 'Sprint demo'), ('17:30', 'Workout'), ('20:00', 'Dinner with family')]),
 }
 TODAY, MONTH_DAYS, FIRST_COL = 30, 31, 3  # Friday 30 October 2026; 1 October is a Thursday
 
@@ -172,8 +174,52 @@ def day_small(cv, t):
     cv.mid(str(TODAY), cv.w / 2, cv.h / 2, dot(40), 'display', 'm')
 
 
+def clock(cv, t):
+    """Day clock (ClockWidget): 24-hour dial at 13:48 on the sample day."""
+    import math
+    cv.card(24)
+    cx, cy = cv.w / 2, cv.h / 2
+    outer = cv.w / 2 - 8 * S
+    ring = outer - 25 * S
+    stroke = 9 * S
+
+    def at(r, deg):
+        return cx + r * math.cos(math.radians(deg)), cy + r * math.sin(math.radians(deg))
+
+    def ang(h):
+        return h / 24 * 360 - 90
+
+    for hr in range(24):
+        x, y = at(outer, hr * 15 - 90)
+        main = hr % 6 == 0
+        r = (2 if main else 1.2) * S
+        cv.d.ellipse([x - r, y - r, x + r, y + r], fill=cv.c['secondary' if main else 'dot_off'])
+        if main:
+            lx, ly = at(outer - 11 * S, hr * 15 - 90)
+            cv.mid('%02d' % hr, lx, ly, mono(10), 'secondary', 'm', LT)
+    box = [cx - ring - stroke / 2, cy - ring - stroke / 2, cx + ring + stroke / 2, cy + ring + stroke / 2]
+    cv.d.arc(box, 0, 360, fill=cv.c['raised'], width=stroke)
+    for a, b, color in [(8.5, 9, 'disabled'), (10, 11.5, 'disabled'), (12.5, 13.25, 'disabled'), (14, 15, 'display'),
+                        (14.5, 15.5, 'warning'), (17.5, 18.5, 'display'), (20, 21.5, 'display')]:
+        cv.d.arc(box, ang(a) + 0.6, ang(b) - 0.6, fill=cv.c[color], width=stroke)
+    now = 13 + 48 / 60
+    x1, y1 = at(ring - stroke * 1.6, ang(now))
+    x2, y2 = at(ring + stroke * 0.9, ang(now))
+    cv.d.line([x1, y1, x2, y2], fill=cv.c['red'], width=int(1.5 * S))
+    cv.d.ellipse([x2 - 3 * S, y2 - 3 * S, x2 + 3 * S, y2 + 3 * S], fill=cv.c['red'])
+    big, lf, tf = dot(24), mono(10), sans(12)
+    g1, g2 = 6 * S, 7 * S
+    top = cy - (cv.cap(big) + g1 + cv.cap(lf) + g2 + cv.cap(tf)) / 2
+    cv.top(t['events'][0][0], cx, top, big, 'display', 'm')
+    top += cv.cap(big) + g1
+    cv.top(t['soon15'], cx, top, lf, 'accent', 'm', LT)
+    top += cv.cap(lf) + g2
+    cv.top(t['events'][0][1], cx, top, tf, 'primary', 'm')
+
+
 WIDGETS = {'month': (month, 336, 336), 'today': (today, 336, 160), 'week': (week, 336, 72), 'date': (date, 160, 160),
-           'next': (next_big, 160, 160), 'next_small': (next_small, 160, 72), 'day_small': (day_small, 72, 72)}
+           'next': (next_big, 160, 160), 'next_small': (next_small, 160, 72), 'day_small': (day_small, 72, 72),
+           'clock': (clock, 170, 170)}
 
 if __name__ == '__main__':
     for lang, folder_lang in [('en', ''), ('pl', '-pl')]:

@@ -41,7 +41,10 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
     });
     WidgetsBinding.instance.addObserver(this);
     store.notifier?.onOpen = _fromNotification;
-    WidgetsBinding.instance.addPostFrameCallback((_) => _showCrash());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _showCrash();
+      _widgetOpen();
+    });
   }
 
   /// After a crash the app shows its report once, so the owner can copy it (CrashLog.kt).
@@ -95,7 +98,13 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState s) {
     if (s == AppLifecycleState.resumed) {
       store.reloadPrefs().then((_) => _autoSync()); // the background job may have synced meanwhile
+      _widgetOpen();
     }
+  }
+
+  /// The day clock widget opens today's day view (Widgets.kt ClockWidget.tap).
+  Future<void> _widgetOpen() async {
+    if (await store.takeOpen() == 'day' && mounted) go(DateTime.now(), 3);
   }
 
   /// Refreshes when automatic sync is on and the last sync is older than the chosen interval.

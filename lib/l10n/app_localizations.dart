@@ -1981,6 +1981,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The {name} calendar and all its events are deleted from Google for everyone it is shared with. This cannot be undone.'**
   String deleteCalendarBody(String name);
+
+  /// No description provided for @freeNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Free'**
+  String get freeNow;
+
+  /// No description provided for @ongoingUntil.
+  ///
+  /// In en, this message translates to:
+  /// **'Now · until {time}'**
+  String ongoingUntil(String time);
 }
 
 class _AppLocalizationsDelegate

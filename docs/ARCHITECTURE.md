@@ -55,6 +55,11 @@ copies the events (`_copyFeed`: events.import, then deletes events whose UID lef
 repeats it at most hourly from `refresh()` and the background job (`syncNow`). Calendar id → address is the `subs`
 preference; such calendars are read-only in the app (`writable`, event details).
 
+## Day clock widget
+`ClockWidget` (Widgets.kt) draws the dial from the events the app sends (`Store.updateWidgets`, strings "free" and
+"until"); `ClockWidget.schedule` sets the next redraw (CLOCK_TICK broadcast). Its tap passes `open=day` to MainActivity,
+which Dart reads once via Device "takeOpen" (`Home._widgetOpen`). Preview: `tool/widget_previews.py` `clock`.
+
 ## Holidays
 `holidayCodes` (calendars.dart) lists ISO countries with a Google holiday calendar; `holidayId(code, lang)` builds the
 calendar id, `holidayCode(id)` reads it back. Country names come from Android (`Device.kt` "countries").

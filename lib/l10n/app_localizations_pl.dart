@@ -1178,4 +1178,12 @@ class AppLocalizationsPl extends AppLocalizations {
   String deleteCalendarBody(String name) {
     return 'Kalendarz $name i wszystkie jego wydarzenia zostaną usunięte z Google, także dla osób, którym go udostępniasz. Tego nie da się cofnąć.';
   }
+
+  @override
+  String get freeNow => 'Wolne';
+
+  @override
+  String ongoingUntil(String time) {
+    return 'Trwa · do $time';
+  }
 }

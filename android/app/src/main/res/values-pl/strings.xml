@@ -8,4 +8,5 @@
     <string name="widget_next">Następne</string>
     <string name="widget_next_small">Następne · mały</string>
     <string name="widget_day_small">Data · mały</string>
+    <string name="widget_clock">Zegar dnia</string>
 </resources>

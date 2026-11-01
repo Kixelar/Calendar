@@ -1166,4 +1166,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String deleteCalendarBody(String name) {
     return 'The $name calendar and all its events are deleted from Google for everyone it is shared with. This cannot be undone.';
   }
+
+  @override
+  String get freeNow => 'Free';
+
+  @override
+  String ongoingUntil(String time) {
+    return 'Now · until $time';
+  }
 }

@@ -329,7 +329,7 @@ void main() {
 
     body = feed(['b']);
     await store.refreshSubscriptions(force: true);
-    expect(g.imported, ['b', 'b']); // 'a' left the file and was deleted
+    expect(g.imported, ['b']); // 'b' did not change, so it was not sent again; 'a' left the file and was deleted
     expect(g.deleted, ['id-a']);
   });
 

@@ -36,6 +36,11 @@ object Device {
                     val lang = java.util.Locale(call.argument<String>("lang")!!)
                     result.success(call.argument<List<String>>("codes")!!.associateWith { java.util.Locale("", it).getDisplayCountry(lang) })
                 }
+                // A widget asked to open a view (MainActivity.open); handed out once.
+                "takeOpen" -> {
+                    result.success(MainActivity.open)
+                    MainActivity.open = null
+                }
                 "testSync" -> {
                     SyncJob.testSoon(context)
                     result.success(null)

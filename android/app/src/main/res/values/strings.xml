@@ -9,4 +9,5 @@
     <string name="widget_next">Next</string>
     <string name="widget_next_small">Next · small</string>
     <string name="widget_day_small">Date · small</string>
+    <string name="widget_clock">Day clock</string>
 </resources>
