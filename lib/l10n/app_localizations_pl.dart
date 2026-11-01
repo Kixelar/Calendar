@@ -1169,4 +1169,12 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get notIcs => 'Pod tym adresem nie ma kalendarza .ics';
+
+  @override
+  String get deleteCalendar => 'Usuń kalendarz';
+
+  @override
+  String deleteCalendarBody(String name) {
+    return 'Kalendarz $name i wszystkie jego wydarzenia zostaną usunięte z Google, także dla osób, którym go udostępniasz. Tego nie da się cofnąć.';
+  }
 }

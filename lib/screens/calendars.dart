@@ -216,6 +216,16 @@ class Calendars extends StatelessWidget {
                     Expanded(child: Text(c.name, maxLines: 1, overflow: TextOverflow.ellipsis)),
                     IconBtn(Icons.ios_share, label: l.shareCalendar(c.name), onTap: () => _go(context, Share(store, c))),
                     toggle(c),
+                    // Google cannot delete the primary calendar (its id is the account e-mail), only other own ones.
+                    if (c.role == 'owner' && c.id != store.email)
+                      IconBtn(Icons.delete_outline, label: l.deleteCalendar, onTap: () async {
+                        if (!await confirm(context, l.deleteCalendar, l.deleteCalendarBody(c.name), l.delete) || !context.mounted) return;
+                        try {
+                          await store.deleteCalendar(c);
+                        } catch (e) {
+                          if (context.mounted) _fail(context, e);
+                        }
+                      }),
                   ]),
               ],
             ),

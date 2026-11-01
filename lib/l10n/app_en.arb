@@ -360,5 +360,8 @@
   "unsubscribe": "Unsubscribe",
   "unsubscribeBody": "The {name} calendar and its events are deleted from Google. You can subscribe again later.",
   "@unsubscribeBody": {"placeholders": {"name": {"type": "String"}}},
-  "notIcs": "This address is not an .ics calendar"
+  "notIcs": "This address is not an .ics calendar",
+  "deleteCalendar": "Delete calendar",
+  "deleteCalendarBody": "The {name} calendar and all its events are deleted from Google for everyone it is shared with. This cannot be undone.",
+  "@deleteCalendarBody": {"placeholders": {"name": {"type": "String"}}}
 }

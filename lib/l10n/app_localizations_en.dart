@@ -1157,4 +1157,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get notIcs => 'This address is not an .ics calendar';
+
+  @override
+  String get deleteCalendar => 'Delete calendar';
+
+  @override
+  String deleteCalendarBody(String name) {
+    return 'The $name calendar and all its events are deleted from Google for everyone it is shared with. This cannot be undone.';
+  }
 }

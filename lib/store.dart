@@ -541,9 +541,14 @@ class Store extends ChangeNotifier {
 
   /// Deletes a subscription's calendar.
   Future<void> unsubscribe(Cal c) async {
-    await g.deleteCalendar(c.id);
+    await deleteCalendar(c);
     await _p.setString('subs', jsonEncode({...subscriptions}..remove(c.id)));
     await _p.remove('subHash.${c.id}');
+  }
+
+  /// Deletes an own calendar and all its events from Google (not the primary one).
+  Future<void> deleteCalendar(Cal c) async {
+    await g.deleteCalendar(c.id);
     await loadCalendars();
     _days.clear();
     notifyListeners();

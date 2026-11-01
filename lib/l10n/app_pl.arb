@@ -311,5 +311,7 @@
   "subscribed": "Subskrybujesz: {name}",
   "unsubscribe": "Anuluj subskrypcję",
   "unsubscribeBody": "Kalendarz {name} i jego wydarzenia zostaną usunięte z Google. Możesz go później subskrybować ponownie.",
-  "notIcs": "Pod tym adresem nie ma kalendarza .ics"
+  "notIcs": "Pod tym adresem nie ma kalendarza .ics",
+  "deleteCalendar": "Usuń kalendarz",
+  "deleteCalendarBody": "Kalendarz {name} i wszystkie jego wydarzenia zostaną usunięte z Google, także dla osób, którym go udostępniasz. Tego nie da się cofnąć."
 }

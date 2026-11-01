@@ -1969,6 +1969,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This address is not an .ics calendar'**
   String get notIcs;
+
+  /// No description provided for @deleteCalendar.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete calendar'**
+  String get deleteCalendar;
+
+  /// No description provided for @deleteCalendarBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The {name} calendar and all its events are deleted from Google for everyone it is shared with. This cannot be undone.'**
+  String deleteCalendarBody(String name);
 }
 
 class _AppLocalizationsDelegate
