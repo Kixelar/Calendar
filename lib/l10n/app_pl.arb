@@ -292,5 +292,16 @@
   "dayOff": "Dzień wolny",
   "hoursFree": "{h}h wolne",
   "wifiOnly": "Tylko Wi-Fi",
-  "wifiOnlyHint": "Synchronizacja automatyczna i w tle czeka na Wi-Fi. Przeciągnięcie listy w dół synchronizuje zawsze."
+  "wifiOnlyHint": "Synchronizacja automatyczna i w tle czeka na Wi-Fi. Przeciągnięcie listy w dół synchronizuje zawsze.",
+  "importFile": "Importuj plik",
+  "importFileHint": "Plik .ics z telefonu",
+  "exportAll": "Eksportuj wszystko",
+  "importExport": "Import i eksport",
+  "importTo": "{n, plural, =1{Importuj 1 wydarzenie do} few{Importuj {n} wydarzenia do} other{Importuj {n} wydarzeń do}}",
+  "importing": "Importowanie {done} z {n}",
+  "importedN": "{n, plural, =1{Zaimportowano 1 wydarzenie} few{Zaimportowano {n} wydarzenia} other{Zaimportowano {n} wydarzeń}}",
+  "failedN": "{n} się nie udało",
+  "icsEmpty": "W pliku nie ma wydarzeń",
+  "exporting": "Eksportowanie…",
+  "fileSaved": "Zapisano plik"
 }

@@ -417,6 +417,27 @@ class GoogleCalendar {
     await api.events.insert(next, e.calId, sendUpdates: send);
   }
 
+  /// Adds an event from an .ics file (04.2 / 05.5). `import` keeps its iCalUID, so importing the same file again
+  /// updates those events instead of doubling them. Guests are not invited.
+  Future<void> importEvent(String calId, gcal.Event e) async {
+    await _authorize(interactive: false);
+    await _api!.events.import(e, calId);
+  }
+
+  /// Every event of a calendar as Google keeps it (series with their rules, changed and cancelled occurrences),
+  /// for the .ics export (05.5).
+  Future<List<gcal.Event>> allEvents(String calId) async {
+    await _authorize(interactive: false);
+    final out = <gcal.Event>[];
+    String? page;
+    do {
+      final r = await _api!.events.list(calId, singleEvents: false, showDeleted: true, maxResults: 2500, pageToken: page);
+      out.addAll((r.items ?? const <gcal.Event>[]).where((e) => e.status != 'cancelled' || e.recurringEventId != null));
+      page = r.nextPageToken;
+    } while (page != null);
+    return out;
+  }
+
   /// Recurrence lines of a series, for the "every 2 weeks" text of an occurrence (03.1).
   Future<List<String>> recurrence(String calId, String seriesId) async {
     await _authorize(interactive: false);

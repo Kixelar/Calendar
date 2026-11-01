@@ -2,6 +2,8 @@
 
 ## 2026.11.01-dev
 ### Added
+- Import an .ics file into a Google calendar (Add calendar → Import file, Settings → Data and privacy); importing the same file again updates its events.
+- Export all shown calendars to one .ics file (Settings → Data and privacy → Export all).
 - Settings → Accounts → "Wi-Fi only": automatic and background sync wait for Wi-Fi (pull to refresh always syncs).
 ### Fixed
 - Widgets follow the app's theme setting (Appearance → Dark / Light); "System" keeps following the phone's dark mode.

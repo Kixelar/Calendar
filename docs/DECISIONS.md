@@ -16,3 +16,9 @@
 - **Place and notes** in 03.2 are edited in a small dialog styled like the mockup's `.dlg` (the mockup shows only the rows).
 - **All-day icon**: sun, centred in the time column. (owner asked for an icon, then for centring)
 - **Left out of the mockup for now** (no function yet, so no dead buttons): search and settings icons, FAB, CalDAV/Outlook button, terms caption.
+- **.ics import** (owner, 2026-11-01): `events.import` keeps each event's UID, so importing a file twice updates instead of
+  doubling; guests are not invited. Changed single occurrences (RECURRENCE-ID) are skipped. Times with unknown zones
+  (e.g. Outlook's Windows names) are read in the phone's zone.
+- **.ics export** "Export all": shown calendars except holidays, one file, saved where the user picks (`file_picker`,
+  also used for opening the file to import). Times keep their zone (TZID) so repeats follow daylight saving time.
+- **Subscribe to address** (webcal): postponed (owner).

@@ -1085,4 +1085,59 @@ class AppLocalizationsPl extends AppLocalizations {
   @override
   String get wifiOnlyHint =>
       'Synchronizacja automatyczna i w tle czeka na Wi-Fi. Przeciągnięcie listy w dół synchronizuje zawsze.';
+
+  @override
+  String get importFile => 'Importuj plik';
+
+  @override
+  String get importFileHint => 'Plik .ics z telefonu';
+
+  @override
+  String get exportAll => 'Eksportuj wszystko';
+
+  @override
+  String get importExport => 'Import i eksport';
+
+  @override
+  String importTo(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Importuj $n wydarzeń do',
+      few: 'Importuj $n wydarzenia do',
+      one: 'Importuj 1 wydarzenie do',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String importing(int done, int n) {
+    return 'Importowanie $done z $n';
+  }
+
+  @override
+  String importedN(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Zaimportowano $n wydarzeń',
+      few: 'Zaimportowano $n wydarzenia',
+      one: 'Zaimportowano 1 wydarzenie',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String failedN(int n) {
+    return '$n się nie udało';
+  }
+
+  @override
+  String get icsEmpty => 'W pliku nie ma wydarzeń';
+
+  @override
+  String get exporting => 'Eksportowanie…';
+
+  @override
+  String get fileSaved => 'Zapisano plik';
 }

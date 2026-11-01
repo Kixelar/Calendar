@@ -1855,6 +1855,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Automatic and background sync wait for Wi-Fi. Pulling down the list always syncs.'**
   String get wifiOnlyHint;
+
+  /// No description provided for @importFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Import file'**
+  String get importFile;
+
+  /// No description provided for @importFileHint.
+  ///
+  /// In en, this message translates to:
+  /// **'.ics file from the phone'**
+  String get importFileHint;
+
+  /// No description provided for @exportAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Export all'**
+  String get exportAll;
+
+  /// No description provided for @importExport.
+  ///
+  /// In en, this message translates to:
+  /// **'Import and export'**
+  String get importExport;
+
+  /// No description provided for @importTo.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{Import 1 event to} other{Import {n} events to}}'**
+  String importTo(int n);
+
+  /// No description provided for @importing.
+  ///
+  /// In en, this message translates to:
+  /// **'Importing {done} of {n}'**
+  String importing(int done, int n);
+
+  /// No description provided for @importedN.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{Imported 1 event} other{Imported {n} events}}'**
+  String importedN(int n);
+
+  /// No description provided for @failedN.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} failed'**
+  String failedN(int n);
+
+  /// No description provided for @icsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No events in this file'**
+  String get icsEmpty;
+
+  /// No description provided for @exporting.
+  ///
+  /// In en, this message translates to:
+  /// **'Exporting…'**
+  String get exporting;
+
+  /// No description provided for @fileSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'File saved'**
+  String get fileSaved;
 }
 
 class _AppLocalizationsDelegate

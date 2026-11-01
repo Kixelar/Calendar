@@ -4,12 +4,16 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'dart:ui' show Locale, PlatformDispatcher;
+import 'package:googleapis/calendar/v3.dart' as gcal;
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'google.dart';
+import 'ics.dart';
 import 'l10n/app_localizations.dart';
 import 'notify.dart';
+import 'package:timezone/data/latest.dart' as tzdata;
+import 'package:timezone/timezone.dart' as tz;
 import 'view.dart';
 
 DateTime dayOf(DateTime t) => DateTime(t.year, t.month, t.day);
@@ -454,6 +458,38 @@ class Store extends ChangeNotifier {
     } on MissingPluginException {
       return const {};
     }
+  }
+
+  /// Events of an .ics file (04.2 / 05.5), ready to import.
+  Future<List<gcal.Event>> readIcs(String text) async {
+    if (!tz.timeZoneDatabase.isInitialized) tzdata.initializeTimeZones();
+    return parseIcs(text, local: await timeZone());
+  }
+
+  /// Adds [evs] to [calId] one by one; [progress] gets how many are done. Returns how many failed.
+  Future<int> importIcs(List<gcal.Event> evs, String calId, void Function(int) progress) async {
+    var failed = 0;
+    for (final (i, e) in evs.indexed) {
+      try {
+        await g.importEvent(calId, e);
+      } catch (_) {
+        failed++;
+      }
+      progress(i + 1);
+    }
+    _days.clear();
+    notifyListeners();
+    return failed;
+  }
+
+  /// All events of the shown calendars (holidays left out) as one .ics file (05.5 "Export all").
+  Future<String> exportIcs() async {
+    if (!tz.timeZoneDatabase.isInitialized) tzdata.initializeTimeZones();
+    final all = [
+      for (final c in cals)
+        if (c.on && !c.holiday && !c.id.startsWith('#')) ...await g.allEvents(c.id),
+    ];
+    return writeIcs(all, local: await timeZone());
   }
 
   Future<void> save(Ev e, {String? fromCal, bool force = false}) async {

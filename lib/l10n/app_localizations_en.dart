@@ -1075,4 +1075,57 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get wifiOnlyHint =>
       'Automatic and background sync wait for Wi-Fi. Pulling down the list always syncs.';
+
+  @override
+  String get importFile => 'Import file';
+
+  @override
+  String get importFileHint => '.ics file from the phone';
+
+  @override
+  String get exportAll => 'Export all';
+
+  @override
+  String get importExport => 'Import and export';
+
+  @override
+  String importTo(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Import $n events to',
+      one: 'Import 1 event to',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String importing(int done, int n) {
+    return 'Importing $done of $n';
+  }
+
+  @override
+  String importedN(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Imported $n events',
+      one: 'Imported 1 event',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String failedN(int n) {
+    return '$n failed';
+  }
+
+  @override
+  String get icsEmpty => 'No events in this file';
+
+  @override
+  String get exporting => 'Exporting…';
+
+  @override
+  String get fileSaved => 'File saved';
 }

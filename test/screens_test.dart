@@ -1,11 +1,13 @@
 // Logic checks, plus screen renders to PNG for comparing with the mockup without a device:
 //   $env:CAL_SHOTS='C:\some\folder'; flutter test test/screens_test.dart
+import 'dart:convert';
 import 'dart:io';
 import 'dart:ui' as ui;
 
 import 'package:calendar/google.dart';
 import 'package:calendar/l10n/app_localizations.dart';
 import 'package:calendar/help.dart';
+import 'package:calendar/ics.dart';
 import 'package:calendar/main.dart';
 import 'package:calendar/notify.dart';
 import 'package:calendar/rrule.dart';
@@ -29,6 +31,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:timezone/data/latest.dart' as tzdata;
 
 final _out = Platform.environment['CAL_SHOTS'];
 
@@ -198,6 +201,37 @@ void main() {
     expect(xs.last.end, 1440); // clipped at midnight
     expect(hourRange(xs), (8, 24));
     expect(hourRange(const []), (8, 22));
+  });
+
+  test('.ics: import reads zones, all-day, durations, repeats; export round-trips', () {
+    tzdata.initializeTimeZones();
+    const file = 'BEGIN:VCALENDAR\r\nBEGIN:VTIMEZONE\r\nTZID:Europe/Warsaw\r\nBEGIN:STANDARD\r\nDTSTART:19701025T030000\r\nEND:STANDARD\r\nEND:VTIMEZONE\r\n'
+        'BEGIN:VEVENT\r\nUID:a@x\r\nDTSTART;TZID=Europe/Warsaw:20261030T140000\r\nDTEND;TZID=Europe/Warsaw:20261030T150000\r\n'
+        'SUMMARY:Demo\\, sprint\r\nLOCATION:Sala 4B\r\nDESCRIPTION:line one\\nline two that is long enough to be\r\n  folded\r\n'
+        'RRULE:FREQ=WEEKLY;BYDAY=FR\r\nEXDATE;TZID=Europe/Warsaw:20261106T140000\r\nBEGIN:VALARM\r\nTRIGGER:-PT10M\r\nEND:VALARM\r\nEND:VEVENT\r\n'
+        'BEGIN:VEVENT\r\nUID:b@x\r\nDTSTART;VALUE=DATE:20261101\r\nSUMMARY:Wszystkich Świętych\r\nEND:VEVENT\r\n'
+        'BEGIN:VEVENT\r\nUID:c@x\r\nDTSTART:20261031T090000Z\r\nDURATION:PT1H30M\r\nSUMMARY:Call\r\nEND:VEVENT\r\n'
+        'BEGIN:VEVENT\r\nUID:a@x\r\nRECURRENCE-ID;TZID=Europe/Warsaw:20261113T140000\r\nDTSTART;TZID=Europe/Warsaw:20261113T160000\r\nSUMMARY:Moved\r\nEND:VEVENT\r\n'
+        'BEGIN:VEVENT\r\nUID:d@x\r\nSTATUS:CANCELLED\r\nDTSTART:20261031T090000Z\r\nSUMMARY:Gone\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n';
+    final evs = parseIcs(file, local: 'Europe/Warsaw');
+    expect(evs.map((e) => e.summary), ['Demo, sprint', 'Wszystkich Świętych', 'Call']);
+    final demo = evs.first;
+    expect(demo.iCalUID, 'a@x');
+    expect(demo.start!.dateTime!.toUtc(), DateTime.utc(2026, 10, 30, 13)); // CET, after the October change
+    expect(demo.start!.timeZone, 'Europe/Warsaw');
+    expect(demo.description, 'line one\nline two that is long enough to be folded');
+    expect(demo.recurrence, ['RRULE:FREQ=WEEKLY;BYDAY=FR', 'EXDATE;TZID=Europe/Warsaw:20261106T140000']);
+    expect(evs[1].start!.date, DateTime.utc(2026, 11, 1));
+    expect(evs[1].end!.date, DateTime.utc(2026, 11, 2));
+    expect(evs[2].end!.dateTime!.toUtc(), DateTime.utc(2026, 10, 31, 10, 30));
+
+    final out = writeIcs(evs, local: 'Europe/Warsaw');
+    expect(out.split('\r\n').every((line) => utf8.encode(line).length <= 75), isTrue);
+    expect(out, contains('DTSTART;TZID=Europe/Warsaw:20261030T140000'));
+    expect(out, contains('DTSTART;VALUE=DATE:20261101'));
+    final again = parseIcs(out, local: 'Europe/Warsaw');
+    String key(e) => '${e.summary}|${e.iCalUID}|${e.description}|${e.recurrence}|${e.start!.toJson()}|${e.end!.toJson()}';
+    expect(again.map(key), evs.map(key));
   });
 
   test('ISO week numbers', () {

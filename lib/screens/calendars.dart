@@ -1,6 +1,11 @@
+import 'dart:convert';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+
+import 'package:googleapis/calendar/v3.dart' as gcal;
 
 import '../google.dart';
 import '../l10n/app_localizations.dart';
@@ -99,6 +104,88 @@ Widget _closeBar(BuildContext c) => Padding(
 
 void _go(BuildContext c, Widget page) => Navigator.push(c, MaterialPageRoute(builder: (_) => page));
 
+void _say(BuildContext c, String text) => ScaffoldMessenger.of(c).showSnackBar(SnackBar(content: Text(text)));
+
+/// Small blocking dialog while a long job runs (import, export).
+void _busy(BuildContext context, Widget child) => showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      barrierColor: const Color(0xA3000000),
+      builder: (c) => PopScope(
+        canPop: false,
+        child: Dialog(
+          backgroundColor: Tok.of(c).surfaceRaised,
+          child: Padding(padding: const EdgeInsets.all(24), child: child),
+        ),
+      ),
+    );
+
+/// 04.2 / 05.5 "Import file": an .ics from the phone into a chosen Google calendar.
+Future<void> importIcsFile(BuildContext context, Store store) async {
+  final l = l10n(context), t = Tok.of(context);
+  final file = await FilePicker.pickFile();
+  if (file == null || !context.mounted) return;
+  final List<gcal.Event> evs;
+  try {
+    evs = await store.readIcs(utf8.decode(await file.readAsBytes(), allowMalformed: true));
+  } catch (e) {
+    if (context.mounted) _fail(context, e);
+    return;
+  }
+  if (!context.mounted) return;
+  if (evs.isEmpty) return _say(context, l.icsEmpty);
+  final cal = await pick<String?>(context, Pick(
+    title: l.importTo(evs.length),
+    selected: null,
+    options: [for (final c in store.writable) (c.id, c.name)],
+    leading: (id) => Marker(store.cal(id!)?.shape ?? Shape.dot),
+  ));
+  if (cal?.$1 == null || !context.mounted) return;
+  final done = ValueNotifier(0);
+  _busy(
+    context,
+    ValueListenableBuilder(
+      valueListenable: done,
+      builder: (c, n, _) => Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, spacing: 16, children: [
+        Text(l.importing(n, evs.length), style: T.body(t.display)),
+        LinearProgressIndicator(value: n / evs.length, color: t.display, backgroundColor: t.borderSubtle),
+      ]),
+    ),
+  );
+  final failed = await store.importIcs(evs, cal!.$1!, (n) => done.value = n);
+  if (!context.mounted) return;
+  Navigator.pop(context);
+  _say(context, [l.importedN(evs.length - failed), if (failed > 0) l.failedN(failed)].join(' · '));
+}
+
+/// 05.5 "Export all": one .ics with the shown calendars, saved where the user picks.
+Future<void> exportIcsFile(BuildContext context, Store store) async {
+  final l = l10n(context), t = Tok.of(context);
+  _busy(context, Row(spacing: 16, children: [
+    SizedBox.square(dimension: 16, child: CircularProgressIndicator(strokeWidth: 1.5, color: t.display)),
+    Text(l.exporting, style: T.body(t.display)),
+  ]));
+  String text;
+  try {
+    text = await store.exportIcs();
+  } catch (e) {
+    if (context.mounted) {
+      Navigator.pop(context);
+      _fail(context, e);
+    }
+    return;
+  }
+  if (!context.mounted) return;
+  Navigator.pop(context);
+  final now = DateTime.now();
+  final saved = await FilePicker.saveFile(
+    fileName: 'calendar-${DateFormat('yyyy-MM-dd').format(now)}.ics',
+    bytes: utf8.encode(text),
+    mimeType: 'text/calendar',
+  );
+  if (saved != null && context.mounted) _say(context, l.fileSaved);
+}
+
 /// 04.1: which calendars show up, grouped as mine, shared with me and subscriptions.
 class Calendars extends StatelessWidget {
   const Calendars(this.store, {super.key, required this.backLabel});
@@ -192,6 +279,7 @@ class AddCalendar extends StatelessWidget {
         }),
         option(Icons.wb_sunny_outlined, l.holidaysAndDaysOff, l.holidaysHint, () => _go(context, Holidays(store))),
         option(Icons.person_outline, l.googleAccount, l.googleAccountHint, () => _go(context, Connect(store))),
+        option(Icons.file_download_outlined, l.importFile, l.importFileHint, () => importIcsFile(context, store)),
       ]),
     ]);
   }

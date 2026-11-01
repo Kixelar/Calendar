@@ -350,6 +350,11 @@ class DataPrivacy extends StatelessWidget {
             Section(left: l.privacy, children: [
               _switch(l.hideOnLockScreen, store.hideOnLock, (v) => store.set('hideOnLock', v)),
             ]),
+            if (store.signedIn)
+              Section(left: l.importExport, children: [
+                ValueRow(l.importFile, value: '.ics', onTap: () => importIcsFile(context, store)),
+                ValueRow(l.exportAll, value: '.ics', onTap: () => exportIcsFile(context, store)),
+              ]),
             Section(left: l.device, children: [
               RowItem(
                 onTap: () async {

@@ -17,10 +17,11 @@ lib/
   screens/repeat.dart      03.3 custom repeat; rules live in lib/rrule.dart (parse, format, Polish/English sentence; tested)
   screens/invite.dart      03.4 invite guests (suggestions = guests of loaded events, Store.people)
   screens/search.dart      02.5 search in the events on the phone (`Store.search`: substrings, Polish letters folded, two years back and ahead)
-  screens/calendars.dart   04.1 calendars, 04.2 add, 04.3 holidays (Google holiday calendars by country), 04.4 share (ACL), 04.5 shared with you
+  screens/calendars.dart   .ics import/export flows (file_picker), 04.1 calendars, 04.2 add, 04.3 holidays (Google holiday calendars by country), 04.4 share (ACL), 04.5 shared with you
   screens/settings.dart    05.1 settings, 05.2 appearance, 05.4 accounts, 05.5 data, 05.6/05.7 help (texts in lib/help.dart), 05.8 about
   screens/notifications.dart  05.3 notification settings
   notify.dart              07.3 notifications: plan() (pure, tested) + Notifier (flutter_local_notifications)
+  ics.dart                 .ics import (parseIcs → Google events) and export (writeIcs, TZID times, folded lines); tested
   view.dart                `Look`: 05.2 view settings as globals for widgets without a Store (time format, fonts, week layout)
   screens/event.dart       03.1 event details, 03.2 new/edit event, 06.2 delete dialog, calendar picker
 android/app/src/main/res/values*/strings.xml   Launcher name and widget names per device language

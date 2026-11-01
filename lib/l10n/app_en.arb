@@ -335,5 +335,20 @@
   "hoursFree": "{h}h free",
   "@hoursFree": {"placeholders": {"h": {"type": "int"}}},
   "wifiOnly": "Wi-Fi only",
-  "wifiOnlyHint": "Automatic and background sync wait for Wi-Fi. Pulling down the list always syncs."
+  "wifiOnlyHint": "Automatic and background sync wait for Wi-Fi. Pulling down the list always syncs.",
+  "importFile": "Import file",
+  "importFileHint": ".ics file from the phone",
+  "exportAll": "Export all",
+  "importExport": "Import and export",
+  "importTo": "{n, plural, =1{Import 1 event to} other{Import {n} events to}}",
+  "@importTo": {"placeholders": {"n": {"type": "int"}}},
+  "importing": "Importing {done} of {n}",
+  "@importing": {"placeholders": {"done": {"type": "int"}, "n": {"type": "int"}}},
+  "importedN": "{n, plural, =1{Imported 1 event} other{Imported {n} events}}",
+  "@importedN": {"placeholders": {"n": {"type": "int"}}},
+  "failedN": "{n} failed",
+  "@failedN": {"placeholders": {"n": {"type": "int"}}},
+  "icsEmpty": "No events in this file",
+  "exporting": "Exporting…",
+  "fileSaved": "File saved"
 }

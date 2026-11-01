@@ -18,8 +18,8 @@ Screen numbers refer to docs/design/mockup.html; the month, week and day views f
 - [x] 04.1 Calendars, 04.2 Add calendar, 04.3 Holidays, 04.4 Share calendar, 04.5 Shared with you
 - [x] 05.1–05.8 Settings, appearance, notifications, accounts, data & privacy, help, about
 - [x] 05.4 background sync when the app is closed (JobScheduler, SyncJob.kt), "Wi-Fi only"
-- [ ] 04.2 / 05.5 import an .ics file into a Google calendar (agreed, 2026-11-01)
-- [ ] 05.5 export calendars to an .ics file (agreed, 2026-11-01)
+- [x] 04.2 / 05.5 import an .ics file into a Google calendar (2026-11-01)
+- [x] 05.5 export the shown calendars to an .ics file (2026-11-01)
 - [ ] 04.2 "Subscribe to address" (.ics / webcal): later; the Calendar API cannot add URL subscriptions, so it would be a
       periodic download into a chosen calendar
 - [ ] 04.5 "Ask for edit rights": the API cannot ask; only an e-mail to the owner from the user's mail app (owner thinks it over)
