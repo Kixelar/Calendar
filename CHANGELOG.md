@@ -15,7 +15,7 @@
 ### Fixed
 - Widgets follow the app's theme setting (Appearance → Dark / Light); "System" keeps following the phone's dark mode.
 ### Changed
-- Address subscriptions are much faster: events go to Google 8 at a time, and a refresh sends only events that changed.
+- Address subscriptions are much faster: events go to Google 4 at a time (waiting and trying again when Google reports its rate limit), and a refresh sends only events that changed. A subscription that fails is taken back, so no half-filled calendar stays behind.
 - Contacts' birthdays are no longer shown: the Birthdays calendar and birthday events are gone (owner).
 - Settings: the account row at the top opens accounts and sync (the separate "Accounts and sync" row is gone); without an account it says "Not signed in".
 - Accounts: "Add account" only when no Google account is signed in.

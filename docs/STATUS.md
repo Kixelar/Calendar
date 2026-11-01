@@ -49,7 +49,7 @@
 - Gradle/Java does not run in Claude's sandbox: build APKs in the owner's terminal (docs/WORKFLOW.md), and run
   `flutter pub get` there after adding packages (different pub cache).
 - Build numbers must keep growing: 30000000 + minutes since 2026-01-01 UTC, and never below the last one sent
-  (30438805 on 2026-11-01).
+  (30438816 on 2026-11-01).
 - `google_sign_in` 7.x gives no refresh token: always get the token through `GoogleCalendar._authorize` before an API call.
 - Builds are signed with the app's own key in `<keystore folder>/` (docs/WORKFLOW.md); its SHA-1 is in the Android OAuth client.
 - ARB files: append keys as text; re-dumping them with a JSON tool reformats the whole file.

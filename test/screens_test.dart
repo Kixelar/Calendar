@@ -137,6 +137,25 @@ class _SubGoogle extends _FakeGoogle {
   }
 }
 
+/// Creates the subscription calendar, then fails to import (not a rate limit).
+class _FailingSubGoogle extends _SubGoogle {
+  final deletedCalendars = <String>[];
+  @override
+  Future<void> importEvent(String calId, gcal.Event e) async => throw StateError('no');
+  @override
+  Future<void> deleteCalendar(String id) async => deletedCalendars.add(id);
+}
+
+/// The first import hits Google's rate limit.
+class _LimitedSubGoogle extends _SubGoogle {
+  var tries = 0;
+  @override
+  Future<void> importEvent(String calId, gcal.Event e) async {
+    if (++tries == 1) throw gcal.DetailedApiRequestError(403, 'Rate Limit Exceeded');
+    await super.importEvent(calId, e);
+  }
+}
+
 /// No network: every Google call fails, as on a phone without internet.
 class _OfflineGoogle extends GoogleCalendar {
   @override
@@ -247,6 +266,42 @@ void main() {
     final again = parseIcs(out, local: 'Europe/Warsaw');
     String key(e) => '${e.summary}|${e.iCalUID}|${e.description}|${e.recurrence}|${e.start!.toJson()}|${e.end!.toJson()}';
     expect(again.map(key), evs.map(key));
+  });
+
+  test('address subscription: a failed copy takes the new calendar back', () async {
+    SharedPreferences.setMockInitialValues({'onboarded': true, 'google': true});
+    final overrides = HttpOverrides.current;
+    HttpOverrides.global = null;
+    addTearDown(() => HttpOverrides.global = overrides);
+    final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+    server.listen((r) => r.response
+      ..write('BEGIN:VCALENDAR\r\nBEGIN:VEVENT\r\nUID:x\r\nDTSTART:20261107T150000Z\r\nSUMMARY:M\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n')
+      ..close());
+    addTearDown(server.close);
+    final g = _FailingSubGoogle();
+    final store = Store(g, Directory.systemTemp.createTempSync());
+    await store.start();
+    await expectLater(store.subscribe('http://127.0.0.1:${server.port}/x.ics'), throwsA(isA<StateError>()));
+    expect(store.subscriptions, isEmpty);
+    expect(g.deletedCalendars, ['sub1']);
+  });
+
+  test('address subscription: waits and tries again when Google hits its rate limit', () async {
+    SharedPreferences.setMockInitialValues({'onboarded': true, 'google': true});
+    final overrides = HttpOverrides.current;
+    HttpOverrides.global = null;
+    addTearDown(() => HttpOverrides.global = overrides);
+    final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+    server.listen((r) => r.response
+      ..write('BEGIN:VCALENDAR\r\nBEGIN:VEVENT\r\nUID:x\r\nDTSTART:20261107T150000Z\r\nSUMMARY:M\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n')
+      ..close());
+    addTearDown(server.close);
+    final g = _LimitedSubGoogle();
+    final store = Store(g, Directory.systemTemp.createTempSync());
+    await store.start();
+    await store.subscribe('http://127.0.0.1:${server.port}/x.ics');
+    expect(g.imported, ['x']);
+    expect(g.tries, 2);
   });
 
   test('names sort the Polish way', () {

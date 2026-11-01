@@ -542,7 +542,17 @@ class Store extends ChangeNotifier {
     final name = icsName(text) ?? Uri.parse(url).host;
     final id = await g.createCalendar(name, await timeZone());
     await _p.setString('subs', jsonEncode({...subscriptions, id: url}));
-    await _copyFeed(id, text);
+    try {
+      await _copyFeed(id, text);
+    } catch (_) {
+      // A half-filled calendar would stay behind (and a second try would make another): take it back.
+      await _p.setString('subs', jsonEncode({...subscriptions}..remove(id)));
+      await _p.remove('subEv.$id');
+      try {
+        await g.deleteCalendar(id);
+      } catch (_) {}
+      rethrow;
+    }
     await loadCalendars();
     if (cal(id) case final c? when !c.on) await toggle(c, true);
     _days.clear();
@@ -590,19 +600,32 @@ class Store extends ChangeNotifier {
     // Only events that changed since the last copy are sent (UID -> hash of the event), 8 at a time.
     final sent = {...?(jsonDecode(_p.getString('subEv.$id') ?? '{}') as Map?)?.cast<String, String>()};
     final now = {for (final e in evs) e.iCalUID!: '${fnv(jsonEncode(e))}'};
-    await _each([for (final e in evs) if (sent[e.iCalUID] != now[e.iCalUID]) e], (e) => g.importEvent(id, e));
+    await _each([for (final e in evs) if (sent[e.iCalUID] != now[e.iCalUID]) e], (e) => _retry(() => g.importEvent(id, e)));
     final gone = sent.keys.where((u) => !now.containsKey(u)).toSet();
     if (gone.isNotEmpty) {
       final drop = [for (final e in await g.allEvents(id)) if (e.recurringEventId == null && gone.contains(e.iCalUID)) e.id!];
-      await _each(drop, (e) => g.deleteEvent(id, e));
+      await _each(drop, (e) => _retry(() => g.deleteEvent(id, e)));
     }
     await _p.setString('subEv.$id', jsonEncode(now));
     await _p.setString('subHash.$id', hash);
     _days.clear();
   }
 
-  /// Runs [f] on every item, [at] at a time.
-  static Future<void> _each<T>(List<T> items, Future<void> Function(T) f, {int at = 8}) async {
+  /// Runs [f] on [call] again after 1, 2, 4, 8 and 16 s while Google says the rate limit is hit (403 / 429).
+  static Future<void> _retry(Future<void> Function() call) async {
+    for (var wait = 1;; wait *= 2) {
+      try {
+        return await call();
+      } on gcal.DetailedApiRequestError catch (e) {
+        final limit = e.status == 429 || (e.status == 403 && (e.message ?? '').toLowerCase().contains('rate limit'));
+        if (!limit || wait > 16) rethrow;
+        await Future<void>.delayed(Duration(seconds: wait));
+      }
+    }
+  }
+
+  /// Runs [f] on every item, [at] at a time (Google's per-user write limit allows only a few at once).
+  static Future<void> _each<T>(List<T> items, Future<void> Function(T) f, {int at = 4}) async {
     var next = 0;
     Future<void> worker() async {
       while (next < items.length) {
