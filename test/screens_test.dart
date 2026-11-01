@@ -233,6 +233,11 @@ void main() {
     expect(again.map(key), evs.map(key));
   });
 
+  test('names sort the Polish way', () {
+    final names = ['Zimbabwe', 'Łotwa', 'Luksemburg', 'Macedonia', 'Święta Lucia', 'Szwecja', 'Tajlandia']..sort((a, b) => sortKey(a).compareTo(sortKey(b)));
+    expect(names, ['Luksemburg', 'Łotwa', 'Macedonia', 'Szwecja', 'Święta Lucia', 'Tajlandia', 'Zimbabwe']);
+  });
+
   test('ISO week numbers', () {
     expect(isoWeek(DateTime(2026, 10, 30)), 44);
     expect(isoWeek(DateTime(2027, 1, 1)), 53); // Friday: belongs to the last week of 2026

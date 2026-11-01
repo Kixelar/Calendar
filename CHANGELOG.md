@@ -2,7 +2,7 @@
 
 ## 2026.11.01-dev
 ### Added
-- Holidays: every country Google has a holiday calendar for (244, names in the phone's language); a country can be removed.
+- Holidays: every country Google has a holiday calendar for (244, names in the phone's language); a country can be removed. Names sort the Polish way (Łotwa after Luksemburg, not after Zimbabwe).
 - Tapping a view tab (year, month, week, day) twice quickly jumps back to today.
 - Import an .ics file into a Google calendar (Add calendar → Import file, Settings → Data and privacy); importing the same file again updates its events.
 - Export all shown calendars to one .ics file (Settings → Data and privacy → Export all).

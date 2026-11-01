@@ -295,6 +295,10 @@ const _holidayNames = {'at': 'austrian', 'au': 'australian', 'bg': 'bulgarian', 
 /// Holiday calendar of [code] with holiday names in [lang] (pl or en).
 String holidayId(String code, String lang) => '$lang.${_holidayNames[code] ?? code}#holiday@group.v.calendar.google.com';
 
+/// Key for sorting names the Polish way: Ą after A, Ł after L, Ś after S... (plain compareTo puts them after Z).
+String sortKey(String s) =>
+    s.toLowerCase().replaceAllMapped(RegExp('[ąćęłńóśźż]'), (m) => '${'acelnoszz'['ąćęłńóśźż'.indexOf(m[0]!)]}\u007f');
+
 /// Country code of a holiday calendar id in any language, e.g. "pl.polish#holiday@..." → "pl".
 String? holidayCode(String calId) {
   final name = calId.split('#').first.split('.').last;
@@ -339,7 +343,7 @@ class Holidays extends StatelessWidget {
                   final names = await store.countryNames(holidayCodes, lang);
                   if (!context.mounted) return;
                   final options = [for (final c in holidayCodes) if (!have.contains(c)) (c, names[c] ?? c.toUpperCase())]
-                    ..sort((a, b) => a.$2.toLowerCase().compareTo(b.$2.toLowerCase()));
+                    ..sort((a, b) => sortKey(a.$2).compareTo(sortKey(b.$2)));
                   final p = await pick<String>(context, Pick(title: l.country, selected: '', options: options));
                   if (p == null || !context.mounted) return;
                   try {
