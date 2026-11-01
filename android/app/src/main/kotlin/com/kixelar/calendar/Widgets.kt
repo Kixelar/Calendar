@@ -41,6 +41,7 @@ object Widgets {
         val tomorrow: String = json.optString("tomorrow", "Tomorrow")
         val noEvents: String = json.optString("noEvents", "No events")
         val use24h: Boolean = json.optBoolean("use24h", true)
+        val theme: String = json.optString("theme", "system") // the app's Appearance setting: dark, light or system
         val events: List<Ev> = json.optJSONArray("events")?.let { a ->
             (0 until a.length()).map { i ->
                 val e = a.getJSONObject(i)
@@ -136,8 +137,11 @@ abstract class CalendarWidget : AppWidgetProvider() {
         }
         // Both themes are sent; layout/ and layout-night/ show one of them, so the launcher switches with the system theme.
         val views = RemoteViews(context.packageName, R.layout.widget_image)
-        views.setImageViewBitmap(R.id.widget_light, bitmap(false))
-        views.setImageViewBitmap(R.id.widget_dark, bitmap(true))
+        // "system" sends both and the layouts pick by night mode; a fixed app theme puts the same look in both slots.
+        val light = if (data.theme == "dark") bitmap(true) else bitmap(false)
+        val dark = if (data.theme == "light") light else if (data.theme == "dark") light else bitmap(true)
+        views.setImageViewBitmap(R.id.widget_light, light)
+        views.setImageViewBitmap(R.id.widget_dark, dark)
         val open = context.packageManager.getLaunchIntentForPackage(context.packageName)
         views.setOnClickPendingIntent(R.id.widget_root,
             PendingIntent.getActivity(context, 0, open, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT))

@@ -96,6 +96,7 @@ class Store extends ChangeNotifier {
       'tomorrow': l.tomorrow,
       'noEvents': l.noEvents,
       'use24h': use24h,
+      'theme': theme,
       'events': [
         for (final e in evs) {'t': e.title, 's': e.start.millisecondsSinceEpoch, 'e': e.end.millisecondsSinceEpoch, 'a': e.allDay},
       ],

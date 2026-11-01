@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026.11.01-dev
+### Fixed
+- Widgets follow the app's theme setting (Appearance → Dark / Light); "System" keeps following the phone's dark mode.
+
 ## 2026.10.31-dev
 ### Added
 - 01.4 sync screen after choosing calendars: events counter, progress, status per calendar, "Run in background".

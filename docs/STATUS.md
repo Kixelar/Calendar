@@ -1,6 +1,6 @@
 # Status
 
-**Version:** `2026.10.31-dev` (branch `dev`). Nothing released on `main` yet.
+**Version:** `2026.11.01-dev` (branch `dev`). Nothing released on `main` yet.
 
 ## Done (all mockup screens that the Google Calendar API supports)
 - 01 onboarding: welcome, connect Google, choose calendars, sync progress.
@@ -21,8 +21,8 @@
   background sync (WorkManager), invitation replies after the organizer fix.
 
 ## Open (owner's test, 2026-10-31, build 30437026)
-- **Widget theme switching does not work**: widgets do not change between light and dark with the system theme
-  (layout/ vs layout-night/ approach in Widgets.kt). Not investigated yet.
+- Widget theme: following the system's dark mode works (checked over adb with `cmd uimode night`); widgets ignored the
+  app's own theme setting. Fixed in 30438477 (theme passed to Widgets.kt); owner to confirm.
 - Owner asked what happens when an invitation notification is dismissed: nothing is sent; the invitation stays
   unanswered in Google, the app does not notify about it again (`seenInvites`), and it can still be answered from the
   event (03.5 screen).
@@ -48,7 +48,7 @@
 - Gradle/Java does not run in Claude's sandbox: build APKs in the owner's terminal (docs/WORKFLOW.md), and run
   `flutter pub get` there after adding packages (different pub cache).
 - Build numbers must keep growing: 30000000 + minutes since 2026-01-01 UTC, and never below the last one sent
-  (30437159 on 2026-10-31).
+  (30438477 on 2026-11-01).
 - `google_sign_in` 7.x gives no refresh token: always get the token through `GoogleCalendar._authorize` before an API call.
 - Builds are signed with the app's own key in `<keystore folder>/` (docs/WORKFLOW.md); its SHA-1 is in the Android OAuth client.
 - ARB files: append keys as text; re-dumping them with a JSON tool reformats the whole file.
