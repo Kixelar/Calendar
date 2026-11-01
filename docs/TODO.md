@@ -47,6 +47,6 @@ Screen numbers refer to docs/design/mockup.html.
 - [ ] Glyph interface on Nothing phones (Glyph Developer Kit)
 - [x] Release signing key
 - [x] App icon
-- [ ] Widgets do not switch light/dark with the system theme (owner, 2026-10-31)
+- [x] Widgets follow the app theme setting (2026-11-01)
 - [x] Background sync confirmed on the phone (2026-11-01)
 - Google Tasks: dropped (owner, 2026-10-31)

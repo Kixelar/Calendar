@@ -167,8 +167,9 @@ def next_small(cv, t):
 
 
 def day_small(cv, t):
-    cv.circle(cv.w / 2, cv.h / 2, min(cv.w, cv.h) / 2, 'display')
-    cv.mid(str(TODAY), cv.w / 2, cv.h / 2, dot(40), 'bg', 'm')
+    r = min(cv.w, cv.h) / 2
+    cv.d.ellipse([cv.w / 2 - r, cv.h / 2 - r, cv.w / 2 + r - 1, cv.h / 2 + r - 1], fill=cv.c['surface'], outline=cv.c['border'], width=S)
+    cv.mid(str(TODAY), cv.w / 2, cv.h / 2, dot(40), 'display', 'm')
 
 
 WIDGETS = {'month': (month, 336, 336), 'today': (today, 336, 160), 'week': (week, 336, 72), 'date': (date, 160, 160),

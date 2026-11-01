@@ -21,8 +21,6 @@
   background sync (WorkManager), invitation replies after the organizer fix.
 
 ## Open (owner's test, 2026-10-31, build 30437026)
-- Widget theme: following the system's dark mode works (checked over adb with `cmd uimode night`); widgets ignored the
-  app's own theme setting. Fixed in 30438477 (theme passed to Widgets.kt); owner to confirm.
 - Owner asked what happens when an invitation notification is dismissed: nothing is sent; the invitation stays
   unanswered in Google, the app does not notify about it again (`seenInvites`), and it can still be answered from the
   event (03.5 screen).
@@ -34,6 +32,9 @@
 - Background sync never ran: scheduling threw `SecurityException: ACCESS_NETWORK_STATE required for jobs with a
   connectivity constraint` (WorkManager used to add that permission). Added in 30437159; confirmed on the owner's phone
   (widgets update with the app closed, 2026-11-01).
+
+- Widget theme: widgets ignored the app's own theme setting; fixed in 30438477, confirmed by the owner (2026-11-01).
+  1×1 widget restyled to the theme's card colour (owner's choice, 30438483).
 
 ## Waiting for the owner (decisions or material)
 - **Glyph Interface** (05.3 section, 07.3 countdown): yes, later (owner, 2026-10-31).
@@ -48,7 +49,7 @@
 - Gradle/Java does not run in Claude's sandbox: build APKs in the owner's terminal (docs/WORKFLOW.md), and run
   `flutter pub get` there after adding packages (different pub cache).
 - Build numbers must keep growing: 30000000 + minutes since 2026-01-01 UTC, and never below the last one sent
-  (30438477 on 2026-11-01).
+  (30438483 on 2026-11-01).
 - `google_sign_in` 7.x gives no refresh token: always get the token through `GoogleCalendar._authorize` before an API call.
 - Builds are signed with the app's own key in `<keystore folder>/` (docs/WORKFLOW.md); its SHA-1 is in the Android OAuth client.
 - ARB files: append keys as text; re-dumping them with a JSON tool reformats the whole file.

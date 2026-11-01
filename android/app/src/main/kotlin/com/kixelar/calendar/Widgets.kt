@@ -391,10 +391,12 @@ class NextSmallWidget : CalendarWidget() {
     }
 }
 
-/** 1x1: today's date in a filled circle. */
+/** 1x1: today's date in a circle in the theme's card colour, like the other widgets (owner's choice over the mockup's inverted fill). */
 class DaySmallWidget : CalendarWidget() {
     override fun draw(p: Painter) = with(p) {
-        circle(w / 2, h / 2, minOf(w, h) / 2, col.display)
-        mid("${now.get(Calendar.DAY_OF_MONTH)}", w / 2, h / 2, dot(40f, col.bg), Paint.Align.CENTER)
+        val r = minOf(w, h) / 2
+        circle(w / 2, h / 2, r, col.surface)
+        c.drawCircle(w / 2, h / 2, r - dp(0.5f), Paint(Paint.ANTI_ALIAS_FLAG).apply { color = col.border; style = Paint.Style.STROKE; strokeWidth = dp(1f) })
+        mid("${now.get(Calendar.DAY_OF_MONTH)}", w / 2, h / 2, dot(40f, col.display), Paint.Align.CENTER)
     }
 }
