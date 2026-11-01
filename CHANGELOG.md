@@ -7,6 +7,7 @@
 - Month, week and day views redesigned after the new mockup (docs/design/views.html): event strips under month days,
   hour grid in the week, timeline with cards, free time and clashes in the day; tap a day to select it, again to open it.
 - Year view: "A dot is a day" removed; "Year" moved to its line next to the big number.
+- Headers of all views keep the same gap between the big number and its text (as in the year view).
 - 1×1 date widget uses the card colour of the theme (dark circle, white digit in dark mode), like the other widgets.
 
 ## 2026.10.31-dev

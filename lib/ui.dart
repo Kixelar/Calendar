@@ -297,10 +297,8 @@ class Hero2 extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 22, 10, 14),
       child: Row(children: [
-        ConstrainedBox(
-          constraints: const BoxConstraints(minWidth: 68),
-          child: Text(big, style: T.displayLg(t.display).copyWith(fontSize: 44, height: 1, letterSpacing: .9)),
-        ),
+        // No min-width (mockup has 68px): the gap to the text stays the same for "1", "44" and "2026" (owner).
+        Text(big, style: T.displayLg(t.display).copyWith(fontSize: 44, height: 1, letterSpacing: .9)),
         const SizedBox(width: 12),
         Expanded(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
