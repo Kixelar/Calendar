@@ -293,6 +293,7 @@ class _AccountsState extends State<Accounts> {
                     ));
                     if (p != null) await store.set('syncMinutes', p.$1);
                   }),
+                if (store.autoSync) _switch(l.wifiOnly, store.wifiOnly, (v) => store.set('wifiOnly', v), hint: l.wifiOnlyHint),
                 RowItem(
                   onTap: () async {
                     if (await _confirm(context, l.disconnectGoogle, l.disconnectBody, l.disconnect) && context.mounted) {

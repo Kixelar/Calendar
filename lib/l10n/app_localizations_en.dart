@@ -152,9 +152,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get allDay => 'All day';
 
   @override
-  String get schedule => 'Schedule';
-
-  @override
   String get noEvents => 'No events';
 
   @override
@@ -332,9 +329,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get past => 'Past';
-
-  @override
-  String get recentSearches => 'Recent searches';
 
   @override
   String get noResults => 'Nothing found';
@@ -539,12 +533,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get nothingPlanned => 'Nothing planned.';
-
-  @override
-  String get freeDay => 'A day off work. Rest or add something for yourself.';
-
-  @override
-  String get openDay => 'This day is free. Add something or keep it that way.';
 
   @override
   String get addEvent => 'Add event';
@@ -1080,4 +1068,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String hoursFree(int h) {
     return '${h}h free';
   }
+
+  @override
+  String get wifiOnly => 'Wi-Fi only';
+
+  @override
+  String get wifiOnlyHint =>
+      'Automatic and background sync wait for Wi-Fi. Pulling down the list always syncs.';
 }

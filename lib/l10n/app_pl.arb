@@ -38,7 +38,6 @@
   "tomorrow": "Jutro",
   "next": "Następne",
   "allDay": "Cały dzień",
-  "schedule": "Harmonogram",
   "noEvents": "Brak wydarzeń",
   "weekdays": "PN,WT,ŚR,CZ,PT,SB,ND",
   "previous": "Poprzedni",
@@ -90,7 +89,6 @@
   "withGuests": "Z gośćmi",
   "upcoming": "Nadchodzące",
   "past": "Minione",
-  "recentSearches": "Ostatnio szukane",
   "noResults": "Nic nie znaleziono",
   "everyDays": "{n, plural, =1{Codziennie} other{Co {n} dni}}",
   "everyWeeks": "{n, plural, =1{Co tydzień} few{Co {n} tygodnie} other{Co {n} tygodni}}",
@@ -140,8 +138,6 @@
   "organizerLabel": "Organizator",
   "conflict": "Kolizja",
   "nothingPlanned": "Nic nie zaplanowano.",
-  "freeDay": "Dzień wolny od pracy. Odpocznij albo dodaj coś dla siebie.",
-  "openDay": "Ten dzień jest wolny. Dodaj coś albo zostaw go tak.",
   "addEvent": "Dodaj wydarzenie",
   "holiday": "Święto",
   "syncLabel": "Synchronizacja",
@@ -294,5 +290,7 @@
   "inH": "Za {h} h",
   "inHM": "Za {h} h {m} min",
   "dayOff": "Dzień wolny",
-  "hoursFree": "{h}h wolne"
+  "hoursFree": "{h}h wolne",
+  "wifiOnly": "Tylko Wi-Fi",
+  "wifiOnlyHint": "Synchronizacja automatyczna i w tle czeka na Wi-Fi. Przeciągnięcie listy w dół synchronizuje zawsze."
 }

@@ -45,7 +45,6 @@
   "tomorrow": "Tomorrow",
   "next": "Next",
   "allDay": "All day",
-  "schedule": "Schedule",
   "noEvents": "No events",
   "weekdays": "MO,TU,WE,TH,FR,SA,SU",
   "previous": "Previous",
@@ -104,7 +103,6 @@
   "withGuests": "With guests",
   "upcoming": "Upcoming",
   "past": "Past",
-  "recentSearches": "Recent searches",
   "noResults": "Nothing found",
   "everyDays": "{n, plural, =1{Every day} other{Every {n} days}}",
   "@everyDays": {"placeholders": {"n": {"type": "int"}}},
@@ -163,8 +161,6 @@
   "organizerLabel": "Organizer",
   "conflict": "Conflict",
   "nothingPlanned": "Nothing planned.",
-  "freeDay": "A day off work. Rest or add something for yourself.",
-  "openDay": "This day is free. Add something or keep it that way.",
   "addEvent": "Add event",
   "holiday": "Holiday",
   "syncLabel": "Sync",
@@ -337,5 +333,7 @@
   "@inHM": {"placeholders": {"h": {"type": "int"}, "m": {"type": "int"}}},
   "dayOff": "Day off",
   "hoursFree": "{h}h free",
-  "@hoursFree": {"placeholders": {"h": {"type": "int"}}}
+  "@hoursFree": {"placeholders": {"h": {"type": "int"}}},
+  "wifiOnly": "Wi-Fi only",
+  "wifiOnlyHint": "Automatic and background sync wait for Wi-Fi. Pulling down the list always syncs."
 }

@@ -26,9 +26,11 @@ object Device {
                 }
                 // 05.4 automatic sync: run SyncJob every N minutes (Android's minimum is 15) when online; 0 stops it.
                 "scheduleSync" -> {
-                    SyncJob.schedule(context, call.arguments as Int)
+                    SyncJob.schedule(context, call.argument<Int>("minutes")!!, call.argument<Boolean>("wifiOnly")!!)
                     result.success(null)
                 }
+                // "Wi-Fi only": in-app automatic sync waits while the phone is on a metered network.
+                "metered" -> result.success(context.getSystemService(android.net.ConnectivityManager::class.java).isActiveNetworkMetered)
                 "testSync" -> {
                     SyncJob.testSoon(context)
                     result.success(null)

@@ -1,6 +1,8 @@
 # Changelog
 
 ## 2026.11.01-dev
+### Added
+- Settings → Accounts → "Wi-Fi only": automatic and background sync wait for Wi-Fi (pull to refresh always syncs).
 ### Fixed
 - Widgets follow the app's theme setting (Appearance → Dark / Light); "System" keeps following the phone's dark mode.
 ### Changed

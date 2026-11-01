@@ -1,52 +1,43 @@
 # TODO
 
-Screen numbers refer to docs/design/mockup.html.
+Screen numbers refer to docs/design/mockup.html; the month, week and day views follow docs/design/views.html.
 
 ## Stage 1: Google + views
-- [x] 01.1 Welcome, 01.2 Connect Google, 01.3 Choose calendars
-- [x] 02.1 Year, 02.2 Month, 02.3 Week, 02.4 Day
-- [x] Google Cloud project + `config.json` (owner, docs/GOOGLE.md)
-- [x] Test sign-in and event loading on a phone (owner)
-- [x] Confirm the app no longer asks to sign in on every launch (owner)
-- [x] Fonts (owner supplied, docs/DESIGN.md)
-- [x] 01.4 Sync progress screen
-- [x] 02.5 Search
+- [x] 01.1 Welcome, 01.2 Connect Google, 01.3 Choose calendars, 01.4 Sync progress
+- [x] 02.1 Year, 02.2 Month, 02.3 Week, 02.4 Day, 02.5 Search
+- [x] Views rework after docs/design/views.html (confirmed by the owner, 2026-11-01)
+- [x] Google Cloud project + `config.json` (owner, docs/GOOGLE.md), fonts (owner)
 - [x] Offline cache of events (JSON files per year in the app support folder)
 
 ## Stage 2: events
-- [x] 03.1 Event details (time, title, calendar, place, reminder, notes, guests with replies; edit, delete)
-- [x] 03.2 New / edit event: title, all day, start, end, calendar, place, notes
-- [x] 03.2 rows: time zone (read-only, device zone), repeat, reminder, guests
-- [x] 03.1 repeat description, share and "more" icons; notifications switch waits for 07.3
-- [x] 03.3 Custom repeat
+- [x] 03.1 Event details, 03.2 New / edit event (repeat, reminder, time zone, guests), 03.3 Custom repeat
 - [x] 03.4 Invite guests, 03.5 Received invitation (reply)
-- [ ] 03.5 "Add to" another calendar and "Propose another time": the Calendar API has no call for either (left out)
-- [x] 06.2 Delete event (only this / this and following / all, notify guests)
-- [x] 06.1 Empty day, 06.3 Sync conflict (compares Google's `updated` time when saving)
+- [x] 06.1 Empty day, 06.2 Delete event, 06.3 Sync conflict
 
 ## Stage 3: calendars and settings
-- [x] 04.1 Calendars, 04.3 Holidays, 04.4 Share calendar, 04.5 Shared with you
-- [x] 04.2 Add calendar: new Google calendar, holidays, Google account
-- [ ] 04.2 "Subscribe to address" (.ics / webcal) and "Import file": the Calendar API cannot add URL subscriptions; needs an in-app .ics importer (owner decision)
-- [ ] 04.3 "Show" filters (days off / religious / name days / special days): Google holiday calendars do not mark these kinds, name days do not exist there (owner decision)
-- [ ] 04.4 "Invited" state for people who have not accepted: the ACL API does not report it
-- [ ] 04.5 "Ask for edit rights": needs sending an e-mail (url_launcher), left out
+- [x] 04.1 Calendars, 04.2 Add calendar, 04.3 Holidays, 04.4 Share calendar, 04.5 Shared with you
 - [x] 05.1–05.8 Settings, appearance, notifications, accounts, data & privacy, help, about
-- [ ] 05.3 Glyph section (light on reminder, pattern, countdown): needs the Nothing Glyph Developer Kit (owner decision)
-- [ ] 05.4 "On this device" account and "Wi-Fi only": no local calendars / no background sync yet
-- [x] 05.4 background sync when the app is closed (WorkManager, every 15–60 min, online only)
-- [ ] 05.5 import / export .ics, daily backup, app lock, anonymous statistics (owner decision; the app collects none)
-- [ ] 05.6 contact rows ("Write to support", "Report a bug"): need a support address (owner)
-- [ ] 05.8 terms and privacy policy rows, update check
-- [ ] Terms and privacy policy texts (welcome screen caption from the mockup is left out until they exist)
-- [ ] "Other account — CalDAV, Outlook" (01.2 secondary button, left out for now)
+- [x] 05.4 background sync when the app is closed (JobScheduler, SyncJob.kt), "Wi-Fi only"
+- [ ] 04.2 / 05.5 import an .ics file into a Google calendar (agreed, 2026-11-01)
+- [ ] 05.5 export calendars to an .ics file (agreed, 2026-11-01)
+- [ ] 04.2 "Subscribe to address" (.ics / webcal): later; the Calendar API cannot add URL subscriptions, so it would be a
+      periodic download into a chosen calendar
+- [ ] 04.5 "Ask for edit rights": the API cannot ask; only an e-mail to the owner from the user's mail app (owner thinks it over)
+- [ ] 05.5 app lock (later), daily backup (owner decision)
+- [ ] 05.8 update check (later)
+- [ ] 05.4 "On this device" account: no local calendars (owner decision)
 
 ## Stage 4: Android extras
-- [x] 07.1/07.2 Home screen widgets (dark, light) — native Kotlin, drawn as bitmaps with the app fonts (not yet checked on a phone)
-- [x] 07.3 Event notifications (scheduled for the next 7 days at every sync; Glyph countdown waits for the SDK)
-- [ ] Glyph interface on Nothing phones (Glyph Developer Kit)
-- [x] Release signing key
-- [x] App icon
-- [x] Widgets follow the app theme setting (2026-11-01)
-- [x] Background sync confirmed on the phone (2026-11-01)
-- Google Tasks: dropped (owner, 2026-10-31)
+- [x] 07.1/07.2 Home screen widgets, following the app theme (confirmed on the phone)
+- [x] 07.3 Event notifications
+- [x] Release signing key, app icon
+- [ ] Glyph interface on Nothing phones (Glyph Developer Kit): agreed without tests, the owner's phone has no Glyph lights
+
+## At the end
+- [ ] Terms and privacy policy texts, support address; then 05.6 contact rows, 05.8 terms rows, welcome screen caption
+- [ ] First release: merge `dev` into `main`, tag, GitHub Release (only when the owner says so)
+
+## Not doing
+- 03.5 "Add to" another calendar and "Propose another time", 04.4 "Invited" state: the Google Calendar API has no way to do these.
+- Google Tasks (owner, 2026-10-31).
+- For now: CalDAV / Outlook / iCloud, holiday filters and name days (04.3) (owner).

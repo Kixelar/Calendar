@@ -15,16 +15,14 @@
 - Tests: `flutter test` (logic: day index, ISO weeks, RRULE, delete-following, cache, notification plan, marquee) and
   PNG renders of every screen (`CAL_SHOTS`).
 
-## Not checked on a device yet
-- Everything added on 2026-10-31 after the event writes: search, repeat/guests/invitations, calendars and sharing,
-  settings, notifications (exact alarms, snooze, actions), home screen widgets (drawn natively; not seen on a screen),
-  background sync (WorkManager), invitation replies after the organizer fix.
+## Checked on the owner's phone
+- Everything listed above, including notifications, widgets, background sync and the views rework (2026-11-01).
 
-## Open (owner's test, 2026-10-31, build 30437026)
+## Open
 - Owner asked what happens when an invitation notification is dismissed: nothing is sent; the invitation stays
   unanswered in Google, the app does not notify about it again (`seenInvites`), and it can still be answered from the
   event (03.5 screen).
-- Google Tasks: not doing it (owner, 2026-10-31).
+- Next: .ics import and export (docs/TODO.md).
 
 ## Resolved
 - Crash at start (2026-10-31) was caused by WorkManager (it initialises before app code); removed in 30436952,
@@ -35,14 +33,15 @@
 
 - Widget theme: widgets ignored the app's own theme setting; fixed in 30438477, confirmed by the owner (2026-11-01).
   1×1 widget restyled to the theme's card colour (owner's choice, 30438483).
-- Views rework (month/week/day after docs/design/views.html, year header): build 30438617, waiting for the owner's check.
+- Views rework (month/week/day after docs/design/views.html, year header): confirmed by the owner (2026-11-01).
 
 ## Waiting for the owner (decisions or material)
-- **Glyph Interface** (05.3 section, 07.3 countdown): yes, later (owner, 2026-10-31).
-- **Terms and privacy policy** texts and a **support address**: to be done together (owner agreed).
-- **.ics** subscribe / import / export (04.2, 05.5): agreed to build an in-app importer (owner, 2026-10-31), not started.
-- **CalDAV / Outlook / iCloud**: dropped for now (owner).
-- **Holiday filters / name days**: dropped for now (owner).
+- **Glyph Interface** (05.3 section, 07.3 countdown): agreed, built without tests (the owner's Nothing phone has no Glyph lights).
+- **Terms and privacy policy** texts and a **support address**: at the very end, together.
+- **.ics subscribe** by address (04.2): later.
+- **Ask for edit rights** (04.5): only possible as an e-mail from the user's mail app; owner decides.
+- **App lock, update check**: later. **Daily backup**: owner decides.
+- **CalDAV / Outlook / iCloud**, **holiday filters / name days**: dropped for now (owner).
 
 ## Traps
 - Diagnose on the phone over USB: `adb shell dumpsys jobscheduler` (job history, constraints), `adb logcat`,

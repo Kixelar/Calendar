@@ -23,19 +23,22 @@ class SyncJob : JobService() {
         private const val TEST_ID = 32
         private const val TIMEOUT_MS = 120_000L
 
-        /** Runs the job every [minutes] (at least 15) when online; 0 or less cancels it. */
-        fun schedule(context: Context, minutes: Int) {
+        /** Runs the job every [minutes] (at least 15) when online, or only on Wi-Fi; 0 or less cancels it. */
+        fun schedule(context: Context, minutes: Int, wifiOnly: Boolean) {
             val js = context.getSystemService(JobScheduler::class.java)
             if (minutes <= 0) {
                 js.cancel(ID)
                 return
             }
             val every = maxOf(15, minutes) * 60_000L
+            val net = if (wifiOnly) JobInfo.NETWORK_TYPE_UNMETERED else JobInfo.NETWORK_TYPE_ANY
             // Scheduling again restarts the period: the app does this on every start, so leave a matching job alone.
-            if (js.getPendingJob(ID)?.intervalMillis == every) return
+            val pending = js.getPendingJob(ID)
+            @Suppress("DEPRECATION")
+            if (pending?.intervalMillis == every && pending.networkType == net) return
             js.schedule(JobInfo.Builder(ID, ComponentName(context, SyncJob::class.java))
                 .setPeriodic(every)
-                .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
+                .setRequiredNetworkType(net)
                 .setPersisted(true)
                 .build())
         }

@@ -99,10 +99,12 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
   }
 
   /// Refreshes when automatic sync is on and the last sync is older than the chosen interval.
-  void _autoSync() {
+  Future<void> _autoSync() async {
     final last = store.lastSync;
     if (!store.signedIn || !store.autoSync) return;
-    if (last == null || DateTime.now().difference(last).inMinutes >= store.syncMinutes) store.refresh();
+    if (last != null && DateTime.now().difference(last).inMinutes < store.syncMinutes) return;
+    if (store.wifiOnly && await store.metered()) return; // pull to refresh still syncs
+    await store.refresh();
   }
 
   /// A tapped notification (07.3): open the event, or send the invitation reply chosen on it.

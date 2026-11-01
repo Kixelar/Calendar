@@ -49,6 +49,7 @@ class Store extends ChangeNotifier {
   bool get dimPast => _p.getBool('dimPast') ?? true;
   bool get autoSync => _p.getBool('autoSync') ?? true;
   int get syncMinutes => _p.getInt('syncMinutes') ?? 15;
+  bool get wifiOnly => _p.getBool('wifiOnly') ?? false;
   DateTime? get lastSync => switch (_p.getInt('lastSync')) { final ms? => DateTime.fromMillisecondsSinceEpoch(ms), _ => null };
 
   bool get hideOnLock => _p.getBool('hideOnLock') ?? true;
@@ -128,10 +129,20 @@ class Store extends ChangeNotifier {
   /// Fetches the current year now and waits for it (background sync job).
   Future<void> syncNow() => _load(DateTime.now().year);
 
+  /// True on mobile data (or another metered network), where "Wi-Fi only" holds automatic sync back.
+  Future<bool> metered() async {
+    try {
+      return await const MethodChannel('calendar/device').invokeMethod<bool>('metered') ?? false;
+    } on MissingPluginException {
+      return false; // tests
+    }
+  }
+
   /// Asks Android to run the sync job every [syncMinutes] (at least 15) while online, or stops it (05.4).
   Future<void> scheduleBackground() async {
     try {
-      await const MethodChannel('calendar/device').invokeMethod<void>('scheduleSync', signedIn && autoSync ? syncMinutes : 0);
+      await const MethodChannel('calendar/device')
+          .invokeMethod<void>('scheduleSync', {'minutes': signedIn && autoSync ? syncMinutes : 0, 'wifiOnly': wifiOnly});
     } on MissingPluginException {
       // tests
     }
@@ -185,7 +196,7 @@ class Store extends ChangeNotifier {
         await _p.setString(key, v);
     }
     if (key == 'showDeclined') _days.clear();
-    if (key == 'autoSync' || key == 'syncMinutes') await scheduleBackground();
+    if (key == 'autoSync' || key == 'syncMinutes' || key == 'wifiOnly') await scheduleBackground();
     notifyListeners();
     await reschedule(); // reminder settings, or which events count
   }

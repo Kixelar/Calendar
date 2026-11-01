@@ -326,12 +326,6 @@ abstract class AppLocalizations {
   /// **'All day'**
   String get allDay;
 
-  /// No description provided for @schedule.
-  ///
-  /// In en, this message translates to:
-  /// **'Schedule'**
-  String get schedule;
-
   /// No description provided for @noEvents.
   ///
   /// In en, this message translates to:
@@ -638,12 +632,6 @@ abstract class AppLocalizations {
   /// **'Past'**
   String get past;
 
-  /// No description provided for @recentSearches.
-  ///
-  /// In en, this message translates to:
-  /// **'Recent searches'**
-  String get recentSearches;
-
   /// No description provided for @noResults.
   ///
   /// In en, this message translates to:
@@ -937,18 +925,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Nothing planned.'**
   String get nothingPlanned;
-
-  /// No description provided for @freeDay.
-  ///
-  /// In en, this message translates to:
-  /// **'A day off work. Rest or add something for yourself.'**
-  String get freeDay;
-
-  /// No description provided for @openDay.
-  ///
-  /// In en, this message translates to:
-  /// **'This day is free. Add something or keep it that way.'**
-  String get openDay;
 
   /// No description provided for @addEvent.
   ///
@@ -1867,6 +1843,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{h}h free'**
   String hoursFree(int h);
+
+  /// No description provided for @wifiOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Wi-Fi only'**
+  String get wifiOnly;
+
+  /// No description provided for @wifiOnlyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic and background sync wait for Wi-Fi. Pulling down the list always syncs.'**
+  String get wifiOnlyHint;
 }
 
 class _AppLocalizationsDelegate
