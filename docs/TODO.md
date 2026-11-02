@@ -38,6 +38,13 @@ Screen numbers refer to docs/design/mockup.html; the month, week and day views f
   - [ ] Check on a real Nothing phone: lights from the background (the kit's README says "only foreground
         applications"), strip order top/bottom, the matrix toy and its preview image
 
+## Stage 5: languages and onboarding (owner, 2026-11-02)
+- [ ] Translate the app into more languages (now Polish and English); the owner picks which. Covers lib/l10n/*.arb,
+      Android strings (launcher name, widget names, Glyph toy) and the widget/notification texts sent from Dart
+- [ ] Onboarding rework with an extra panel to choose the app language (the owner designs the look)
+- [ ] One step indicator on every onboarding panel: the welcome screen (01.1) marks the step with dots, the others
+      say "Step 1 of 3"; the owner decides which style stays
+
 ## At the end
 - [ ] Terms and privacy policy texts, support address; then 05.6 contact rows, 05.8 terms rows, welcome screen caption
 - [ ] First release: merge `dev` into `main`, tag, GitHub Release (only when the owner says so)
