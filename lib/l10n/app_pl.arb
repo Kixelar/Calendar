@@ -315,5 +315,11 @@
   "deleteCalendar": "Usuń kalendarz",
   "deleteCalendarBody": "Kalendarz {name} i wszystkie jego wydarzenia zostaną usunięte z Google, także dla osób, którym go udostępniasz. Tego nie da się cofnąć.",
   "freeNow": "Wolne",
-  "ongoingUntil": "Trwa · do {time}"
+  "ongoingUntil": "Trwa · do {time}",
+  "appLock": "Blokada aplikacji",
+  "appLockHint": "Prosi o odcisk palca, twarz lub kod blokady ekranu przy otwarciu i po minucie poza aplikacją.",
+  "appLocked": "Kalendarz jest zablokowany",
+  "unlock": "Odblokuj",
+  "unlockReason": "Odblokuj Kalendarz",
+  "appLockNoScreenLock": "Najpierw ustaw blokadę ekranu w telefonie."
 }

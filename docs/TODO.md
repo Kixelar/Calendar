@@ -21,8 +21,8 @@ Screen numbers refer to docs/design/mockup.html; the month, week and day views f
 - [x] 04.2 / 05.5 import an .ics file into a Google calendar (2026-11-01)
 - [x] 05.5 export the shown calendars to an .ics file (2026-11-01)
 - [x] 04.2 "Subscribe to address" (.ics / webcal): own calendar refreshed hourly by the app (2026-11-01)
-- [ ] 04.5 "Ask for edit rights": the API cannot ask; only an e-mail to the owner from the user's mail app (owner thinks it over)
-- [ ] 05.5 app lock (later), daily backup (owner decision)
+- [x] 05.5 app lock: fingerprint, face or screen lock code (2026-11-02)
+- [x] Marker shape menu (24 shapes) from the calendar list and 04.5 (2026-11-02)
 - [ ] 05.8 update check (later)
 - [ ] 05.4 "On this device" account: no local calendars (owner decision)
 
@@ -37,6 +37,7 @@ Screen numbers refer to docs/design/mockup.html; the month, week and day views f
 - [ ] First release: merge `dev` into `main`, tag, GitHub Release (only when the owner says so)
 
 ## Not doing
+- 04.5 "Ask for edit rights" and 05.5 daily backup: dropped (owner, 2026-11-02).
 - 03.5 "Add to" another calendar and "Propose another time", 04.4 "Invited" state: the Google Calendar API has no way to do these.
 - Google Tasks (owner, 2026-10-31).
 - For now: CalDAV / Outlook / iCloud, holiday filters and name days (04.3) (owner).

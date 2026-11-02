@@ -1174,4 +1174,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String ongoingUntil(String time) {
     return 'Now · until $time';
   }
+
+  @override
+  String get appLock => 'App lock';
+
+  @override
+  String get appLockHint =>
+      'Asks for your fingerprint, face or screen lock code when the app opens and after a minute away.';
+
+  @override
+  String get appLocked => 'Calendar is locked';
+
+  @override
+  String get unlock => 'Unlock';
+
+  @override
+  String get unlockReason => 'Unlock Calendar';
+
+  @override
+  String get appLockNoScreenLock => 'Set a screen lock on your phone first.';
 }

@@ -39,3 +39,7 @@
 - **Widget countdown** (owner, 2026-11-01): every widget shows "in 60 / 45 / 30 / 15 min" (`Widgets.step`) and all are
   redrawn by one AlarmManager RTC alarm (`Widgets.schedule` -> `WidgetTick`, does not wake the phone) at quarter hours,
   at those steps before each event, and at its start and end. The app keeps counting by the minute.
+- **App lock** (owner, 2026-11-02): `local_auth` with the phone's own fingerprint / face / screen lock code (no app PIN);
+  locks at start and after more than a minute away, so a file picker or Google sign-in does not lock it. Needs
+  `FlutterFragmentActivity` and AppCompat themes (styles.xml, appcompat dependency).
+- **Dropped** (owner, 2026-11-02): 04.5 "Ask for edit rights", 05.5 daily backup.

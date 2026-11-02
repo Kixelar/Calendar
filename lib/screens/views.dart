@@ -444,10 +444,14 @@ class DayTimeline extends StatelessWidget {
           child: Row(children: [
             Container(width: 8, height: 8, decoration: BoxDecoration(color: t.accent, shape: BoxShape.circle)),
             Container(width: 8, height: 1, color: t.accent),
-            Container(color: t.bg, padding: const EdgeInsets.symmetric(horizontal: 4), child: Text(hmShort(context, now), style: red)),
+            Container(color: t.bg, padding: const EdgeInsets.symmetric(horizontal: 4), child: monoCentred(Text(hmShort(context, now), style: red), 11.5)),
             Expanded(child: Container(height: 1, color: t.accent)),
             if (next != null)
-              Container(color: t.bg, padding: const EdgeInsets.only(left: 4), child: Text(soonText(context, minsTo(next.e, now)).toUpperCase(), style: red)),
+              Container(
+                color: t.bg,
+                padding: const EdgeInsets.only(left: 4),
+                child: monoCentred(Text(soonText(context, minsTo(next.e, now)).toUpperCase(), style: red), 11.5),
+              ),
           ]),
         ));
       }

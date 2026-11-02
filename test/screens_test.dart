@@ -465,6 +465,20 @@ void main() {
     expect(t.hasRunningAnimations, isFalse);
   });
 
+  testWidgets('app lock covers the app at start until unlocked', (t) async {
+    await _fonts();
+    SharedPreferences.setMockInitialValues({'onboarded': true, 'google': true, 'appLock': true});
+    t.platformDispatcher.localesTestValue = const [Locale('pl')];
+    addTearDown(t.platformDispatcher.clearAllTestValues);
+    final store = Store(_FakeGoogle(), Directory.systemTemp.createTempSync());
+    await t.runAsync(store.start);
+    await t.pumpWidget(App(store));
+    await t.pump();
+    await t.pump();
+    expect(find.text('Kalendarz jest zablokowany'), findsOneWidget);
+    await t.pumpWidget(const SizedBox()); // stops the minute ticker
+  });
+
   testWidgets('tapping a view tab twice quickly jumps back to today', (t) async {
     await _fonts();
     await initializeDateFormatting();

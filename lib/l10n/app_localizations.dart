@@ -1993,6 +1993,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Now · until {time}'**
   String ongoingUntil(String time);
+
+  /// No description provided for @appLock.
+  ///
+  /// In en, this message translates to:
+  /// **'App lock'**
+  String get appLock;
+
+  /// No description provided for @appLockHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Asks for your fingerprint, face or screen lock code when the app opens and after a minute away.'**
+  String get appLockHint;
+
+  /// No description provided for @appLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Calendar is locked'**
+  String get appLocked;
+
+  /// No description provided for @unlock.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock'**
+  String get unlock;
+
+  /// No description provided for @unlockReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock Calendar'**
+  String get unlockReason;
+
+  /// No description provided for @appLockNoScreenLock.
+  ///
+  /// In en, this message translates to:
+  /// **'Set a screen lock on your phone first.'**
+  String get appLockNoScreenLock;
 }
 
 class _AppLocalizationsDelegate

@@ -1,9 +1,10 @@
 package com.kixelar.calendar
 
-import io.flutter.embedding.android.FlutterActivity
+import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
 
-class MainActivity : FlutterActivity() {
+// FlutterFragmentActivity: local_auth (app lock) shows the system fingerprint / PIN prompt as a fragment.
+class MainActivity : FlutterFragmentActivity() {
     companion object {
         /** True while the app is on screen; the background sync job then stays out of the way. */
         @Volatile

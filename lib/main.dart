@@ -5,6 +5,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'l10n/app_localizations.dart';
 import 'notify.dart';
 import 'screens/home.dart';
+import 'screens/lock.dart';
 import 'screens/onboarding.dart';
 import 'store.dart';
 import 'theme.dart';
@@ -66,6 +67,7 @@ class App extends StatelessWidget {
         supportedLocales: AppLocalizations.supportedLocales,
         theme: buildTheme(Brightness.light),
         darkTheme: buildTheme(Brightness.dark),
+        builder: (context, child) => Lock(store, child: child!),
         themeMode: !store.ready ? ThemeMode.system : switch (store.theme) { 'dark' => ThemeMode.dark, 'light' => ThemeMode.light, _ => ThemeMode.system },
         home: !store.ready
             ? const Scaffold()

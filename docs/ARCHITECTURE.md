@@ -22,6 +22,7 @@ lib/
   screens/notifications.dart  05.3 notification settings
   notify.dart              07.3 notifications: plan() (pure, tested) + Notifier (flutter_local_notifications)
   ics.dart                 .ics import (parseIcs → Google events) and export (writeIcs, TZID times, folded lines); tested
+  screens/lock.dart        05.5 app lock: Lock wraps the whole app (MaterialApp.builder), askDeviceAuth (local_auth)
   view.dart                `Look`: 05.2 view settings as globals for widgets without a Store (time format, fonts, week layout)
   screens/event.dart       03.1 event details, 03.2 new/edit event, 06.2 delete dialog, calendar picker
 android/app/src/main/res/values*/strings.xml   Launcher name and widget names per device language

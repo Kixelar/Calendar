@@ -1186,4 +1186,24 @@ class AppLocalizationsPl extends AppLocalizations {
   String ongoingUntil(String time) {
     return 'Trwa · do $time';
   }
+
+  @override
+  String get appLock => 'Blokada aplikacji';
+
+  @override
+  String get appLockHint =>
+      'Prosi o odcisk palca, twarz lub kod blokady ekranu przy otwarciu i po minucie poza aplikacją.';
+
+  @override
+  String get appLocked => 'Kalendarz jest zablokowany';
+
+  @override
+  String get unlock => 'Odblokuj';
+
+  @override
+  String get unlockReason => 'Odblokuj Kalendarz';
+
+  @override
+  String get appLockNoScreenLock =>
+      'Najpierw ustaw blokadę ekranu w telefonie.';
 }

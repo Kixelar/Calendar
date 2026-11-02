@@ -366,5 +366,11 @@
   "@deleteCalendarBody": {"placeholders": {"name": {"type": "String"}}},
   "freeNow": "Free",
   "ongoingUntil": "Now · until {time}",
-  "@ongoingUntil": {"placeholders": {"time": {"type": "String"}}}
+  "@ongoingUntil": {"placeholders": {"time": {"type": "String"}}},
+  "appLock": "App lock",
+  "appLockHint": "Asks for your fingerprint, face or screen lock code when the app opens and after a minute away.",
+  "appLocked": "Calendar is locked",
+  "unlock": "Unlock",
+  "unlockReason": "Unlock Calendar",
+  "appLockNoScreenLock": "Set a screen lock on your phone first."
 }

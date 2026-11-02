@@ -106,6 +106,74 @@ Widget _closeBar(BuildContext c) => Padding(
 
 void _go(BuildContext c, Widget page) => Navigator.push(c, MaterialPageRoute(builder: (_) => page));
 
+/// Menu with all marker shapes (04.5, calendar list); the chosen one is saved for [cal].
+Future<void> _chooseShape(BuildContext context, Store store, Cal cal) async {
+  final names = l10n(context).shapeNames.split(',');
+  final s = await showDialog<Shape>(
+    context: context,
+    barrierColor: const Color(0xA3000000),
+    builder: (c) {
+      final t = Tok.of(c);
+      return Dialog(
+        backgroundColor: t.surfaceRaised,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 24),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8), side: BorderSide(color: t.borderSubtle)),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, spacing: 16, children: [
+            Text(l10n(c).marker, style: T.headlineMd(t.display)),
+            Text(cal.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: T.bodySm(t.secondary)),
+            GridView.count(
+              crossAxisCount: 6,
+              shrinkWrap: true,
+              mainAxisSpacing: 8,
+              crossAxisSpacing: 8,
+              children: [
+                for (final s in Shape.values)
+                  Semantics(
+                    label: names[s.index],
+                    selected: s == cal.shape,
+                    child: InkWell(
+                      onTap: () => Navigator.pop(c, s),
+                      borderRadius: BorderRadius.circular(8),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: s == cal.shape ? t.display : t.borderSubtle),
+                        ),
+                        alignment: Alignment.center,
+                        child: Transform.scale(scale: 1.6, child: Marker(s)),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ]),
+        ),
+      );
+    },
+  );
+  if (s == null || s == cal.shape) return;
+  try {
+    await store.setShape(cal, s);
+  } catch (e) {
+    if (context.mounted) _fail(context, e);
+  }
+}
+
+/// A calendar's marker that opens the shape menu.
+class _ShapeBtn extends StatelessWidget {
+  const _ShapeBtn(this.store, this.cal);
+  final Store store;
+  final Cal cal;
+  @override
+  Widget build(BuildContext context) => InkWell(
+        onTap: () => _chooseShape(context, store, cal),
+        customBorder: const CircleBorder(),
+        child: SizedBox.square(dimension: 32, child: Center(child: Marker(cal.shape))),
+      );
+}
+
 void _say(BuildContext c, String text) => ScaffoldMessenger.of(c).showSnackBar(SnackBar(content: Text(text)));
 
 /// Small blocking dialog while a long job runs (import, export).
@@ -212,7 +280,7 @@ class Calendars extends StatelessWidget {
               children: [
                 for (final c in mine)
                   RowItem(children: [
-                    Marker(c.shape),
+                    _ShapeBtn(store, c),
                     Expanded(child: Text(c.name, maxLines: 1, overflow: TextOverflow.ellipsis)),
                     IconBtn(Icons.ios_share, label: l.shareCalendar(c.name), onTap: () => _go(context, Share(store, c))),
                     toggle(c),
@@ -233,7 +301,7 @@ class Calendars extends StatelessWidget {
               Section(left: l.sharedWithMe, children: [
                 for (final c in shared)
                   RowItem(onTap: () => _go(context, SharedWithYou(store, c)), children: [
-                    Marker(c.shape),
+                    _ShapeBtn(store, c),
                     Expanded(child: _twoLine(context, c.name, roleText(l, c.role))),
                     toggle(c),
                   ]),
@@ -243,7 +311,7 @@ class Calendars extends StatelessWidget {
                 for (final c in subs)
                   if (feeds[c.id] case final url?)
                     RowItem(children: [
-                      Marker(c.shape),
+                      _ShapeBtn(store, c),
                       Expanded(child: _twoLine(context, c.name, Uri.tryParse(url)?.host ?? url)),
                       toggle(c),
                       IconBtn(Icons.delete_outline, label: l.unsubscribe, onTap: () async {
@@ -257,7 +325,7 @@ class Calendars extends StatelessWidget {
                     ])
                   else
                     RowItem(onTap: () => _go(context, c.holiday ? Holidays(store) : SharedWithYou(store, c)), children: [
-                      Marker(c.shape),
+                      _ShapeBtn(store, c),
                       Expanded(child: _twoLine(context, c.name, c.holiday ? l.holidays : roleText(l, c.role))),
                       toggle(c),
                       if (c.holiday)
@@ -619,20 +687,7 @@ class SharedWithYou extends StatelessWidget {
               ValueRow(l.calendar, value: c.name),
               ValueRow(l.yourAccess, value: roleText(l, c.role), valueColor: t.display),
               RowItem(
-                onTap: () async {
-                  final p = await pick<Shape>(context, Pick(
-                    title: l.marker,
-                    selected: c.shape,
-                    options: [for (final s in Shape.values) (s, shapes[s.index])],
-                    leading: (s) => Marker(s),
-                  ));
-                  if (p == null) return;
-                  try {
-                    await store.setShape(c, p.$1);
-                  } catch (e) {
-                    if (context.mounted) _fail(context, e);
-                  }
-                },
+                onTap: () => _chooseShape(context, store, c),
                 children: [
                   Expanded(child: Text(l.marker)),
                   Marker(c.shape),

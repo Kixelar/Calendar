@@ -2,8 +2,11 @@
 
 ## 2026.11.02-dev
 ### Added
+- App lock (Settings → Data and privacy): asks for the fingerprint, face or screen lock code when the app opens and after a minute away.
+- Marker shape menu: tap a calendar's marker in Calendars (or the marker row of a shared calendar) to pick one of the 24 shapes.
 - Calendars → Subscriptions: a holiday country can be removed there too (bin icon), not only in Holidays.
 ### Fixed
+- The now line's time and the letters in round avatars are centred (Lettera Mono's capitals sit high in their line).
 - "Check" in Settings → Accounts ran the background test on mobile data even with "Wi-Fi only" on.
 
 ## 2026.11.01-dev

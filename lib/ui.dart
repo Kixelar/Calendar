@@ -27,6 +27,10 @@ Widget timeCell(BuildContext c, DateTime t, Color color) => Look.use24h
         Text(ampm(c, t), style: T.labelSm(color)),
       ]);
 
+/// Lettera Mono's capitals sit 0.1 em above the middle of its line box (ascent 750, descent 250, cap 703):
+/// moves [child] down so the letters look centred in a circle or on a line.
+Widget monoCentred(Widget child, double fontSize) => Transform.translate(offset: Offset(0, fontSize * 0.1), child: child);
+
 /// Uppercase small mono label (.lbl).
 class Lbl extends StatelessWidget {
   const Lbl(this.text, {super.key, this.color});
@@ -562,7 +566,7 @@ class Avatar extends StatelessWidget {
       decoration: BoxDecoration(shape: BoxShape.circle, color: filled ? t.display : null, border: Border.all(color: filled ? t.display : t.borderControl)),
       child: icon != null
           ? Icon(icon, size: 18, color: t.display)
-          : Text(words.map((w) => w[0]).join().toUpperCase(), style: T.labelSm(filled ? t.bg : t.display)),
+          : monoCentred(Text(words.map((w) => w[0]).join().toUpperCase(), style: T.labelSm(filled ? t.bg : t.display)), 11),
     );
   }
 }

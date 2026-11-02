@@ -6,6 +6,7 @@ import '../store.dart';
 import '../theme.dart';
 import '../ui.dart';
 import 'calendars.dart';
+import 'lock.dart';
 import 'notifications.dart';
 import 'onboarding.dart';
 
@@ -323,6 +324,15 @@ class DataPrivacy extends StatelessWidget {
             _head(context, l.settings, l.dataPrivacy),
             Section(left: l.privacy, children: [
               _switch(l.hideOnLockScreen, store.hideOnLock, (v) => store.set('hideOnLock', v)),
+              _switch(l.appLock, store.appLock, hint: l.appLockHint, (v) async {
+                // Turning it on proves the phone has a screen lock and the owner can pass it.
+                if (v && !await deviceAuthAvailable()) {
+                  if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l.appLockNoScreenLock)));
+                  return;
+                }
+                if (v && !await askDeviceAuth(l.unlockReason)) return;
+                await store.set('appLock', v);
+              }),
             ]),
             if (store.signedIn)
               Section(left: l.importExport, children: [

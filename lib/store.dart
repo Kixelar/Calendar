@@ -57,6 +57,7 @@ class Store extends ChangeNotifier {
   DateTime? get lastSync => switch (_p.getInt('lastSync')) { final ms? => DateTime.fromMillisecondsSinceEpoch(ms), _ => null };
 
   bool get hideOnLock => _p.getBool('hideOnLock') ?? true;
+  bool get appLock => _p.getBool('appLock') ?? false;
   NotifyPrefs get notifyPrefs => NotifyPrefs(
         defaultReminder: _p.getInt('defaultReminder') ?? 10,
         allDayAt: _p.getInt('allDayAt') ?? 9 * 60,
