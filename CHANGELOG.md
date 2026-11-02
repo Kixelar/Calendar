@@ -1,6 +1,8 @@
 # Changelog
 
 ## 2026.11.02-dev
+### Changed
+- Add calendar: the "Google account" option is gone while a Google account is signed in.
 ### Added
 - App lock (Settings → Data and privacy): asks for the fingerprint, face or screen lock code when the app opens and after a minute away.
 - Marker shape menu: tap a calendar's marker in Calendars (or the marker row of a shared calendar) to pick one of the 24 shapes.

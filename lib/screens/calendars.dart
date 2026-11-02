@@ -397,7 +397,8 @@ class AddCalendar extends StatelessWidget {
         option(Icons.wb_sunny_outlined, l.holidaysAndDaysOff, l.holidaysHint, () => _go(context, Holidays(store))),
         option(Icons.link, l.subscribeUrl, l.subscribeUrlHint, () => _subscribe(context)),
         option(Icons.file_download_outlined, l.importFile, l.importFileHint, () => importIcsFile(context, store)),
-        option(Icons.person_outline, l.googleAccount, l.googleAccountHint, () => _go(context, Connect(store))),
+        // One Google account at a time: offered only when signed out.
+        if (!store.signedIn) option(Icons.person_outline, l.googleAccount, l.googleAccountHint, () => _go(context, Connect(store))),
       ]),
     ]);
   }
