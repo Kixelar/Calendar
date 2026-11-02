@@ -42,7 +42,7 @@ object Device {
                     MainActivity.open = null
                 }
                 "testSync" -> {
-                    SyncJob.testSoon(context)
+                    SyncJob.testSoon(context, call.arguments as? Boolean ?: false)
                     result.success(null)
                 }
                 // Report of a crash since the last start (CrashLog.kt), shown once by the app.

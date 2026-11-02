@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026.11.02-dev
+### Added
+- Calendars → Subscriptions: a holiday country can be removed there too (bin icon), not only in Holidays.
+### Fixed
+- "Check" in Settings → Accounts ran the background test on mobile data even with "Wi-Fi only" on.
+
 ## 2026.11.01-dev
 ### Added
 - Day clock widget (2×2, resizable): 24-hour dial with today's timed events (grey past, white to come, yellow clashes) and a red hand for now; the middle shows the next event's time and title, "in 60 / 45 / 30 / 15 min" before it, "now · until" during it, or "Free". A tap opens today's day view. A tap opens today's day view.

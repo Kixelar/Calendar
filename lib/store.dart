@@ -169,7 +169,7 @@ class Store extends ChangeNotifier {
   /// Asks for one background run in about a minute (the app must be left for it to run).
   Future<void> testBackground() async {
     try {
-      await const MethodChannel('calendar/device').invokeMethod<void>('testSync');
+      await const MethodChannel('calendar/device').invokeMethod<void>('testSync', wifiOnly);
     } on MissingPluginException {
       // tests
     }

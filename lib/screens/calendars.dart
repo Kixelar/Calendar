@@ -260,6 +260,14 @@ class Calendars extends StatelessWidget {
                       Marker(c.shape),
                       Expanded(child: _twoLine(context, c.name, c.holiday ? l.holidays : roleText(l, c.role))),
                       toggle(c),
+                      if (c.holiday)
+                        IconBtn(Icons.delete_outline, label: l.removeCountry, onTap: () async {
+                          try {
+                            await store.removeCalendar(c);
+                          } catch (e) {
+                            if (context.mounted) _fail(context, e);
+                          }
+                        }),
                     ]),
               ]),
           ], foot: [

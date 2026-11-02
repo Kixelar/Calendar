@@ -44,10 +44,10 @@ class SyncJob : JobService() {
         }
 
         /** One extra run in about a minute, to check background sync without waiting a full period (Settings → Accounts). */
-        fun testSoon(context: Context) {
+        fun testSoon(context: Context, wifiOnly: Boolean) {
             context.getSystemService(JobScheduler::class.java).schedule(JobInfo.Builder(TEST_ID, ComponentName(context, SyncJob::class.java))
                 .setMinimumLatency(60_000L)
-                .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
+                .setRequiredNetworkType(if (wifiOnly) JobInfo.NETWORK_TYPE_UNMETERED else JobInfo.NETWORK_TYPE_ANY)
                 .build())
         }
 
