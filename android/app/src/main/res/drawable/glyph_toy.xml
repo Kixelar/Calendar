@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Glyph Toy preview (CountdownToy): the full circle the countdown starts from. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="100dp" android:height="100dp" android:viewportWidth="25" android:viewportHeight="25">
+    <path android:fillColor="#FFFFFFFF" android:pathData="M12.5,2.5a10,10 0,1 1,0 20a10,10 0,1 1,0 -20z"/>
+</vector>

@@ -629,6 +629,27 @@ void main() {
     testWidgets('settings', (t) => shot(t, '05_1_settings', page: (s) => Settings(s, backLabel: 'Miesiąc')));
     testWidgets('appearance', (t) => shot(t, '05_2_appearance', page: (s) => Appearance(s)));
     testWidgets('notifications', (t) => shot(t, '05_3_notifications', page: (s) => Notifications(s)));
+    testWidgets('notifications on a phone with Glyph lights', (t) async {
+      const channel = MethodChannel('calendar/device');
+      String? sent;
+      t.binding.defaultBinaryMessenger.setMockMethodCallHandler(channel, (c) async {
+        if (c.method == 'glyph') return 'strip';
+        if (c.method == 'widgets') return sent = c.arguments as String;
+        throw MissingPluginException();
+      });
+      addTearDown(() => t.binding.defaultBinaryMessenger.setMockMethodCallHandler(channel, null));
+      await shot(t, '05_3_notifications_glyph', page: (s) => Notifications(s), act: (t) async {
+        await t.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50))); // the channel answers
+        await t.pump();
+        expect(find.text('PULS'), findsOneWidget); // default pattern, lights off (owner)
+        await t.tap(find.byWidgetPredicate((w) => w is Toggle && w.label == 'Światło przy przypomnieniu'));
+        await t.pump();
+      });
+      final glyph = jsonDecode(sent!)['glyph'];
+      expect(glyph['light'], isTrue);
+      expect(glyph['countdown'], isFalse);
+      expect(glyph['pattern'], 'pulse');
+    });
     testWidgets('accounts', (t) => shot(t, '05_4_accounts', page: (s) => Accounts(s)));
     testWidgets('data', (t) => shot(t, '05_5_data', page: (s) => DataPrivacy(s)));
     testWidgets('help', (t) => shot(t, '05_6_help', page: (s) => Help(s)));

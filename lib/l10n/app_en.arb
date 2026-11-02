@@ -372,5 +372,14 @@
   "appLocked": "Calendar is locked",
   "unlock": "Unlock",
   "unlockReason": "Unlock Calendar",
-  "appLockNoScreenLock": "Set a screen lock on your phone first."
+  "appLockNoScreenLock": "Set a screen lock on your phone first.",
+  "glyphInterface": "Glyph Interface",
+  "glyphLight": "Light with reminders",
+  "glyphPattern": "Light pattern",
+  "glyphCountdown": "Countdown to event",
+  "glyphPulse": "Pulse",
+  "glyphBlink": "Blink",
+  "glyphSteady": "Steady",
+  "glyphGlass": "Glass",
+  "glyphClock": "Clock"
 }

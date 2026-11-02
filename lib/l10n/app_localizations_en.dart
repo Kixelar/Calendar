@@ -1193,4 +1193,31 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get appLockNoScreenLock => 'Set a screen lock on your phone first.';
+
+  @override
+  String get glyphInterface => 'Glyph Interface';
+
+  @override
+  String get glyphLight => 'Light with reminders';
+
+  @override
+  String get glyphPattern => 'Light pattern';
+
+  @override
+  String get glyphCountdown => 'Countdown to event';
+
+  @override
+  String get glyphPulse => 'Pulse';
+
+  @override
+  String get glyphBlink => 'Blink';
+
+  @override
+  String get glyphSteady => 'Steady';
+
+  @override
+  String get glyphGlass => 'Glass';
+
+  @override
+  String get glyphClock => 'Clock';
 }

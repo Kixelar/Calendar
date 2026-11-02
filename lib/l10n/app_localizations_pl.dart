@@ -1206,4 +1206,31 @@ class AppLocalizationsPl extends AppLocalizations {
   @override
   String get appLockNoScreenLock =>
       'Najpierw ustaw blokadę ekranu w telefonie.';
+
+  @override
+  String get glyphInterface => 'Glyph Interface';
+
+  @override
+  String get glyphLight => 'Światło przy przypomnieniu';
+
+  @override
+  String get glyphPattern => 'Wzór światła';
+
+  @override
+  String get glyphCountdown => 'Odliczanie do wydarzenia';
+
+  @override
+  String get glyphPulse => 'Puls';
+
+  @override
+  String get glyphBlink => 'Mignięcie';
+
+  @override
+  String get glyphSteady => 'Stałe';
+
+  @override
+  String get glyphGlass => 'Szklanka';
+
+  @override
+  String get glyphClock => 'Zegar';
 }

@@ -68,6 +68,23 @@ class Store extends ChangeNotifier {
         hideOnLock: hideOnLock,
       );
 
+  // 05.3 Glyph Interface (Lights.kt): lights off by default, pulse and glass as the main styles (owner).
+  bool get glyphLight => _p.getBool('glyphLight') ?? false;
+  bool get glyphCountdown => _p.getBool('glyphCountdown') ?? false;
+  String get glyphPattern => _p.getString('glyphPattern') ?? 'pulse'; // pulse, blink, steady
+  String get glyphMatrix => _p.getString('glyphMatrix') ?? 'glass'; // glass, clock
+
+  Future<String?>? _glyph;
+
+  /// The phone's Glyph lights: "strip", "matrix" or null (asked once).
+  Future<String?> glyph() => _glyph ??= () async {
+        try {
+          return await const MethodChannel('calendar/device').invokeMethod<String>('glyph');
+        } on MissingPluginException {
+          return null; // tests
+        }
+      }();
+
   // Notifications are built outside any widget, so they take the phone's language directly.
   String get _lang => PlatformDispatcher.instance.locale.languageCode == 'pl' ? 'pl' : 'en';
   AppLocalizations get _l => lookupAppLocalizations(Locale(_lang));
@@ -105,6 +122,14 @@ class Store extends ChangeNotifier {
       'until': l.ongoingUntil('%s'),
       'use24h': use24h,
       'theme': theme,
+      'glyph': {
+        'light': glyphLight,
+        'countdown': glyphCountdown,
+        'pattern': glyphPattern,
+        'matrix': glyphMatrix,
+        if (glyphLight)
+          'reminders': [for (final r in plan(_soon, now, notifyPrefs, l, _lang)) if (!r.summary) r.at.millisecondsSinceEpoch],
+      },
       'events': [
         for (final e in evs) {'t': e.title, 's': e.start.millisecondsSinceEpoch, 'e': e.end.millisecondsSinceEpoch, 'a': e.allDay},
       ],

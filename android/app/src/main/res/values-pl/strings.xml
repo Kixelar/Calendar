@@ -9,4 +9,6 @@
     <string name="widget_next_small">Następne · mały</string>
     <string name="widget_day_small">Data · mały</string>
     <string name="widget_clock">Zegar dnia</string>
+    <string name="glyph_toy">Odliczanie kalendarza</string>
+    <string name="glyph_toy_summary">Czas do następnego wydarzenia</string>
 </resources>

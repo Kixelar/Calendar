@@ -43,3 +43,14 @@
   locks at start and after more than a minute away, so a file picker or Google sign-in does not lock it. Needs
   `FlutterFragmentActivity` and AppCompat themes (styles.xml, appcompat dependency).
 - **Dropped** (owner, 2026-11-02): 04.5 "Ask for edit rights", 05.5 daily backup.
+- **Glyph Interface** (owner, 2026-11-02): a section in Notifications (mockup 05.3), hidden on phones without Glyph
+  lights; "Light with reminders" and "Countdown to event" off by default, pattern Pulse / matrix style Glass.
+  Kit: `android/app/libs/glyph-matrix-sdk-2.0.aar` (one file for strips and matrix); no API key is needed for apps
+  targeting Android 16, the manifest keeps `NothingKey`="test" as Nothing advises (Android 14/15 phones would need a key).
+  `Lights.kt`: one RTC_WAKEUP alarm (`LightsTick`) for the next moment, taken from the widget data (`glyph` with the
+  settings and reminder times). Strips: reminders flash in the pattern; countdown lights the bar for 5 s at 60/45/30/15
+  min (Phone (4a), 6 lights: every 10 min), lights going out from the top; event start blinks every light; a reminder
+  wins over a countdown step at the same moment. Matrix: the same moments through `setAppMatrixFrame`, and
+  `CountdownToy` (Glyph Toy, AOD) shows the circle emptying from the top ("glass") or clockwise from 12 with the lit
+  part on the left ("clock", variant A), a 3x3 plus while timed events remain today, else nothing. Previews approved
+  by the owner in chat.

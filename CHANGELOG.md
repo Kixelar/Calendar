@@ -1,6 +1,12 @@
 # Changelog
 
 ## 2026.11.02-dev
+### Added
+- Glyph Interface on Nothing phones (Settings → Notifications, shown only on phones with Glyph lights; built without a
+  test device): light with reminders (Pulse, Blink or Steady), countdown to event (the bar lights for 5 s at 60/45/30/15
+  min before, every 10 min on Phone (4a); every light blinks when the event starts), and a "Calendar countdown" Glyph
+  Toy for the matrix on Phone (3) / (4a) Pro (circle emptying like a glass or a clock, a small plus while events are left
+  today). Both switches are off by default.
 ### Changed
 - Add calendar: the "Google account" option is gone while a Google account is signed in.
 ### Added

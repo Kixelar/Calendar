@@ -34,7 +34,10 @@ Screen numbers refer to docs/design/mockup.html; the month, week and day views f
 - [x] 07.1/07.2 Home screen widgets, following the app theme (confirmed on the phone)
 - [x] 07.3 Event notifications
 - [x] Release signing key, app icon
-- [ ] Glyph interface on Nothing phones (Glyph Developer Kit): agreed without tests, the owner's phone has no Glyph lights
+- [x] Glyph interface on Nothing phones (Lights.kt, Glyph Developer Kit), not run on a Glyph phone
+  - [ ] Check on a real Nothing phone: lights from the background (the kit's README says "only foreground
+        applications"), strip order top/bottom, the matrix toy and its preview image
+  - [ ] The approved "top light" dot on strips has no moment to show yet (strips have no Glyph button); ask the owner
 
 ## At the end
 - [ ] Terms and privacy policy texts, support address; then 05.6 contact rows, 05.8 terms rows, welcome screen caption

@@ -2029,6 +2029,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Set a screen lock on your phone first.'**
   String get appLockNoScreenLock;
+
+  /// No description provided for @glyphInterface.
+  ///
+  /// In en, this message translates to:
+  /// **'Glyph Interface'**
+  String get glyphInterface;
+
+  /// No description provided for @glyphLight.
+  ///
+  /// In en, this message translates to:
+  /// **'Light with reminders'**
+  String get glyphLight;
+
+  /// No description provided for @glyphPattern.
+  ///
+  /// In en, this message translates to:
+  /// **'Light pattern'**
+  String get glyphPattern;
+
+  /// No description provided for @glyphCountdown.
+  ///
+  /// In en, this message translates to:
+  /// **'Countdown to event'**
+  String get glyphCountdown;
+
+  /// No description provided for @glyphPulse.
+  ///
+  /// In en, this message translates to:
+  /// **'Pulse'**
+  String get glyphPulse;
+
+  /// No description provided for @glyphBlink.
+  ///
+  /// In en, this message translates to:
+  /// **'Blink'**
+  String get glyphBlink;
+
+  /// No description provided for @glyphSteady.
+  ///
+  /// In en, this message translates to:
+  /// **'Steady'**
+  String get glyphSteady;
+
+  /// No description provided for @glyphGlass.
+  ///
+  /// In en, this message translates to:
+  /// **'Glass'**
+  String get glyphGlass;
+
+  /// No description provided for @glyphClock.
+  ///
+  /// In en, this message translates to:
+  /// **'Clock'**
+  String get glyphClock;
 }
 
 class _AppLocalizationsDelegate

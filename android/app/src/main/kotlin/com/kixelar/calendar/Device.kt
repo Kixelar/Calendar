@@ -36,6 +36,8 @@ object Device {
                     val lang = java.util.Locale(call.argument<String>("lang")!!)
                     result.success(call.argument<List<String>>("codes")!!.associateWith { java.util.Locale("", it).getDisplayCountry(lang) })
                 }
+                // 05.3: which Glyph lights the phone has ("strip", "matrix") or null; the section shows only with them.
+                "glyph" -> result.success(try { Lights.kind() } catch (_: Throwable) { null })
                 // A widget asked to open a view (MainActivity.open); handed out once.
                 "takeOpen" -> {
                     result.success(MainActivity.open)

@@ -10,4 +10,6 @@
     <string name="widget_next_small">Next · small</string>
     <string name="widget_day_small">Date · small</string>
     <string name="widget_clock">Day clock</string>
+    <string name="glyph_toy">Calendar countdown</string>
+    <string name="glyph_toy_summary">Time left to the next event</string>
 </resources>

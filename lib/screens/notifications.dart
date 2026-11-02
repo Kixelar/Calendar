@@ -5,7 +5,7 @@ import '../theme.dart';
 import '../ui.dart';
 import 'event.dart';
 
-/// 05.3: reminders, daily summary and invitation notifications. The mockup's Glyph section waits for the Glyph SDK.
+/// 05.3: reminders, daily summary, Glyph lights (only on Nothing phones that have them) and invitation notifications.
 class Notifications extends StatelessWidget {
   const Notifications(this.store, {super.key});
   final Store store;
@@ -70,6 +70,26 @@ class Notifications extends StatelessWidget {
                         ],
                       ),
                     ]),
+                    FutureBuilder(
+                      future: store.glyph(),
+                      builder: (context, kind) {
+                        if (kind.data == null) return const SizedBox.shrink();
+                        final matrix = kind.data == 'matrix';
+                        final key = matrix ? 'glyphMatrix' : 'glyphPattern';
+                        final styles = matrix
+                            ? [('glass', l.glyphGlass), ('clock', l.glyphClock)]
+                            : [('pulse', l.glyphPulse), ('blink', l.glyphBlink), ('steady', l.glyphSteady)];
+                        final current = matrix ? store.glyphMatrix : store.glyphPattern;
+                        return Section(left: l.glyphInterface, children: [
+                          toggle(l.glyphLight, store.glyphLight, 'glyphLight'),
+                          ValueRow(l.glyphPattern, value: styles.firstWhere((s) => s.$1 == current, orElse: () => styles.first).$2, onTap: () async {
+                            final r = await pick<String>(context, Pick(title: l.glyphPattern, selected: current, options: styles));
+                            if (r != null) await store.set(key, r.$1);
+                          }),
+                          toggle(l.glyphCountdown, store.glyphCountdown, 'glyphCountdown'),
+                        ]);
+                      },
+                    ),
                     Section(left: l.invitations, children: [
                       toggle(l.newInvitations, p.invites, 'notifyInvites'),
                       toggle(l.sharedChanges, p.sharedChanges, 'notifyShared'),

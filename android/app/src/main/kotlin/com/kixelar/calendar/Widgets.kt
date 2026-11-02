@@ -50,6 +50,16 @@ object Widgets {
                 Ev(e.getString("t"), e.getLong("s"), e.getLong("e"), e.getBoolean("a"))
             }
         } ?: emptyList()
+        val glyph = GlyphPrefs(json.optJSONObject("glyph") ?: JSONObject())
+    }
+
+    /** 05.3 Glyph settings and today's reminder times (Lights.kt). */
+    class GlyphPrefs(json: JSONObject) {
+        val light: Boolean = json.optBoolean("light", false)
+        val countdown: Boolean = json.optBoolean("countdown", false)
+        val pattern: String = json.optString("pattern", "pulse") // pulse, blink, steady
+        val matrix: String = json.optString("matrix", "glass") // glass, clock
+        val reminders: List<Long> = json.optJSONArray("reminders")?.let { a -> (0 until a.length()).map { a.getLong(it) } } ?: emptyList()
     }
 
     /** Countdown shown by widgets: 60, 45, 30 or 15 min before an event (owner, 2026-11-01), null earlier. */
@@ -75,6 +85,7 @@ object Widgets {
     fun save(context: Context, json: String) {
         context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().putString("data", json).apply()
         updateAll(context)
+        try { Lights.schedule(context) } catch (e: Exception) { CrashLog.write(context, Thread.currentThread(), e) }
     }
 
     fun data(context: Context): Data =

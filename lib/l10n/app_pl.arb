@@ -321,5 +321,14 @@
   "appLocked": "Kalendarz jest zablokowany",
   "unlock": "Odblokuj",
   "unlockReason": "Odblokuj Kalendarz",
-  "appLockNoScreenLock": "Najpierw ustaw blokadę ekranu w telefonie."
+  "appLockNoScreenLock": "Najpierw ustaw blokadę ekranu w telefonie.",
+  "glyphInterface": "Glyph Interface",
+  "glyphLight": "Światło przy przypomnieniu",
+  "glyphPattern": "Wzór światła",
+  "glyphCountdown": "Odliczanie do wydarzenia",
+  "glyphPulse": "Puls",
+  "glyphBlink": "Mignięcie",
+  "glyphSteady": "Stałe",
+  "glyphGlass": "Szklanka",
+  "glyphClock": "Zegar"
 }

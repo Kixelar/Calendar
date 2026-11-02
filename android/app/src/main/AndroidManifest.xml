@@ -1,4 +1,8 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    <!-- Glyph Developer Kit (Lights.kt) says minSdk 33; every call is behind an Android 14 check. -->
+    <uses-sdk tools:overrideLibrary="com.nothing.thirdparty"/>
+    <uses-permission android:name="com.nothing.ketchum.permission.ENABLE"/>
     <!-- Event reminders (07.3): exact alarms are allowed for calendar apps without asking; reschedule after reboot. -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <uses-permission android:name="android.permission.USE_EXACT_ALARM"/>
@@ -80,6 +84,16 @@
             <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
             <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_clock" />
         </receiver>
+        <!-- 05.3 Glyph Interface (Lights.kt). No key is needed for apps targeting Android 16; Nothing still advises the entry. -->
+        <meta-data android:name="NothingKey" android:value="test"/>
+        <receiver android:name=".LightsTick" android:exported="false" />
+        <service android:name=".CountdownToy" android:exported="true">
+            <intent-filter><action android:name="com.nothing.glyph.TOY"/></intent-filter>
+            <meta-data android:name="com.nothing.glyph.toy.name" android:resource="@string/glyph_toy"/>
+            <meta-data android:name="com.nothing.glyph.toy.image" android:resource="@drawable/glyph_toy"/>
+            <meta-data android:name="com.nothing.glyph.toy.summary" android:resource="@string/glyph_toy_summary"/>
+            <meta-data android:name="com.nothing.glyph.toy.aod_support" android:value="1"/>
+        </service>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data

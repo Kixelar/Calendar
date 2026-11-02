@@ -27,6 +27,8 @@ lib/
   screens/event.dart       03.1 event details, 03.2 new/edit event, 06.2 delete dialog, calendar picker
 android/app/src/main/res/values*/strings.xml   Launcher name and widget names per device language
 android/app/src/main/kotlin/.../MainActivity.kt  Channel `calendar/device`: time zone, version info, widget data
+android/app/src/main/kotlin/.../Lights.kt        05.3 Glyph Interface: strip lights, countdown, matrix Glyph Toy (CountdownToy)
+android/app/libs/glyph-matrix-sdk-2.0.aar         Nothing's Glyph Developer Kit (strips and matrix in one file)
 android/app/src/main/kotlin/.../Widgets.kt       07.1/07.2 home screen widgets (7 sizes), res/xml/widget_*.xml
 test/screens_test.dart   Logic tests + PNG renders of screens with a fake Google account
 ```
