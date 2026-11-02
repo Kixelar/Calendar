@@ -52,5 +52,6 @@
   min (Phone (4a), 6 lights: every 10 min), lights going out from the top; event start blinks every light; a reminder
   wins over a countdown step at the same moment. Matrix: the same moments through `setAppMatrixFrame`, and
   `CountdownToy` (Glyph Toy, AOD) shows the circle emptying from the top ("glass") or clockwise from 12 with the lit
-  part on the left ("clock", variant A), a 3x3 plus while timed events remain today, else nothing. Previews approved
+  part on the left ("clock", variant A), a 3x3 plus while timed events remain today, else nothing. Strips show no
+  "events left today" dot: they have no Glyph button to call it up (dropped by the owner). Previews approved
   by the owner in chat.
