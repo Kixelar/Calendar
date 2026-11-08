@@ -24,8 +24,6 @@ class Notifications extends StatelessWidget {
                 BackBar(label: l.settings),
                 Expanded(
                   child: ListView(padding: const EdgeInsets.fromLTRB(24, 24, 24, 24), children: [
-                    Lbl(l.settings),
-                    const SizedBox(height: 8),
                     Text(l.notifications, style: T.headlineLg(t.display)),
                     Section(left: l.reminders, children: [
                       ValueRow(l.defaultLabel, value: p.defaultReminder < 0 ? l.none : reminderText(l, p.defaultReminder), onTap: () async {

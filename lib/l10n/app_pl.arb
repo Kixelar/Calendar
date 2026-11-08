@@ -1,7 +1,6 @@
 {
   "@@locale": "pl",
   "appTitle": "Kalendarz",
-  "skip": "Pomiń",
   "welcomeTitle": "Twój czas,\nbez szumu.",
   "welcomeBody": "Wszystkie kalendarze w jednym miejscu. Synchronizacja z Google, święta i wspólne kalendarze z bliskimi.",
   "connectGoogle": "Połącz z Google",

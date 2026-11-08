@@ -42,16 +42,7 @@ class Welcome extends StatelessWidget {
     return Scaffold(
       body: SafeArea(
         child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(14, 12, 14, 0),
-            child: SizedBox(
-              height: 44,
-              child: Align(
-                alignment: Alignment.centerRight,
-                child: TextButton(onPressed: store.finishOnboarding, child: Text(l.skip.toUpperCase(), style: T.labelMd(t.secondary))),
-              ),
-            ),
-          ),
+          const SizedBox(height: 56), // where the removed "Skip" was, so the layout stays (owner, 2026-11-08)
           Expanded(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),

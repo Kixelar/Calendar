@@ -17,6 +17,10 @@
 ### Changed
 - An existing event can only move to calendars of the same kind (Google or phone); phone events have no guests.
 - "Disconnect Google" keeps the calendars on this phone; "Clear data" removes them too.
+- Settings pages (Appearance, Notifications, Accounts, Data and privacy, Help) no longer repeat "Settings" above their
+  title; the back button says it (owner).
+### Removed
+- "Skip" on the welcome screen (owner); "Continue without account" stays.
 
 ## 2026.11.02-dev
 ### Added

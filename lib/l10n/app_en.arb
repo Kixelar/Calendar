@@ -1,7 +1,6 @@
 {
   "@@locale": "en",
   "appTitle": "Calendar",
-  "skip": "Skip",
   "welcomeTitle": "Your time,\nwithout the noise.",
   "welcomeBody": "All your calendars in one place. Google sync, holidays and calendars shared with people close to you.",
   "connectGoogle": "Connect Google",

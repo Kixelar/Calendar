@@ -13,9 +13,6 @@ class AppLocalizationsPl extends AppLocalizations {
   String get appTitle => 'Kalendarz';
 
   @override
-  String get skip => 'Pomiń';
-
-  @override
   String get welcomeTitle => 'Twój czas,\nbez szumu.';
 
   @override

@@ -104,12 +104,6 @@ abstract class AppLocalizations {
   /// **'Calendar'**
   String get appTitle;
 
-  /// No description provided for @skip.
-  ///
-  /// In en, this message translates to:
-  /// **'Skip'**
-  String get skip;
-
   /// No description provided for @welcomeTitle.
   ///
   /// In en, this message translates to:

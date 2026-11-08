@@ -26,10 +26,11 @@ Widget _page(BuildContext c, String back, List<Widget> body, {List<Widget> foot 
       ),
     );
 
-Widget _head(BuildContext c, String over, String? title) => Padding(
+/// Page title; [over] is the small label above it, left out on settings pages (the back button already says it, owner).
+Widget _head(BuildContext c, String? over, String? title) => Padding(
       padding: const EdgeInsets.only(top: 24),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, spacing: 8, children: [
-        Lbl(over),
+        if (over != null) Lbl(over),
         if (title != null) Text(title, style: T.headlineLg(Tok.of(c).display)),
       ]),
     );
@@ -118,7 +119,7 @@ class Appearance extends StatelessWidget {
           final dayNames = l.weekdaysAcc.split(',');
           String dayName(int d) => '${dayNames[d - 1][0].toUpperCase()}${dayNames[d - 1].substring(1)}';
           return _page(context, l.settings, [
-            _head(context, l.settings, l.appearance),
+            _head(context, null, l.appearance),
             Section(left: l.theme, children: [
               seg(context, [('dark', l.themeDark), ('light', l.themeLight), ('system', l.themeSystem)], store.theme, (v) => store.set('theme', v)),
             ]),
@@ -181,7 +182,7 @@ class _AccountsState extends State<Accounts> {
           final t = Tok.of(context), l = l10n(context), store = widget.store;
           final last = store.lastSync;
           return _page(context, l.settings, [
-            _head(context, l.settings, l.accounts),
+            _head(context, null, l.accounts),
             if (store.signedIn)
               Container(
                 margin: const EdgeInsets.only(top: 24),
@@ -306,7 +307,7 @@ class DataPrivacy extends StatelessWidget {
         builder: (context, _) {
           final t = Tok.of(context), l = l10n(context);
           return _page(context, l.settings, [
-            _head(context, l.settings, l.dataPrivacy),
+            _head(context, null, l.dataPrivacy),
             Section(left: l.privacy, children: [
               _switch(l.hideOnLockScreen, store.hideOnLock, (v) => store.set('hideOnLock', v)),
               _switch(l.appLock, store.appLock, hint: l.appLockHint, (v) async {
@@ -357,7 +358,7 @@ class _HelpState extends State<Help> {
     final all = helpFor(loc(context));
     final shown = [for (final a in all) if (q.isEmpty || '${a.title} ${a.steps.join(' ')}'.toLowerCase().contains(q.toLowerCase())) a];
     return _page(context, l.settings, [
-      _head(context, l.settings, l.help),
+      _head(context, null, l.help),
       const SizedBox(height: 24),
       Container(
         height: 48,

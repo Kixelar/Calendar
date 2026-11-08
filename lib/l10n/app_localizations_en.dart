@@ -13,9 +13,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appTitle => 'Calendar';
 
   @override
-  String get skip => 'Skip';
-
-  @override
   String get welcomeTitle => 'Your time,\nwithout the noise.';
 
   @override
