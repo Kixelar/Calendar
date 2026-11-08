@@ -49,6 +49,8 @@ Screen numbers refer to docs/design/mockup.html; the month, week and day views f
 
 ## Not doing
 - 04.5 "Ask for edit rights" and 05.5 daily backup: dropped (owner, 2026-11-02).
+- Launcher icon with today's date: Android only allows it by switching between up to 217 icon aliases, which moves or
+  removes the home screen icon on many launchers; dropped (owner, 2026-11-08).
 - 03.5 "Add to" another calendar and "Propose another time", 04.4 "Invited" state: the Google Calendar API has no way to do these.
 - Google Tasks (owner, 2026-10-31).
 - For now: CalDAV / Outlook / iCloud, holiday filters and name days (04.3) (owner).

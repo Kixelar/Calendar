@@ -41,8 +41,8 @@
 - **Glyph Interface** (05.3): built 2026-11-02 to the owner's choices, but never run on a phone with Glyph lights (the
   owner's has none). Needs someone with a Nothing phone (lights or matrix) to check; see DECISIONS.
 - **Terms and privacy policy** texts and a **support address**: at the very end, together.
-- **Update check**: later. **"On this device" account** (local calendars): to do. **Translations**: owner decides which.
-- Dropped (owner, 2026-11-02): ask for edit rights, daily backup.
+- **Update check**: later. More languages (cs, sk, sv, da, fi, tr): maybe later.
+- Dropped (owner, 2026-11-02): ask for edit rights, daily backup. (2026-11-08): launcher icon showing today's date.
 - **CalDAV / Outlook / iCloud**, **holiday filters / name days**: dropped for now (owner).
 
 ## Traps
