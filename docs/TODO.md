@@ -23,7 +23,9 @@ Screen numbers refer to docs/design/mockup.html; the month, week and day views f
 - [x] 04.2 "Subscribe to address" (.ics / webcal): own calendar refreshed hourly by the app (2026-11-01)
 - [x] 05.5 app lock: fingerprint, face or screen lock code (2026-11-02)
 - [x] Marker shape menu (24 shapes) from the calendar list and 04.5 (2026-11-02)
-- [ ] 05.8 update check (later)
+- [ ] 05.8 update check (later). Screens are done (lib/screens/update.dart: card on the home screen, full screen, row in
+      About); missing: where releases live (the repo is private, so the app cannot read its GitHub Releases; proposed a
+      public releases-only repo), filling Store.update, and downloading / installing the APK
 - [x] 05.4 "On this device": full local calendars (agreed 2026-11-02, done 2026-11-08). Plan, in steps:
       1. [x] local calendars and events (no repeat), views, search, reminders, widgets, .ics import/export (2026-11-08);
       2. [x] repeating local events with exceptions (this / following / all) (2026-11-08);

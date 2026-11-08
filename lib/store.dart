@@ -59,6 +59,14 @@ class Store extends ChangeNotifier {
   bool get wifiOnly => _p.getBool('wifiOnly') ?? false;
   DateTime? get lastSync => switch (_p.getInt('lastSync')) { final ms? => DateTime.fromMillisecondsSinceEpoch(ms), _ => null };
 
+  /// A newer version waiting (05.8), or null; [updateDismissed] is the version whose banner was closed.
+  Update? update;
+  String? get updateDismissed => _p.getString('updateDismissed');
+  Future<void> dismissUpdate() async {
+    if (update case final u?) await _p.setString('updateDismissed', u.version);
+    notifyListeners();
+  }
+
   bool get hideOnLock => _p.getBool('hideOnLock') ?? true;
   bool get appLock => _p.getBool('appLock') ?? false;
   NotifyPrefs get notifyPrefs => NotifyPrefs(
@@ -817,6 +825,15 @@ class Store extends ChangeNotifier {
     }
     notifyListeners();
   }
+}
+
+/// A newer version of the app: its number, release notes and download size.
+/// shortcut: nothing fills [Store.update] yet; the update check comes later (TODO 05.8).
+class Update {
+  const Update(this.version, this.notes, {this.size});
+  final String version;
+  final List<String> notes;
+  final int? size; // bytes
 }
 
 /// FNV-1a hash of [s] (stable between app runs, unlike String.hashCode), to tell whether a subscribed file changed.

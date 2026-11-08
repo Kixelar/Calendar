@@ -337,5 +337,13 @@
   "chooseLanguage": "Scegli la lingua",
   "phoneLanguage": "Lingua del telefono",
   "continueBtn": "Continua",
-  "language": "Lingua"
+  "language": "Lingua",
+  "newVersion": "Nuova versione",
+  "currentVersion": "Attuale {version}",
+  "whatsNew": "Novità",
+  "downloadInstall": "Scarica e installa",
+  "later": "Più tardi",
+  "newVersionN": "Nuova versione {version}",
+  "tapToSee": "Tocca per vedere",
+  "updates": "Aggiornamenti"
 }

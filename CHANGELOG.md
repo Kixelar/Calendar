@@ -24,6 +24,8 @@
 - The app is in 8 languages: Polish, English, German, Spanish, French, Italian, Portuguese and Dutch (help articles,
   notifications and widgets too). Appearance → Language picks one or follows the phone; the launcher and widget names
   follow the phone's language.
+- Update screens, not active yet (no update check): a "new version" card above the view tabs, a full screen with
+  what's new and "Download and install", and an Updates row with a red dot in About (owner chose all three).
 ### Removed
 - "Skip" on the welcome screen (owner); "Continue without account" stays.
 

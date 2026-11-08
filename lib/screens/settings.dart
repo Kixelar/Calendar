@@ -9,6 +9,7 @@ import 'calendars.dart';
 import 'lock.dart';
 import 'notifications.dart';
 import 'onboarding.dart';
+import 'update.dart';
 
 /// Mockup screens 05.1 settings, 05.2 appearance, 05.4 accounts, 05.5 data, 05.6 help, 05.7 article, 05.8 about.
 /// 05.3 notifications lives in notifications.dart.
@@ -99,7 +100,7 @@ class Settings extends StatelessWidget {
             Group(children: [
               ValueRow(l.dataPrivacy, onTap: () => _go(context, DataPrivacy(store))),
               ValueRow(l.help, onTap: () => _go(context, Help(store))),
-              ValueRow(l.about, onTap: () => _go(context, About(store))),
+              ValueRow(l.about, trailing: store.update == null ? null : redDot(context), onTap: () => _go(context, About(store))),
             ]),
           ]);
         },
@@ -478,6 +479,9 @@ class About extends StatelessWidget {
             if (info['build'] != null) ValueRow(l.build, value: info['build']),
             if (info['android'] != null) ValueRow(l.system, value: 'Android ${info['android']}'),
             ValueRow(l.timeZone, value: [?zone, utc].join(' · ')),
+            // 05.8: shown once the update check knows something (TODO 05.8); red with the new version number.
+            if (store.update case final u?)
+              ValueRow(l.updates, value: u.version, valueColor: t.accentText, trailing: redDot(context), onTap: () => openUpdate(context, store)),
           ]),
           Section(left: l.legal, children: [
             ValueRow(l.licenses, onTap: () => showLicensePage(context: context, applicationName: l.appTitle, applicationVersion: version)),

@@ -2137,6 +2137,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Language'**
   String get language;
+
+  /// No description provided for @newVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'New version'**
+  String get newVersion;
+
+  /// No description provided for @currentVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Now {version}'**
+  String currentVersion(String version);
+
+  /// No description provided for @whatsNew.
+  ///
+  /// In en, this message translates to:
+  /// **'What\'s new'**
+  String get whatsNew;
+
+  /// No description provided for @downloadInstall.
+  ///
+  /// In en, this message translates to:
+  /// **'Download and install'**
+  String get downloadInstall;
+
+  /// No description provided for @later.
+  ///
+  /// In en, this message translates to:
+  /// **'Later'**
+  String get later;
+
+  /// No description provided for @newVersionN.
+  ///
+  /// In en, this message translates to:
+  /// **'New version {version}'**
+  String newVersionN(String version);
+
+  /// No description provided for @tapToSee.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to see'**
+  String get tapToSee;
+
+  /// No description provided for @updates.
+  ///
+  /// In en, this message translates to:
+  /// **'Updates'**
+  String get updates;
 }
 
 class _AppLocalizationsDelegate

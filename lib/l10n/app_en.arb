@@ -387,5 +387,15 @@
   "chooseLanguage": "Choose a language",
   "phoneLanguage": "Phone language",
   "continueBtn": "Continue",
-  "language": "Language"
+  "language": "Language",
+  "newVersion": "New version",
+  "currentVersion": "Now {version}",
+  "@currentVersion": {"placeholders": {"version": {"type": "String"}}},
+  "whatsNew": "What's new",
+  "downloadInstall": "Download and install",
+  "later": "Later",
+  "newVersionN": "New version {version}",
+  "@newVersionN": {"placeholders": {"version": {"type": "String"}}},
+  "tapToSee": "Tap to see",
+  "updates": "Updates"
 }

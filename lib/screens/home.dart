@@ -14,6 +14,7 @@ import 'calendars.dart';
 import 'event.dart';
 import 'search.dart';
 import 'settings.dart';
+import 'update.dart';
 import 'views.dart';
 
 /// Main screen with the four views from the mockup: 02.1 year, 02.2 month, 02.3 week, 02.4 day.
@@ -221,6 +222,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
                 ),
               ]),
             ),
+            UpdateBanner(store, onOpen: () => openUpdate(context, store)),
             Padding(
               padding: const EdgeInsets.fromLTRB(14, 8, 24, 32),
               child: Row(children: [

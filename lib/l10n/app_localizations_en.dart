@@ -1239,4 +1239,32 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get language => 'Language';
+
+  @override
+  String get newVersion => 'New version';
+
+  @override
+  String currentVersion(String version) {
+    return 'Now $version';
+  }
+
+  @override
+  String get whatsNew => 'What\'s new';
+
+  @override
+  String get downloadInstall => 'Download and install';
+
+  @override
+  String get later => 'Later';
+
+  @override
+  String newVersionN(String version) {
+    return 'New version $version';
+  }
+
+  @override
+  String get tapToSee => 'Tap to see';
+
+  @override
+  String get updates => 'Updates';
 }

@@ -28,6 +28,7 @@ lib/
   screens/event.dart       03.1 event details, 03.2 new/edit event, 06.2 delete dialog, calendar picker
 android/app/src/main/res/values*/strings.xml   Launcher name and widget names per device language
 android/app/src/main/kotlin/.../MainActivity.kt  Channel `calendar/device`: time zone, version info, widget data
+lib/screens/update.dart           05.8 new version: home card, full screen, About row (fed by Store.update)
 tool/readme_images.py             README images from the test screenshots (CAL_LANG=en CAL_SHOTS=...)
 android/app/src/main/kotlin/.../Lights.kt        05.3 Glyph Interface: strip lights, countdown, matrix Glyph Toy (CountdownToy)
 android/app/libs/glyph-matrix-sdk-2.0.aar         Nothing's Glyph Developer Kit (strips and matrix in one file)

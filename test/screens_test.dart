@@ -20,6 +20,7 @@ import 'package:calendar/screens/onboarding.dart';
 import 'package:calendar/screens/notifications.dart';
 import 'package:calendar/screens/search.dart';
 import 'package:calendar/screens/settings.dart';
+import 'package:calendar/screens/update.dart';
 import 'package:calendar/screens/views.dart';
 import 'package:calendar/store.dart';
 import 'package:calendar/view.dart';
@@ -685,6 +686,7 @@ void main() {
         Widget Function(Store)? page,
         String? tapText,
         Future<void> Function(WidgetTester)? act,
+        void Function(Store)? setup,
         Map<String, Object> prefs = const {}}) async {
       SharedPreferences.setMockInitialValues({'onboarded': onboarded, 'google': onboarded, 'language': ?_lang, ...prefs});
       t.view.physicalSize = const Size(390, 844);
@@ -696,6 +698,7 @@ void main() {
       final store = Store(_FakeGoogle(), Directory.systemTemp.createTempSync());
       final key = GlobalKey();
       await t.runAsync(store.start);
+      setup?.call(store);
       await t.pumpWidget(RepaintBoundary(key: key, child: App(store)));
       await t.pump();
       // Fixed pumps instead of pumpAndSettle: marquees and the minute ticker under the page never settle.
@@ -798,6 +801,16 @@ void main() {
     testWidgets('shared with you', (t) => shot(t, '04_5_shared_with_you', page: (s) => SharedWithYou(s, s.cal('ola.zielinska@gmail.com')!)));
     testWidgets('settings', (t) => shot(t, '05_1_settings', page: (s) => Settings(s, backLabel: _s('Miesiąc', 'Month'))));
     testWidgets('appearance', (t) => shot(t, '05_2_appearance', page: (s) => Appearance(s)));
+    // 05.8 update (proposals A, B, C), with a made-up newer version.
+    final update = Update('2026.11.20', [
+      _s('Widżet tygodnia w dwóch rozmiarach', 'Week widget in two sizes'),
+      _s('Szybsze odświeżanie świąt', 'Faster holiday refresh'),
+      _s('Poprawki powtarzania „to i następne”', 'Fixes for “this and following” repeats'),
+    ], size: 22540000);
+    testWidgets('update screen', (t) => shot(t, '05_9_update', setup: (s) => s.update = update,
+        page: (s) => UpdateScreen(s, update, current: '2026.11.08')));
+    testWidgets('update banner', (t) => shot(t, '05_9_update_banner', setup: (s) => s.update = update));
+    testWidgets('update in about', (t) => shot(t, '05_9_update_about', setup: (s) => s.update = update, page: (s) => About(s)));
     // Every language: the screens with the longest labels, to catch text that does not fit.
     for (final lang in ['de', 'es', 'fr', 'it', 'pt', 'nl']) {
       testWidgets('home $lang', (t) => shot(t, 'lang_${lang}_home', prefs: {'language': lang}));

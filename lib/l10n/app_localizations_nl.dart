@@ -1241,4 +1241,32 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get language => 'Taal';
+
+  @override
+  String get newVersion => 'Nieuwe versie';
+
+  @override
+  String currentVersion(String version) {
+    return 'Nu $version';
+  }
+
+  @override
+  String get whatsNew => 'Wat is er nieuw';
+
+  @override
+  String get downloadInstall => 'Downloaden en installeren';
+
+  @override
+  String get later => 'Later';
+
+  @override
+  String newVersionN(String version) {
+    return 'Nieuwe versie $version';
+  }
+
+  @override
+  String get tapToSee => 'Tik om te bekijken';
+
+  @override
+  String get updates => 'Updates';
 }

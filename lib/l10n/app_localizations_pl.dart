@@ -1252,4 +1252,32 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get language => 'Język';
+
+  @override
+  String get newVersion => 'Nowa wersja';
+
+  @override
+  String currentVersion(String version) {
+    return 'Teraz $version';
+  }
+
+  @override
+  String get whatsNew => 'Co nowego';
+
+  @override
+  String get downloadInstall => 'Pobierz i zainstaluj';
+
+  @override
+  String get later => 'Później';
+
+  @override
+  String newVersionN(String version) {
+    return 'Nowa wersja $version';
+  }
+
+  @override
+  String get tapToSee => 'Dotknij, aby zobaczyć';
+
+  @override
+  String get updates => 'Aktualizacje';
 }

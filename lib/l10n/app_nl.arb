@@ -337,5 +337,13 @@
   "chooseLanguage": "Kies een taal",
   "phoneLanguage": "Taal van de telefoon",
   "continueBtn": "Doorgaan",
-  "language": "Taal"
+  "language": "Taal",
+  "newVersion": "Nieuwe versie",
+  "currentVersion": "Nu {version}",
+  "whatsNew": "Wat is er nieuw",
+  "downloadInstall": "Downloaden en installeren",
+  "later": "Later",
+  "newVersionN": "Nieuwe versie {version}",
+  "tapToSee": "Tik om te bekijken",
+  "updates": "Updates"
 }
