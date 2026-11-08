@@ -35,69 +35,74 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest.dart' as tzdata;
 
 final _out = Platform.environment['CAL_SHOTS'];
+final _lang = Platform.environment['CAL_LANG']; // optional: render the shots in another app language (README)
+
+/// Sample text in the shot language: [pl] by default, [en] when the shots are rendered in English.
+String _s(String pl, String en) => _lang == 'en' ? en : pl;
+AppLocalizations get _l => lookupAppLocalizations(Locale(_lang ?? 'pl'));
 
 /// The mockup's 03.1 example: repeating, with guests, starting in 12 minutes.
-Ev _demo() => Ev('Demo sprintu', 'w', DateTime.now().add(const Duration(minutes: 12)), DateTime.now().add(const Duration(minutes: 72)),
-    id: 'demo_1', recurringId: 'demo', location: 'Sala 4B', reminder: 15, notes: 'Pokaz nowego widoku tygodnia.',
-    guests: const [
-      Guest('Marek Wiśniewski', 'marek@example.com', 'accepted'),
-      Guest('Ola Zielińska', 'ola@example.com', 'tentative'),
-      Guest('Piotr Kamiński', 'piotr@example.com', 'needsAction'),
+Ev _demo() => Ev(_s('Demo sprintu', 'Sprint demo'), 'w', DateTime.now().add(const Duration(minutes: 12)), DateTime.now().add(const Duration(minutes: 72)),
+    id: 'demo_1', recurringId: 'demo', location: _s('Sala 4B', 'Room 4B'), reminder: 15, notes: _s('Pokaz nowego widoku tygodnia.', 'Showing the new week view.'),
+    guests: [
+      Guest(_s('Marek Wiśniewski', 'Mark Wilson'), 'marek@example.com', 'accepted'),
+      Guest(_s('Ola Zielińska', 'Olivia Brown'), 'ola@example.com', 'tentative'),
+      Guest(_s('Piotr Kamiński', 'Peter Hall'), 'piotr@example.com', 'needsAction'),
     ]);
 
 /// A one-off event (no series), for screens where the repeat question would get in the way.
 Ev _single() {
   final d = dayOf(DateTime.now());
-  return Ev('Demo sprintu', 'w', DateTime(d.year, d.month, d.day, 14), DateTime(d.year, d.month, d.day, 15),
-      id: 'single', location: 'Sala 4B', updated: DateTime.now().subtract(const Duration(hours: 1)));
+  return Ev(_s('Demo sprintu', 'Sprint demo'), 'w', DateTime(d.year, d.month, d.day, 14), DateTime(d.year, d.month, d.day, 15),
+      id: 'single', location: _s('Sala 4B', 'Room 4B'), updated: DateTime.now().subtract(const Duration(hours: 1)));
 }
 
 /// The mockup's 03.5 example: an invitation from Marek that clashes with another event.
 Ev _invitation() {
   final d = dayOf(DateTime.now());
-  return Ev('Planowanie Q1', 'p', DateTime(d.year, d.month, d.day + 2, 9, 30), DateTime(d.year, d.month, d.day + 2, 11),
-      id: 'inv', organizer: false, organizerName: 'Marek Wiśniewski', location: 'Sala 4B',
-      guests: const [
-        Guest('Marek Wiśniewski', 'marek@example.com', 'accepted'),
-        Guest('Ola Zielińska', 'ola@example.com', 'tentative'),
-        Guest('Piotr Kamiński', 'piotr@example.com', 'needsAction'),
-        Guest('Anna Nowak', 'anna.nowak@gmail.com', 'needsAction', self: true),
+  return Ev(_s('Planowanie Q1', 'Q1 planning'), 'p', DateTime(d.year, d.month, d.day + 2, 9, 30), DateTime(d.year, d.month, d.day + 2, 11),
+      id: 'inv', organizer: false, organizerName: _s('Marek Wiśniewski', 'Mark Wilson'), location: _s('Sala 4B', 'Room 4B'),
+      guests: [
+        Guest(_s('Marek Wiśniewski', 'Mark Wilson'), 'marek@example.com', 'accepted'),
+        Guest(_s('Ola Zielińska', 'Olivia Brown'), 'ola@example.com', 'tentative'),
+        Guest(_s('Piotr Kamiński', 'Peter Hall'), 'piotr@example.com', 'needsAction'),
+        Guest(_s('Anna Nowak', 'Emma Clark'), _s('anna.nowak@gmail.com', 'emma.clark@gmail.com'), 'needsAction', self: true),
       ]);
 }
 
 /// Google account without a network: calendars and events are made up around today.
 class _FakeGoogle extends GoogleCalendar {
   @override
-  String? get email => 'anna.nowak@gmail.com';
+  String? get email => _s('anna.nowak@gmail.com', 'emma.clark@gmail.com');
   @override
   Future<bool> restore({bool silentOnly = false}) async => true;
   @override
   Future<List<Cal>> calendars(Set<String>? enabled,
           {Map<String, Shape> shapes = const {}, String? primaryName}) async =>
       [
-        Cal('p', 'Osobisty', shared: false, holiday: false, shape: Shape.dot, on: true),
-        Cal('w', 'Praca', shared: false, holiday: false, shape: Shape.square, on: true),
-        Cal('f', 'Rodzina', shared: false, holiday: false, shape: Shape.half, on: true),
-        Cal('ola.zielinska@gmail.com', 'Ola Zielińska', shared: true, holiday: false, shape: Shape.dash, on: true, writable: false, role: 'reader'),
-        Cal('design', 'Zespół Design', shared: true, holiday: false, shape: Shape.dash, on: false, role: 'writer'),
-        Cal('h', 'Święta w Polsce', shared: false, holiday: true, shape: Shape.ring, on: true),
+        Cal('p', _s('Osobisty', 'Personal'), shared: false, holiday: false, shape: Shape.dot, on: true),
+        Cal('w', _s('Praca', 'Work'), shared: false, holiday: false, shape: Shape.square, on: true),
+        Cal('f', _s('Rodzina', 'Family'), shared: false, holiday: false, shape: Shape.half, on: true),
+        Cal('ola.zielinska@gmail.com', _s('Ola Zielińska', 'Olivia Brown'), shared: true, holiday: false, shape: Shape.dash, on: true, writable: false, role: 'reader'),
+        Cal('design', _s('Zespół Design', 'Design team'), shared: true, holiday: false, shape: Shape.dash, on: false, role: 'writer'),
+        Cal('h', _s('Święta w Polsce', 'Holidays in Poland'), shared: false, holiday: true, shape: Shape.ring, on: true),
       ];
   @override
   Future<List<Ev>> events(List<Cal> cals, DateTime from, DateTime to) async {
     final d = dayOf(DateTime.now());
     DateTime at(int day, double h) => DateTime(d.year, d.month, d.day + day, h.floor(), ((h % 1) * 60).round());
     final evs = [
-      Ev('Urodziny Oli', 'f', at(0, 0), at(1, 0), allDay: true),
-      Ev('Standup zespołu', 'w', at(0, 8.5), at(0, 9), location: 'Zoom'),
-      Ev('Warsztaty UX', 'w', at(0, 10), at(0, 12), location: 'Sala konferencyjna, 3 piętro'),
+      Ev(_s('Urodziny Oli', 'Olivia’s birthday'), 'f', at(0, 0), at(1, 0), allDay: true),
+      Ev(_s('Standup zespołu', 'Team standup'), 'w', at(0, 8.5), at(0, 9), location: 'Zoom'),
+      Ev(_s('Warsztaty UX', 'UX workshop'), 'w', at(0, 10), at(0, 12), location: _s('Sala konferencyjna, 3 piętro', 'Conference room, 3rd floor')),
       _demo(),
       _invitation(),
-      Ev('Przegląd kodu', 'w', at(2, 10), at(2, 11)),
-      Ev('Trening', 'p', at(0, 22), at(0, 23), location: 'Siłownia'),
-      Ev('Brunch z Olą', 'ola.zielinska@gmail.com', at(1, 11), at(1, 13), location: 'U Oli'),
-      Ev('Koncert', 'p', at(1, 19), at(1, 22), location: 'Stodoła'),
-      Ev('Wszystkich Świętych', 'h', DateTime(d.year, 11, 1), DateTime(d.year, 11, 2), allDay: true),
-      for (var i = -40; i < 60; i += 3) Ev('Spotkanie', 'w', at(i, 9), at(i, 10 + i % 4)),
+      Ev(_s('Przegląd kodu', 'Code review'), 'w', at(2, 10), at(2, 11)),
+      Ev(_s('Trening', 'Workout'), 'p', at(0, 22), at(0, 23), location: _s('Siłownia', 'Gym')),
+      Ev(_s('Brunch z Olą', 'Brunch with Olivia'), 'ola.zielinska@gmail.com', at(1, 11), at(1, 13), location: _s('U Oli', 'At Olivia’s')),
+      Ev(_s('Koncert', 'Concert'), 'p', at(1, 19), at(1, 22), location: _s('Stodoła', 'Roundhouse')),
+      Ev(_s('Wszystkich Świętych', 'All Saints’ Day'), 'h', DateTime(d.year, 11, 1), DateTime(d.year, 11, 2), allDay: true),
+      for (var i = -40; i < 60; i += 3) Ev(_s('Spotkanie', 'Meeting'), 'w', at(i, 9), at(i, 10 + i % 4)),
     ];
     return evs.where((e) => e.start.isBefore(to) && e.end.isAfter(from)).toList()..sort((a, b) => a.start.compareTo(b.start));
   }
@@ -110,12 +115,12 @@ class _FakeGoogle extends GoogleCalendar {
     if (force) return;
     // Someone moved the meeting in Google meanwhile (06.3).
     throw EditConflict(Ev(e.title, e.calId, e.start.add(const Duration(minutes: 30)), e.end.add(const Duration(minutes: 30)),
-        location: 'Sala 2', updated: DateTime.now().subtract(const Duration(minutes: 1))));
+        location: _s('Sala 2', 'Room 2'), updated: DateTime.now().subtract(const Duration(minutes: 1))));
   }
 
   @override
-  Future<List<Access>> access(String calId) async => const [
-        Access('user:anna.nowak@gmail.com', 'user', 'anna.nowak@gmail.com', 'owner'),
+  Future<List<Access>> access(String calId) async => [
+        Access('user:me', 'user', _s('anna.nowak@gmail.com', 'emma.clark@gmail.com'), 'owner'),
         Access('user:marek@example.com', 'user', 'marek@example.com', 'writer'),
         Access('user:ola@example.com', 'user', 'ola@example.com', 'reader'),
       ];
@@ -681,7 +686,7 @@ void main() {
         String? tapText,
         Future<void> Function(WidgetTester)? act,
         Map<String, Object> prefs = const {}}) async {
-      SharedPreferences.setMockInitialValues({'onboarded': onboarded, 'google': onboarded, ...prefs});
+      SharedPreferences.setMockInitialValues({'onboarded': onboarded, 'google': onboarded, 'language': ?_lang, ...prefs});
       t.view.physicalSize = const Size(390, 844);
       t.view.devicePixelRatio = 1;
       t.platformDispatcher.localesTestValue = const [Locale('pl')];
@@ -705,7 +710,7 @@ void main() {
         await t.pump(const Duration(milliseconds: 600));
       }
       if (tab >= 0) {
-        await t.tap(find.text(['ROK', 'MIESIĄC', 'TYDZIEŃ', 'DZIEŃ'][tab]));
+        await t.tap(find.text([_l.year, _l.month, _l.week, _l.day][tab].toUpperCase()));
         await t.pump();
       }
       await act?.call(t);
@@ -736,7 +741,7 @@ void main() {
       await shot(t, '01_3_choose', onboarded: false, page: (_) => Choose(store, onboarding: true));
     });
     testWidgets('connect', (t) => shot(t, '01_2_connect', onboarded: false, page: (s) => Connect(s)));
-    testWidgets('search', (t) => shot(t, '02_5_search', page: (s) => Search(s, backLabel: 'Miesiąc'), act: (t) async {
+    testWidgets('search', (t) => shot(t, '02_5_search', page: (s) => Search(s, backLabel: _s('Miesiąc', 'Month')), act: (t) async {
           await t.enterText(find.byType(TextField), 'demo');
           await t.pump(const Duration(milliseconds: 500)); // debounce
           await t.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
@@ -755,27 +760,27 @@ void main() {
               sendLabel: 'Wyślij');
         }));
     testWidgets('invitation', (t) => shot(t, '03_5_invitation', page: (s) => EventDetails(_invitation(), s)));
-    testWidgets('delete dialog', (t) => shot(t, '06_2_delete', page: (s) => EventDetails(_demo(), s), tapText: 'USUŃ'));
+    testWidgets('delete dialog', (t) => shot(t, '06_2_delete', page: (s) => EventDetails(_demo(), s), tapText: _l.delete.toUpperCase()));
     testWidgets('year', (t) => shot(t, '02_1_year', tab: 0));
     testWidgets('month', (t) => shot(t, '02_2_month'));
     testWidgets('week', (t) => shot(t, '02_3_week', tab: 2));
     testWidgets('day', (t) => shot(t, '02_4_day', tab: 3));
     testWidgets('empty day', (t) => shot(t, '06_1_empty_day', tab: 3, act: (t) async {
           for (var i = 0; i < 3; i++) {
-            await t.tap(find.byTooltip('Następny'));
+            await t.tap(find.byTooltip(_l.following));
             await t.pump();
           }
         }));
-    testWidgets('save repeating', (t) => shot(t, '03_2_save_repeating', page: (s) => EventEdit(s, ev: _demo()), tapText: 'ZAPISZ'));
-    testWidgets('sync conflict', (t) => shot(t, '06_3_conflict', page: (s) => EventEdit(s, ev: _single()), tapText: 'ZAPISZ', act: (t) async {
+    testWidgets('save repeating', (t) => shot(t, '03_2_save_repeating', page: (s) => EventEdit(s, ev: _demo()), tapText: _l.save.toUpperCase()));
+    testWidgets('sync conflict', (t) => shot(t, '06_3_conflict', page: (s) => EventEdit(s, ev: _single()), tapText: _l.save.toUpperCase(), act: (t) async {
           await t.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50))); // save reaches the fake Google
           await t.pump();
           await t.pump(const Duration(milliseconds: 600));
         }));
-    testWidgets('calendars', (t) => shot(t, '04_1_calendars', page: (s) => Calendars(s, backLabel: 'Miesiąc')));
+    testWidgets('calendars', (t) => shot(t, '04_1_calendars', page: (s) => Calendars(s, backLabel: _s('Miesiąc', 'Month'))));
     testWidgets('add calendar', (t) => shot(t, '04_2_add_calendar', page: (s) => AddCalendar(s)));
-    testWidgets('add calendar on the phone', (t) => shot(t, '04_2_add_calendar_phone', page: (s) => AddCalendar(s), tapText: 'NA TELEFONIE'));
-    testWidgets('calendars without Google', (t) => shot(t, '04_1_calendars_phone', onboarded: false, page: (s) => Calendars(s, backLabel: 'Miesiąc'),
+    testWidgets('add calendar on the phone', (t) => shot(t, '04_2_add_calendar_phone', page: (s) => AddCalendar(s), tapText: _l.onPhone.toUpperCase()));
+    testWidgets('calendars without Google', (t) => shot(t, '04_1_calendars_phone', onboarded: false, page: (s) => Calendars(s, backLabel: _s('Miesiąc', 'Month')),
         act: (t) async {
           await t.runAsync(() => t.element(find.byType(Scaffold).first).findAncestorWidgetOfExactType<App>()!.store.finishOnboarding());
           await t.pump();
@@ -787,11 +792,11 @@ void main() {
             ]),
           ),
         )));
-    testWidgets('subscribe dialog', (t) => shot(t, '04_2_subscribe', page: (s) => AddCalendar(s), tapText: 'Subskrybuj adres'));
+    testWidgets('subscribe dialog', (t) => shot(t, '04_2_subscribe', page: (s) => AddCalendar(s), tapText: _l.subscribeUrl));
     testWidgets('holidays', (t) => shot(t, '04_3_holidays', page: (s) => Holidays(s)));
     testWidgets('share', (t) => shot(t, '04_4_share', page: (s) => Share(s, s.cal('w')!)));
     testWidgets('shared with you', (t) => shot(t, '04_5_shared_with_you', page: (s) => SharedWithYou(s, s.cal('ola.zielinska@gmail.com')!)));
-    testWidgets('settings', (t) => shot(t, '05_1_settings', page: (s) => Settings(s, backLabel: 'Miesiąc')));
+    testWidgets('settings', (t) => shot(t, '05_1_settings', page: (s) => Settings(s, backLabel: _s('Miesiąc', 'Month'))));
     testWidgets('appearance', (t) => shot(t, '05_2_appearance', page: (s) => Appearance(s)));
     // Every language: the screens with the longest labels, to catch text that does not fit.
     for (final lang in ['de', 'es', 'fr', 'it', 'pt', 'nl']) {
@@ -814,8 +819,8 @@ void main() {
       await shot(t, '05_3_notifications_glyph', page: (s) => Notifications(s), act: (t) async {
         await t.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50))); // the channel answers
         await t.pump();
-        expect(find.text('PULS'), findsOneWidget); // default pattern, lights off (owner)
-        await t.tap(find.byWidgetPredicate((w) => w is Toggle && w.label == 'Światło przy przypomnieniu'));
+        expect(find.text(_l.glyphPulse.toUpperCase()), findsOneWidget); // default pattern, lights off (owner)
+        await t.tap(find.byWidgetPredicate((w) => w is Toggle && w.label == _l.glyphLight));
         await t.pump();
       });
       final glyph = jsonDecode(sent!)['glyph'];
@@ -829,7 +834,7 @@ void main() {
     testWidgets('help article', (t) => shot(t, '05_7_article', page: (s) => HelpArticle(s, helpFor('pl').first)));
     testWidgets('about', (t) => shot(t, '05_8_about', page: (s) => About(s)));
     testWidgets('custom reminder', (t) => shot(t, '03_2_custom_reminder', page: (s) => EventEdit(s), act: (t) async {
-          for (final label in ['Przypomnienie', 'Własne…']) {
+          for (final label in [_l.reminder, '${_l.custom}…']) {
             await t.tap(find.text(label).last);
             await t.pump();
             await t.pump(const Duration(milliseconds: 600));
