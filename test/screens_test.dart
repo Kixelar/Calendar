@@ -473,6 +473,44 @@ void main() {
     expect(await store.exportIcs(), allOf(contains('RRULE:FREQ=DAILY;UNTIL='), contains('SUMMARY:Swim')));
   });
 
+  test('without Google an address subscription goes to a calendar on this phone and follows the file', () async {
+    SharedPreferences.setMockInitialValues({});
+    final overrides = HttpOverrides.current;
+    HttpOverrides.global = null; // talk to the local server below
+    addTearDown(() => HttpOverrides.global = overrides);
+    String feed(List<String> uids) => [
+          'BEGIN:VCALENDAR', 'X-WR-CALNAME:Liga', //
+          for (final u in uids) ...['BEGIN:VEVENT', 'UID:$u', 'DTSTART:20261107T150000Z', 'SUMMARY:Mecz $u', 'END:VEVENT'],
+          'END:VCALENDAR',
+        ].join('\r\n');
+    var body = feed(['a', 'b']);
+    final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+    server.listen((r) => r.response
+      ..write(body)
+      ..close());
+    addTearDown(server.close);
+    final store = Store(_OfflineGoogle(), Directory.systemTemp.createTempSync());
+    await store.start();
+    await store.finishOnboarding();
+
+    expect(await store.subscribe('http://127.0.0.1:${server.port}/liga.ics'), 'Liga');
+    final liga = store.cals.firstWhere((c) => c.name == 'Liga');
+    expect(store.isLocal(liga.id), isTrue);
+    expect(store.writable.map((c) => c.name), ['My calendar']); // read-only copy
+    Future<List<String>> titles() async {
+      store.on(DateTime(2026, 11, 7));
+      await Future<void>.delayed(const Duration(milliseconds: 30));
+      return [for (final e in store.on(DateTime(2026, 11, 7))!) e.title]..sort();
+    }
+
+    expect(await titles(), ['Mecz a', 'Mecz b']);
+    body = feed(['b']);
+    await store.refreshSubscriptions(force: true);
+    expect(await titles(), ['Mecz b']);
+    await store.unsubscribe(store.cal(liga.id)!);
+    expect(store.cals.map((c) => c.name), ['My calendar']);
+  });
+
   test('address subscription: copies the file, skips it unchanged, drops events that left it', () async {
     SharedPreferences.setMockInitialValues({'onboarded': true, 'google': true});
     String feed(List<String> uids) => [

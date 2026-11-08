@@ -44,8 +44,9 @@ class LocalCalendar {
   /// Local calendars as (id, name).
   List<(String, String)> get calendars => [for (final e in _names.entries) (e.key, e.value)];
 
-  String createCalendar(String name) {
-    final id = 'local:${_id()}';
+  /// A new calendar; [id] (after "local:") is given for holiday calendars, which keep Google's id.
+  String createCalendar(String name, {String? id}) {
+    id = 'local:${id ?? _id()}';
     _names[id] = name;
     _events[id] = [];
     _save();
@@ -209,6 +210,14 @@ class LocalCalendar {
     } else {
       list[i] = ev;
     }
+    _save();
+  }
+
+  /// Puts [evs] (a subscribed file, holidays) in place of everything [calId] had.
+  void replaceEvents(String calId, List<gcal.Event> evs) {
+    _events[calId] = [
+      for (final e in evs) gcal.Event.fromJson(jsonDecode(jsonEncode(e)) as Map<String, dynamic>)..id = e.iCalUID ?? _id(),
+    ];
     _save();
   }
 

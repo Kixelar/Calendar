@@ -9,6 +9,8 @@
 - Add calendar: with a Google account a Google / On phone switch says where a new calendar or an import goes.
 - Repeating events on this phone, with the same choices as Google: change or delete one occurrence, this and following,
   or all. Repeats from imported .ics files (RRULE with COUNT / UNTIL / BYDAY / BYMONTHDAY / BYMONTH, EXDATE) show too.
+- Without a Google account: holidays by country (Google's public holiday files) and address subscriptions, kept in
+  read-only calendars on this phone and refreshed hourly when the app is opened. With an account they stay in Google.
 ### Fixed
 - "This and following" on a repeating Google event: the new series now keeps the old end date, and a "N times" series
   keeps only the occurrences that were left (before: it repeated forever).

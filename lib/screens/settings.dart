@@ -93,7 +93,7 @@ class Settings extends StatelessWidget {
             ]),
             Group(children: [
                 ValueRow(l.calendarsSharing, value: '${store.cals.length}', onTap: () => _go(context, Calendars(store, backLabel: l.settings))),
-                if (store.signedIn) ValueRow(l.holidays, value: countries.isEmpty ? l.none : countries.join(', '), onTap: () => _go(context, Holidays(store))),
+                ValueRow(l.holidays, value: countries.isEmpty ? l.none : countries.join(', '), onTap: () => _go(context, Holidays(store))),
               ]),
             Group(children: [
               ValueRow(l.dataPrivacy, onTap: () => _go(context, DataPrivacy(store))),

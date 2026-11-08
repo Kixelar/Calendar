@@ -110,7 +110,8 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
   /// Refreshes when automatic sync is on and the last sync is older than the chosen interval.
   Future<void> _autoSync() async {
     final last = store.lastSync;
-    if (!store.signedIn || !store.autoSync) return;
+    if (!store.signedIn) return store.refreshSubscriptions(); // holidays and subscriptions on the phone, hourly
+    if (!store.autoSync) return;
     if (last != null && DateTime.now().difference(last).inMinutes < store.syncMinutes) return;
     if (store.wifiOnly && await store.metered()) return; // pull to refresh still syncs
     await store.refresh();

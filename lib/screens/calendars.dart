@@ -270,7 +270,7 @@ class Calendars extends StatelessWidget {
           final t = Tok.of(context), l = l10n(context);
           final feeds = store.subscriptions;
           final mine = [for (final c in store.cals) if (!c.shared && !c.holiday && !feeds.containsKey(c.id) && !store.isLocal(c.id)) c];
-          final phone = [for (final c in store.cals) if (store.isLocal(c.id)) c];
+          final phone = [for (final c in store.cals) if (store.isLocal(c.id) && !c.holiday && !feeds.containsKey(c.id)) c];
           final shared = [for (final c in store.cals) if (c.shared) c];
           final subs = [for (final c in store.cals) if (c.holiday || feeds.containsKey(c.id)) c];
           Widget toggle(Cal c) => Toggle(value: c.on, label: c.name, onChanged: (v) => store.toggle(c, v));
@@ -362,7 +362,7 @@ class Calendars extends StatelessWidget {
 }
 
 /// 04.2: ways to add a calendar. With a Google account a switch says where new calendars and imports go: Google or
-/// this phone (owner, 2026-11-08). Holidays and address subscriptions need Google for now (TODO stage 3, step 3).
+/// this phone (owner, 2026-11-08). Holidays and address subscriptions go to Google with an account, to the phone without.
 class AddCalendar extends StatefulWidget {
   const AddCalendar(this.store, {super.key});
   final Store store;
@@ -419,7 +419,7 @@ class _AddCalendarState extends State<AddCalendar> {
             if (context.mounted) _fail(context, e);
           }
         }),
-        if (!_phone) ...[
+        if (!store.signedIn || !_phone) ...[
           option(Icons.wb_sunny_outlined, l.holidaysAndDaysOff, l.holidaysHint, () => _go(context, Holidays(store))),
           option(Icons.link, l.subscribeUrl, l.subscribeUrlHint, () => _subscribe(context)),
         ],

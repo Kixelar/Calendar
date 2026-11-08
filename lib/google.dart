@@ -153,6 +153,9 @@ class Access {
 /// Public link to a calendar that has `default` read access.
 String publicLink(String calId) => 'https://calendar.google.com/calendar/embed?src=${Uri.encodeComponent(calId)}';
 
+/// Google's public .ics file of a holiday calendar (holidays without a Google account, 04.3).
+String holidayUrl(String id) => 'https://calendar.google.com/calendar/ical/${Uri.encodeComponent(id)}/public/basic.ics';
+
 /// Saving found that Google changed the event after it was opened here; [remote] is Google's version (06.3).
 class EditConflict implements Exception {
   const EditConflict(this.remote);

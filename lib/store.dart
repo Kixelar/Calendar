@@ -389,8 +389,8 @@ class Store extends ChangeNotifier {
       for (final (id, name) in local.calendars)
         Cal(id, name,
             shared: false,
-            holiday: false,
-            shape: picked[id] ?? freeShape(used, i++),
+            holiday: id.contains('#holiday@'),
+            shape: picked[id] ?? (id.contains('#holiday@') ? Shape.ring : freeShape(used, i++)),
             defaultReminder: rem < 0 ? null : rem,
             on: saved?.contains(id) ?? true),
     ];
@@ -584,9 +584,27 @@ class Store extends ChangeNotifier {
 
   /// Adds a calendar to the list and shows it (holidays, a shared calendar).
   Future<void> addCalendar(String id) async {
+    if (!signedIn && id.contains('#holiday@')) return _addLocalHolidays(id);
     await g.addCalendar(id);
     await _p.setStringList('calendars', {..._p.getStringList('calendars') ?? const <String>[], id}.toList());
     await loadCalendars();
+    _days.clear();
+    notifyListeners();
+  }
+
+  /// Holidays without Google (04.3): Google's public file of that holiday calendar, copied into a calendar on this
+  /// phone with the same id after "local:" and refreshed like an address subscription.
+  Future<void> _addLocalHolidays(String googleId) async {
+    final text = await _download(holidayUrl(googleId));
+    final id = local.createCalendar(icsName(text) ?? googleId, id: googleId);
+    try {
+      await _copyFeed(id, text);
+    } catch (_) {
+      local.deleteCalendar(id);
+      rethrow;
+    }
+    await loadCalendars();
+    if (cal(id) case final c? when !c.on) await toggle(c, true);
     _days.clear();
     notifyListeners();
   }
@@ -613,7 +631,8 @@ class Store extends ChangeNotifier {
     if (!tz.timeZoneDatabase.isInitialized) tzdata.initializeTimeZones();
     if (parseIcs(text, local: 'UTC').isEmpty && !text.contains('BEGIN:VCALENDAR')) throw FormatException(_l.notIcs);
     final name = icsName(text) ?? Uri.parse(url).host;
-    final id = await g.createCalendar(name, await timeZone());
+    // Without Google the copy goes to a calendar on this phone (owner: phone without an account, Google with one).
+    final id = signedIn ? await g.createCalendar(name, await timeZone()) : local.createCalendar(name);
     await _p.setString('subs', jsonEncode({...subscriptions, id: url}));
     try {
       await _copyFeed(id, text);
@@ -622,7 +641,7 @@ class Store extends ChangeNotifier {
       await _p.setString('subs', jsonEncode({...subscriptions}..remove(id)));
       await _p.remove('subEv.$id');
       try {
-        await g.deleteCalendar(id);
+        isLocal(id) ? local.deleteCalendar(id) : await g.deleteCalendar(id);
       } catch (_) {}
       rethrow;
     }
@@ -652,10 +671,15 @@ class Store extends ChangeNotifier {
   /// Copies every subscription's file again when the last check is an hour old (or [force]); errors wait for the next try.
   Future<void> refreshSubscriptions({bool force = false}) async {
     final last = _p.getInt('subAt');
-    if (!signedIn || subscriptions.isEmpty) return;
+    // Feeds: address subscriptions (Google ones only while signed in) and holidays on this phone.
+    final feeds = {
+      for (final e in subscriptions.entries) if (signedIn || isLocal(e.key)) e.key: e.value,
+      for (final c in cals) if (isLocal(c.id) && c.holiday) c.id: holidayUrl(c.id.substring(6)),
+    };
+    if (feeds.isEmpty) return;
     if (!force && last != null && DateTime.now().millisecondsSinceEpoch - last < 55 * 60000) return;
     await _p.setInt('subAt', DateTime.now().millisecondsSinceEpoch);
-    for (final MapEntry(key: id, value: url) in subscriptions.entries) {
+    for (final MapEntry(key: id, value: url) in feeds.entries) {
       try {
         await _copyFeed(id, await _download(url));
       } catch (_) {
@@ -670,6 +694,12 @@ class Store extends ChangeNotifier {
     if (_p.getString('subHash.$id') == hash) return;
     if (!tz.timeZoneDatabase.isInitialized) tzdata.initializeTimeZones();
     final evs = parseIcs(text, local: await timeZone());
+    if (isLocal(id)) {
+      local.replaceEvents(id, evs); // on the phone a whole copy is instant, no need to send only changes
+      await _p.setString('subHash.$id', hash);
+      _days.clear();
+      return notifyListeners();
+    }
     // Only events that changed since the last copy are sent (UID -> hash of the event), 8 at a time.
     final sent = {...?(jsonDecode(_p.getString('subEv.$id') ?? '{}') as Map?)?.cast<String, String>()};
     final now = {for (final e in evs) e.iCalUID!: '${fnv(jsonEncode(e))}'};
@@ -730,7 +760,8 @@ class Store extends ChangeNotifier {
   }
 
   Future<void> removeCalendar(Cal c) async {
-    await g.removeCalendar(c.id);
+    isLocal(c.id) ? local.deleteCalendar(c.id) : await g.removeCalendar(c.id);
+    await _p.remove('subHash.${c.id}'); // adding the country again must copy its file again
     await loadCalendars();
     _days.clear();
     notifyListeners();

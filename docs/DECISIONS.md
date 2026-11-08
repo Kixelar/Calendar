@@ -64,3 +64,7 @@
   Repeats (2026-11-08): the series keeps its RRULE; changed or deleted occurrences are separate events with
   recurringEventId / originalStartTime / status cancelled, like Google, so .ics export writes RECURRENCE-ID / EXDATE.
   `occurrences()` in rrule.dart expands rules on the phone; occurrence ids are "series id _ original start ms".
+  Without Google (2026-11-08): holidays come from `holidayUrl` (Google's public basic.ics) into a phone calendar whose
+  id is "local:" + Google's holiday id (so `holidayCode` still works); address subscriptions into a phone calendar
+  listed in `subs`. Both are copied whole on each change (`LocalCalendar.replaceEvents`) and refreshed hourly when the
+  app opens (no background job without an account).
