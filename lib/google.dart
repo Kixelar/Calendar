@@ -320,40 +320,13 @@ class GoogleCalendar {
         final r = await _api!.events.list(cal.id,
             timeMin: from.toUtc(), timeMax: to.toUtc(), singleEvents: true, maxResults: 2500, pageToken: page);
         for (final e in r.items ?? const <gcal.Event>[]) {
-          if (_ev(e, cal) case final ev?) out.add(ev);
+          if (evOf(e, cal) case final ev?) out.add(ev);
         }
         page = r.nextPageToken;
       } while (page != null);
     }));
     out.sort((a, b) => a.start.compareTo(b.start));
     return out;
-  }
-
-  Ev? _ev(gcal.Event e, Cal cal) {
-    if (e.status == 'cancelled' || e.start == null || e.eventType == 'birthday') return null;
-    final s = _at(e.start);
-    if (s == null) return null;
-    final rem = e.reminders;
-    return Ev(e.summary ?? '', cal.id, s, _at(e.end) ?? s,
-        id: e.id ?? '',
-        allDay: e.start!.dateTime == null,
-        location: e.location,
-        notes: e.description,
-        recurringId: e.recurringEventId,
-        organizer: organizes(e, cal.id),
-        organizerName: e.organizer?.displayName ?? e.organizer?.email,
-        customReminder: !(rem?.useDefault ?? true),
-        guestsInvite: e.guestsCanInviteOthers ?? true,
-        guestsModify: e.guestsCanModify ?? false,
-        guestsSee: e.guestsCanSeeOtherGuests ?? true,
-        updated: e.updated?.toLocal(),
-        guests: [
-          for (final a in e.attendees ?? const <gcal.EventAttendee>[])
-            if (a.resource != true) Guest(a.displayName ?? a.email ?? '', a.email ?? '', a.responseStatus ?? 'needsAction', self: a.self ?? false),
-        ],
-        reminder: rem?.useDefault ?? true
-            ? cal.defaultReminder
-            : rem?.overrides?.where((o) => o.method == 'popup').firstOrNull?.minutes);
   }
 
   /// Creates [e] (empty id) or updates it; [fromCal] is its calendar before the edit when the user moved it.
@@ -367,9 +340,9 @@ class GoogleCalendar {
     final ev = e.id.isEmpty ? gcal.Event() : await api.events.get(e.calId, e.id);
     final seen = e.updated, now = ev.updated?.toLocal();
     if (!force && seen != null && now != null && now.isAfter(seen)) {
-      throw EditConflict(_ev(ev, Cal(e.calId, '', shared: false, holiday: false, shape: Shape.dot, on: true))!);
+      throw EditConflict(evOf(ev, Cal(e.calId, '', shared: false, holiday: false, shape: Shape.dot, on: true))!);
     }
-    _fill(ev, e, e.start, e.end, timeZone);
+    fillEvent(ev, e, e.start, e.end, timeZone);
     // Occurrences cannot carry a rule; a series or single event can.
     if (e.recurringId == null && e.recurrence != null) ev.recurrence = e.recurrence!.isEmpty ? null : e.recurrence;
     final send = e.guests.isEmpty ? 'none' : 'all';
@@ -378,28 +351,6 @@ class GoogleCalendar {
     } else {
       await api.events.update(ev, e.calId, e.id, sendUpdates: send);
     }
-  }
-
-  /// Copies what the edit screen changes from [e] onto [ev], with [start]–[end] as its time.
-  void _fill(gcal.Event ev, Ev e, DateTime start, DateTime end, String timeZone) {
-    gcal.EventDateTime at(DateTime t) => e.allDay
-        ? gcal.EventDateTime(date: DateTime(t.year, t.month, t.day)) // all-day end is exclusive, as Google expects
-        : gcal.EventDateTime(dateTime: t, timeZone: timeZone);
-    // Existing guests keep their reply; new e-mails are invited.
-    final old = {for (final a in ev.attendees ?? const <gcal.EventAttendee>[]) a.email: a};
-    ev
-      ..summary = e.title
-      ..location = e.location
-      ..description = e.notes
-      ..start = at(start)
-      ..end = at(end)
-      ..attendees = [for (final g in e.guests) old[g.email] ?? gcal.EventAttendee(email: g.email, displayName: g.name == g.email ? null : g.name)]
-      ..guestsCanInviteOthers = e.guestsInvite
-      ..guestsCanModify = e.guestsModify
-      ..guestsCanSeeOtherGuests = e.guestsSee
-      ..reminders = e.customReminder
-          ? gcal.EventReminders(useDefault: false, overrides: [if (e.reminder != null) gcal.EventReminder(method: 'popup', minutes: e.reminder)])
-          : gcal.EventReminders(useDefault: true);
   }
 
   /// Saves an edited occurrence of a series for "this and following" or "all" (03.2), like Google Calendar:
@@ -414,7 +365,7 @@ class GoogleCalendar {
     final shift = e.start.difference(originalStart), length = e.end.difference(e.start);
     if (scope == DeleteScope.all || !originalStart.isAfter(first)) {
       final start = first.add(shift);
-      _fill(master, e, start, start.add(length), timeZone);
+      fillEvent(master, e, start, start.add(length), timeZone);
       // Keep exceptions (EXDATE) of the series, replace its rule.
       master.recurrence = rule.isEmpty ? null : [...rule, for (final r in master.recurrence ?? const <String>[]) if (!r.startsWith('RRULE:')) r];
       await api.events.update(master, e.calId, series, sendUpdates: send);
@@ -424,7 +375,7 @@ class GoogleCalendar {
     await api.events.update(master, e.calId, series, sendUpdates: send);
     // The new series repeats as before (without the old end), unless a new rule was chosen.
     final next = gcal.Event();
-    _fill(next, e, e.start, e.end, timeZone);
+    fillEvent(next, e, e.start, e.end, timeZone);
     next.recurrence = [
       for (final r in rule)
         e.recurrence != null ? r : 'RRULE:${r.substring(6).split(';').where((p) => !p.startsWith('UNTIL=') && !p.startsWith('COUNT=')).join(';')}',
@@ -485,6 +436,56 @@ class GoogleCalendar {
     parent.recurrence = [for (final r in parent.recurrence ?? const <String>[]) endRuleBefore(r, e.start, allDay: e.allDay)];
     await api.events.update(parent, e.calId, series, sendUpdates: send);
   }
+}
+
+/// A Google (or locally stored) event as the app shows it, in calendar [cal].
+Ev? evOf(gcal.Event e, Cal cal) {
+  if (e.status == 'cancelled' || e.start == null || e.eventType == 'birthday') return null;
+  final s = _at(e.start);
+  if (s == null) return null;
+  final rem = e.reminders;
+  return Ev(e.summary ?? '', cal.id, s, _at(e.end) ?? s,
+      id: e.id ?? '',
+      allDay: e.start!.dateTime == null,
+      location: e.location,
+      notes: e.description,
+      recurringId: e.recurringEventId,
+      organizer: organizes(e, cal.id),
+      organizerName: e.organizer?.displayName ?? e.organizer?.email,
+      customReminder: !(rem?.useDefault ?? true),
+      guestsInvite: e.guestsCanInviteOthers ?? true,
+      guestsModify: e.guestsCanModify ?? false,
+      guestsSee: e.guestsCanSeeOtherGuests ?? true,
+      updated: e.updated?.toLocal(),
+      guests: [
+        for (final a in e.attendees ?? const <gcal.EventAttendee>[])
+          if (a.resource != true) Guest(a.displayName ?? a.email ?? '', a.email ?? '', a.responseStatus ?? 'needsAction', self: a.self ?? false),
+      ],
+      reminder: rem?.useDefault ?? true
+          ? cal.defaultReminder
+          : rem?.overrides?.where((o) => o.method == 'popup').firstOrNull?.minutes);
+}
+
+/// Copies what the edit screen changes from [e] onto [ev], with [start]–[end] as its time.
+void fillEvent(gcal.Event ev, Ev e, DateTime start, DateTime end, String timeZone) {
+  gcal.EventDateTime at(DateTime t) => e.allDay
+      ? gcal.EventDateTime(date: DateTime(t.year, t.month, t.day)) // all-day end is exclusive, as Google expects
+      : gcal.EventDateTime(dateTime: t, timeZone: timeZone);
+  // Existing guests keep their reply; new e-mails are invited.
+  final old = {for (final a in ev.attendees ?? const <gcal.EventAttendee>[]) a.email: a};
+  ev
+    ..summary = e.title
+    ..location = e.location
+    ..description = e.notes
+    ..start = at(start)
+    ..end = at(end)
+    ..attendees = [for (final g in e.guests) old[g.email] ?? gcal.EventAttendee(email: g.email, displayName: g.name == g.email ? null : g.name)]
+    ..guestsCanInviteOthers = e.guestsInvite
+    ..guestsCanModify = e.guestsModify
+    ..guestsCanSeeOtherGuests = e.guestsSee
+    ..reminders = e.customReminder
+        ? gcal.EventReminders(useDefault: false, overrides: [if (e.reminder != null) gcal.EventReminder(method: 'popup', minutes: e.reminder)])
+        : gcal.EventReminders(useDefault: true);
 }
 
 /// Whether the calendar [calId] organizes [e]. Google sends `organizer.self` only when it is true, so a missing

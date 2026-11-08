@@ -1233,4 +1233,19 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get glyphClock => 'Zegar';
+
+  @override
+  String get myCalendar => 'Mój kalendarz';
+
+  @override
+  String get onDevice => 'Na urządzeniu';
+
+  @override
+  String get onlyThisPhone => 'Tylko ten telefon';
+
+  @override
+  String get newCalendarLocalHint => 'Tylko na tym telefonie';
+
+  @override
+  String get onPhone => 'Na telefonie';
 }

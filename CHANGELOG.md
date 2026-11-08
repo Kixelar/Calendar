@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026.11.08-dev
+### Added
+- Calendars on this phone ("On this device", 05.4), with or without a Google account: "Continue without account"
+  makes "My calendar"; new calendars, events (create, edit, move between phone calendars, delete), search, reminders
+  (the global default), widgets, Glyph, .ics import and export. Calendars → "On this device" lists them (show/hide,
+  shape, delete); Accounts shows the "On this device" row. Data stays in one file on the phone (lost on uninstall).
+- Add calendar: with a Google account a Google / On phone switch says where a new calendar or an import goes.
+### Changed
+- An existing event can only move to calendars of the same kind (Google or phone); phone events have no guests and,
+  for now, no repeat.
+- "Disconnect Google" keeps the calendars on this phone; "Clear data" removes them too.
+
 ## 2026.11.02-dev
 ### Added
 - Glyph Interface on Nothing phones (Settings → Notifications, shown only on phones with Glyph lights; built without a

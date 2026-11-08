@@ -7,6 +7,7 @@ lib/
   main.dart              App: theme (system light/dark), localisation, picks Welcome or Home
   theme.dart             Design tokens from the mockup (colours Tok, text styles T)
   google.dart            Google sign-in + Calendar API (GoogleCalendar), models Cal / Ev, marker Shape
+  local.dart             Calendars on this phone (LocalCalendar): one JSON file, events as Google event resources
   store.dart             App state (ChangeNotifier): account, chosen calendars, events cached per year
   ui.dart                Shared widgets mirroring the mockup's CSS classes (Lbl, Section, RowItem, Toggle, Btn, Hero2, EventRow, Marker, Marquee)
   l10n/app_en.arb        English strings (template)

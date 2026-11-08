@@ -11,6 +11,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'google.dart';
 import 'ics.dart';
 import 'l10n/app_localizations.dart';
+import 'local.dart';
 import 'notify.dart';
 import 'package:timezone/data/latest.dart' as tzdata;
 import 'package:timezone/timezone.dart' as tz;
@@ -18,8 +19,8 @@ import 'view.dart';
 
 DateTime dayOf(DateTime t) => DateTime(t.year, t.month, t.day);
 
-/// App state: Google account, chosen calendars and events per year.
-/// Calendars and events are also kept on disk ([_dir]) so the app opens instantly and works offline;
+/// App state: Google account, calendars on this phone ([local]), chosen calendars and events per year.
+/// Google calendars and events are also kept on disk ([_dir]) so the app opens instantly and works offline;
 /// Google refreshes them in the background.
 class Store extends ChangeNotifier {
   Store([GoogleCalendar? g, this._dir]) : g = g ?? GoogleCalendar();
@@ -28,6 +29,7 @@ class Store extends ChangeNotifier {
   Directory? _dir;
 
   bool ready = false, signedIn = false;
+  late LocalCalendar local;
   Notifier? notifier; // null in tests
   List<Cal> cals = [];
   String? error;
@@ -259,17 +261,19 @@ class Store extends ChangeNotifier {
   /// Events in the loaded current year, for the 05.4 sync card.
   int get eventCount => {for (final d in (_days[DateTime.now().year] ?? const {}).values) ...d}.length;
 
-  /// 05.4 "Disconnect Google" and 05.5 "Clear data on this device": drops the cache and settings here;
-  /// nothing changes in Google. Back to the welcome screen.
-  Future<void> forget() async {
+  /// 05.4 "Disconnect Google" ([keepLocal]: calendars on this phone stay) and 05.5 "Clear data on this device"
+  /// (they go too): drops the cache and settings here; nothing changes in Google. Back to the welcome screen.
+  Future<void> forget({bool keepLocal = false}) async {
     try {
       await g.signOut();
     } catch (_) {} // already signed out or offline: local data goes anyway
     for (final f in _dir!.listSync().whereType<File>().where((f) => f.path.endsWith('.json'))) {
-      f.deleteSync();
+      if (!keepLocal || f.uri.pathSegments.last != 'local.json') f.deleteSync();
     }
     await _p.clear();
+    local = LocalCalendar(_file('local'));
     cals = [];
+    cals = _localCals();
     _days.clear();
     signedIn = false;
     error = null;
@@ -308,9 +312,11 @@ class Store extends ChangeNotifier {
     _dir ??= await getApplicationSupportDirectory();
     // Installs from before the cache had no 'google' flag; a saved calendar list means they signed in.
     signedIn = onboarded && (_p.getBool('google') ?? _p.getStringList('calendars') != null);
-    if (signedIn) {
-      cals = [for (final c in (_read('calendars') as List?) ?? const []) Cal.fromJson((c as Map).cast())];
-    }
+    local = LocalCalendar(_file('local'));
+    cals = [
+      if (signedIn) for (final c in (_read('calendars') as List?) ?? const []) Cal.fromJson((c as Map).cast()),
+    ];
+    cals = [...cals, ..._localCals()];
     ready = true;
     notifyListeners();
     if (!signedIn) return;
@@ -359,28 +365,63 @@ class Store extends ChangeNotifier {
 
   Future<void> loadCalendars() async {
     final saved = _p.getStringList('calendars');
-    cals = await g.calendars(saved?.toSet(), shapes: _shapes, primaryName: name ?? _l.personal);
-    error = null; // Google answered: online again
-    _write('calendars', [for (final c in cals) c.toJson()]);
+    if (signedIn) {
+      // A list with only local ids (signing in after using the phone alone) leaves Google's own choice.
+      final ids = saved?.where((id) => !isLocal(id)).toSet();
+      final google = await g.calendars(ids == null || ids.isEmpty ? null : ids, shapes: _shapes, primaryName: name ?? _l.personal);
+      error = null; // Google answered: online again
+      _write('calendars', [for (final c in google) c.toJson()]);
+      cals = google;
+    } else {
+      cals = [];
+    }
+    cals = [...cals, ..._localCals()];
     notifyListeners();
   }
+
+  /// Calendars on this phone after the Google ones (shapes no other calendar uses), shown unless switched off.
+  /// Their default reminder is the global one from 05.3 (owner).
+  List<Cal> _localCals() {
+    final saved = _p.getStringList('calendars')?.toSet(), picked = _shapes, rem = notifyPrefs.defaultReminder;
+    final used = {...picked.values, for (final c in cals) c.shape};
+    var i = 0;
+    return [
+      for (final (id, name) in local.calendars)
+        Cal(id, name,
+            shared: false,
+            holiday: false,
+            shape: picked[id] ?? freeShape(used, i++),
+            defaultReminder: rem < 0 ? null : rem,
+            on: saved?.contains(id) ?? true),
+    ];
+  }
+
+  bool isLocal(String calId) => LocalCalendar.isLocal(calId);
 
   Future<void> toggle(Cal c, bool on) async {
     c.on = on;
     await _p.setStringList('calendars', [for (final c in cals) if (c.on) c.id]);
-    _write('calendars', [for (final c in cals) c.toJson()]);
+    _write('calendars', [for (final c in cals) if (!isLocal(c.id)) c.toJson()]);
     _days.clear();
     notifyListeners();
   }
 
+  /// Without Google the first calendar on this phone, "My calendar", is made so there is somewhere to add events.
   Future<void> finishOnboarding() async {
     await _p.setBool('onboarded', true);
-    if (signedIn) await _p.setStringList('calendars', [for (final c in cals) if (c.on) c.id]);
+    if (!signedIn && local.calendars.isEmpty) {
+      local.createCalendar(_l.myCalendar);
+      cals = _localCals();
+    }
+    await _p.setStringList('calendars', [for (final c in cals) if (c.on) c.id]);
     notifyListeners();
   }
 
   /// Calendars to ask Google for: the shown ones.
-  List<Cal> get _toFetch => [for (final c in cals) if (c.on) c];
+  List<Cal> get _toFetch => [for (final c in cals) if (c.on && !isLocal(c.id)) c];
+
+  /// Shown local events of [year].
+  List<Ev> _localYear(int year) => local.events([for (final c in cals) if (c.on && isLocal(c.id)) c], DateTime(year), DateTime(year + 1));
 
   List<Ev> _visible(Iterable<Ev> evs) {
     final on = {for (final c in cals) if (c.on) c.id};
@@ -389,7 +430,7 @@ class Store extends ChangeNotifier {
 
   /// Stores a freshly fetched year in memory and on disk (also used by the 01.4 sync screen).
   void putYear(int year, List<Ev> evs) {
-    _days[year] = indexByDay(_visible(evs), year);
+    _days[year] = indexByDay(_visible([...evs, ..._localYear(year)]), year);
     _write('events_$year', [for (final e in evs) e.toJson()]);
     notifyListeners();
   }
@@ -408,7 +449,7 @@ class Store extends ChangeNotifier {
     if (!_loading.add(year)) return;
     // Read asynchronously: on() runs during build, so nothing here may notify before the first await.
     if (await _readAsync('events_$year') case final List cached when signedIn) {
-      _days[year] = indexByDay(_visible([for (final e in cached) Ev.fromJson((e as Map).cast())]), year);
+      _days[year] = indexByDay(_visible([for (final e in cached) Ev.fromJson((e as Map).cast()), ..._localYear(year)]), year);
       notifyListeners();
     }
     if (signedIn) {
@@ -424,10 +465,12 @@ class Store extends ChangeNotifier {
         }
       } catch (e) {
         error = '$e';
-        _days[year] ??= {};
+        _days[year] ??= indexByDay(_visible(_localYear(year)), year);
+        if (year == DateTime.now().year) await reschedule(); // local changes still need their reminders
       }
     } else {
-      _days[year] = {};
+      _days[year] = indexByDay(_visible(_localYear(year)), year);
+      if (year == DateTime.now().year) await reschedule();
     }
     _loading.remove(year);
     notifyListeners();
@@ -443,8 +486,8 @@ class Store extends ChangeNotifier {
       final Iterable<Ev> evs = _days[y] != null
           ? {for (final d in _days[y]!.values) ...d}
           : switch (await _readAsync('events_$y')) {
-              final List cached when signedIn => _visible([for (final e in cached) Ev.fromJson((e as Map).cast())]),
-              _ => const <Ev>[],
+              final List cached when signedIn => _visible([for (final e in cached) Ev.fromJson((e as Map).cast()), ..._localYear(y)]),
+              _ => _visible(_localYear(y)),
             };
       for (final e in evs) {
         final hay = fold([
@@ -509,7 +552,7 @@ class Store extends ChangeNotifier {
     var failed = 0;
     for (final (i, e) in evs.indexed) {
       try {
-        await g.importEvent(calId, e);
+        isLocal(calId) ? local.importEvent(calId, e) : await g.importEvent(calId, e);
       } catch (_) {
         failed++;
       }
@@ -525,13 +568,16 @@ class Store extends ChangeNotifier {
     if (!tz.timeZoneDatabase.isInitialized) tzdata.initializeTimeZones();
     final all = [
       for (final c in cals)
-        if (c.on && !c.holiday && !c.id.startsWith('#')) ...await g.allEvents(c.id),
+        if (c.on && !c.holiday && !c.id.startsWith('#')) ...isLocal(c.id) ? local.allEvents(c.id) : await g.allEvents(c.id),
     ];
     return writeIcs(all, local: await timeZone());
   }
 
   Future<void> save(Ev e, {String? fromCal, bool force = false}) async {
-    await g.save(e, fromCal: fromCal, timeZone: await timeZone(), force: force);
+    // Events stay on their side: the edit screen offers an existing event only calendars of the same kind.
+    isLocal(e.calId)
+        ? local.save(e, fromCal: fromCal, timeZone: await timeZone())
+        : await g.save(e, fromCal: fromCal, timeZone: await timeZone(), force: force);
     _days.clear();
     notifyListeners();
   }
@@ -545,8 +591,9 @@ class Store extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> createCalendar(String name) async {
-    await g.createCalendar(name, await timeZone());
+  /// A new calendar in Google or, with [onPhone], on this phone (04.2 switch).
+  Future<void> createCalendar(String name, {bool onPhone = false}) async {
+    onPhone ? local.createCalendar(name) : await g.createCalendar(name, await timeZone());
     // A new calendar is enabled: its id is not known before the list reloads, so enable whatever is new.
     final before = {for (final c in cals) c.id};
     await loadCalendars();
@@ -596,7 +643,7 @@ class Store extends ChangeNotifier {
 
   /// Deletes an own calendar and all its events from Google (not the primary one).
   Future<void> deleteCalendar(Cal c) async {
-    await g.deleteCalendar(c.id);
+    isLocal(c.id) ? local.deleteCalendar(c.id) : await g.deleteCalendar(c.id);
     await loadCalendars();
     _days.clear();
     notifyListeners();
@@ -717,7 +764,7 @@ class Store extends ChangeNotifier {
   }
 
   Future<void> delete(Ev e, DeleteScope scope, {required bool notify}) async {
-    await g.delete(e, scope, notify: notify);
+    isLocal(e.calId) ? local.delete(e) : await g.delete(e, scope, notify: notify);
     _days.clear();
     notifyListeners();
   }

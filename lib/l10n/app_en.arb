@@ -381,5 +381,10 @@
   "glyphBlink": "Blink",
   "glyphSteady": "Steady",
   "glyphGlass": "Glass",
-  "glyphClock": "Clock"
+  "glyphClock": "Clock",
+  "myCalendar": "My calendar",
+  "onDevice": "On this device",
+  "onlyThisPhone": "Only this phone",
+  "newCalendarLocalHint": "Only on this phone",
+  "onPhone": "On phone"
 }

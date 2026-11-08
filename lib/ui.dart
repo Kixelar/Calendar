@@ -632,3 +632,32 @@ Future<bool> confirm(BuildContext context, String title, String body, String act
       },
     ) ??
     false;
+
+/// Segmented choice (.seg).
+Widget seg<V>(BuildContext c, List<(V, String)> options, V value, ValueChanged<V> onChanged) {
+  final t = Tok.of(c);
+  return Container(
+    height: 40,
+    margin: const EdgeInsets.only(top: 16),
+    padding: const EdgeInsets.all(3),
+    decoration: ShapeDecoration(shape: StadiumBorder(side: BorderSide(color: t.borderControl))),
+    child: Row(children: [
+      for (final (v, label) in options)
+        Expanded(
+          child: Semantics(
+            button: true,
+            selected: v == value,
+            child: InkWell(
+              onTap: () => onChanged(v),
+              customBorder: const StadiumBorder(),
+              child: Container(
+                alignment: Alignment.center,
+                decoration: ShapeDecoration(color: v == value ? t.display : null, shape: const StadiumBorder()),
+                child: Text(label.toUpperCase(), style: T.labelSm(v == value ? t.bg : t.secondary)),
+              ),
+            ),
+          ),
+        ),
+    ]),
+  );
+}

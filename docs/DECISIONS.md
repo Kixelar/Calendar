@@ -55,3 +55,9 @@
   part on the left ("clock", variant A), a 3x3 plus while timed events remain today, else nothing. Strips show no
   "events left today" dot: they have no Glyph button to call it up (dropped by the owner). Previews approved
   by the owner in chat.
+- **Calendars on this phone** (owner, 2026-11-08): work next to a Google account, not instead of it. `local.dart` keeps
+  them in `local.json` (app support dir) with events as Google event resources, so `evOf` / `fillEvent` and the .ics
+  code serve both; ids start with `local:` and `Store` sends each call to Google or the phone by that prefix. "Continue
+  without account" makes "My calendar". Add calendar has a Google / On phone switch (only with Google). Their default
+  reminder is the global one. No guests, sharing or invitations; no moving events between Google and the phone; losing
+  them on uninstall is accepted (.ics export is the backup). "Disconnect Google" keeps them, "Clear data" does not.

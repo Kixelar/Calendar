@@ -127,7 +127,7 @@ class EventDetails extends StatelessWidget {
     final cal = store.cal(e.calId);
     final writable = (cal?.writable ?? false) && !store.subscriptions.containsKey(e.calId); // subscriptions are read-only
     final canEdit = writable && e.organizer; // invitations from others are edited by their organizer
-    final canInvite = canEdit || (writable && e.guestsInvite);
+    final canInvite = !store.isLocal(e.calId) && (canEdit || (writable && e.guestsInvite)); // phone calendars have no guests
     final soon = (e.start.difference(now).inSeconds + 59) ~/ 60;
     Color rsvpColor(String s) => switch (s) { 'accepted' => t.success, 'tentative' => t.warning, _ => t.secondary };
     String rsvp(String s) => switch (s) { 'accepted' => l.rsvpYes, 'tentative' => l.rsvpMaybe, 'declined' => l.rsvpNo, _ => l.rsvpWaiting };
@@ -679,7 +679,7 @@ class _EventEditState extends State<EventEdit> {
   @override
   Widget build(BuildContext context) {
     final t = Tok.of(context), l = l10n(context), store = widget.store;
-    final cal = store.cal(calId);
+    final cal = store.cal(calId), local = store.isLocal(calId);
     Widget when(String label, DateTime d, bool isStart) => RowItem(children: [
           Expanded(child: Text(label)),
           InkWell(
@@ -739,8 +739,10 @@ class _EventEditState extends State<EventEdit> {
                 if (!allDay && timeZone.isNotEmpty) ValueRow(l.timeZone, value: timeZone.split('/').last.replaceAll('_', ' ')),
               ]),
               Group(children: [
-                ValueRow(l.repeat,
-                    value: !_ruleLoaded ? '…' : rule?.describe(l, loc(context)) ?? l.never, onTap: _ruleLoaded ? _pickRepeat : null),
+                // shortcut: no repeat for calendars on this phone until they can expand rules (TODO stage 3, step 2).
+                if (!local)
+                  ValueRow(l.repeat,
+                      value: !_ruleLoaded ? '…' : rule?.describe(l, loc(context)) ?? l.never, onTap: _ruleLoaded ? _pickRepeat : null),
                 ValueRow(l.reminder, value: _reminderLabel(l, reminderChoice), onTap: _pickReminder),
                 RowItem(
                   onTap: () async {
@@ -748,7 +750,9 @@ class _EventEditState extends State<EventEdit> {
                       title: l.calendar,
                       selected: calId,
                       options: [
-                        for (final c in [...store.writable, if (!store.writable.any((c) => c.id == calId)) ?cal]) (c.id, c.name),
+                        // A saved event stays on its side (Google or this phone); a new one can go anywhere (owner).
+                        for (final c in [...store.writable, if (!store.writable.any((c) => c.id == calId)) ?cal])
+                          if (widget.ev == null || store.isLocal(c.id) == store.isLocal(widget.ev!.calId)) (c.id, c.name),
                       ],
                       leading: (id) => Marker(store.cal(id)?.shape ?? Shape.dot),
                     ));
@@ -767,7 +771,7 @@ class _EventEditState extends State<EventEdit> {
                   final v = await _ask(l.place, place);
                   if (v != null) setState(() => place = v.isEmpty ? null : v);
                 }),
-                ValueRow(l.guests, value: guestNames.isEmpty ? l.invite : guestNames.join(', '), onTap: _pickGuests),
+                if (!local) ValueRow(l.guests, value: guestNames.isEmpty ? l.invite : guestNames.join(', '), onTap: _pickGuests),
                 ValueRow(l.notes, value: (notes?.isNotEmpty ?? false) ? notes!.split('\n').first : l.add, onTap: () async {
                   final v = await _ask(l.notes, notes, multi: true);
                   if (v != null) setState(() => notes = v.isEmpty ? null : v);

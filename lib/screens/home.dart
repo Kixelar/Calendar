@@ -166,16 +166,14 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
               child: SizedBox(
                 height: 44,
                 child: Row(children: [
-                  if (store.signedIn)
-                    IconBtn(Icons.search, label: l.search, onTap: () {
+                  IconBtn(Icons.search, label: l.search, onTap: () {
                       final back = [l.year, l.month, l.week, l.day][tab];
                       Navigator.push(context, MaterialPageRoute(builder: (_) => Search(store, backLabel: back)));
                     }),
                   // Google could not be reached: the views show what is saved on the phone.
                   if (store.signedIn && store.error != null) Padding(padding: const EdgeInsets.only(left: 4), child: Lbl(l.offline)),
                   const Spacer(),
-                  if (store.signedIn)
-                    IconBtn(Icons.layers_outlined, label: l.calendars, onTap: () {
+                  IconBtn(Icons.layers_outlined, label: l.calendars, onTap: () {
                       final back = [l.year, l.month, l.week, l.day][tab];
                       Navigator.push(context, MaterialPageRoute(builder: (_) => Calendars(store, backLabel: back)));
                     }),
@@ -238,7 +236,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
                     ),
                   ),
                 const Spacer(),
-                if (store.signedIn && store.writable.isNotEmpty)
+                if (store.writable.isNotEmpty)
                   Material(
                     color: t.display,
                     shape: const CircleBorder(),
@@ -424,7 +422,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
             slots: slots,
             store: store,
             off: focus.weekday >= 6 || all.any(_holiday),
-            onAdd: store.signedIn && store.writable.isNotEmpty
+            onAdd: store.writable.isNotEmpty
                 ? () => Navigator.push(c, MaterialPageRoute(builder: (_) => EventEdit(store, day: focus)))
                 : null,
           ),

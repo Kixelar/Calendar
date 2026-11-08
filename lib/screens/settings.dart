@@ -52,35 +52,6 @@ Widget _switch(String label, bool value, ValueChanged<bool> onChanged, {Widget? 
       ]),
     );
 
-/// Segmented choice (.seg).
-Widget _seg<V>(BuildContext c, List<(V, String)> options, V value, ValueChanged<V> onChanged) {
-  final t = Tok.of(c);
-  return Container(
-    height: 40,
-    margin: const EdgeInsets.only(top: 16),
-    padding: const EdgeInsets.all(3),
-    decoration: ShapeDecoration(shape: StadiumBorder(side: BorderSide(color: t.borderControl))),
-    child: Row(children: [
-      for (final (v, label) in options)
-        Expanded(
-          child: Semantics(
-            button: true,
-            selected: v == value,
-            child: InkWell(
-              onTap: () => onChanged(v),
-              customBorder: const StadiumBorder(),
-              child: Container(
-                alignment: Alignment.center,
-                decoration: ShapeDecoration(color: v == value ? t.display : null, shape: const StadiumBorder()),
-                child: Text(label.toUpperCase(), style: T.labelSm(v == value ? t.bg : t.secondary)),
-              ),
-            ),
-          ),
-        ),
-    ]),
-  );
-}
-
 String _themeName(AppLocalizations l, String v) => switch (v) { 'dark' => l.themeDark, 'light' => l.themeLight, _ => l.themeSystem };
 
 /// 05.1: entry to all settings.
@@ -120,10 +91,9 @@ class Settings extends StatelessWidget {
               ValueRow(l.appearance, value: _themeName(l, store.theme), onTap: () => _go(context, Appearance(store))),
               ValueRow(l.notificationsGlyph, onTap: () => _go(context, Notifications(store))),
             ]),
-            if (store.signedIn)
-              Group(children: [
+            Group(children: [
                 ValueRow(l.calendarsSharing, value: '${store.cals.length}', onTap: () => _go(context, Calendars(store, backLabel: l.settings))),
-                ValueRow(l.holidays, value: countries.isEmpty ? l.none : countries.join(', '), onTap: () => _go(context, Holidays(store))),
+                if (store.signedIn) ValueRow(l.holidays, value: countries.isEmpty ? l.none : countries.join(', '), onTap: () => _go(context, Holidays(store))),
               ]),
             Group(children: [
               ValueRow(l.dataPrivacy, onTap: () => _go(context, DataPrivacy(store))),
@@ -150,7 +120,7 @@ class Appearance extends StatelessWidget {
           return _page(context, l.settings, [
             _head(context, l.settings, l.appearance),
             Section(left: l.theme, children: [
-              _seg(context, [('dark', l.themeDark), ('light', l.themeLight), ('system', l.themeSystem)], store.theme, (v) => store.set('theme', v)),
+              seg(context, [('dark', l.themeDark), ('light', l.themeLight), ('system', l.themeSystem)], store.theme, (v) => store.set('theme', v)),
             ]),
             Section(left: l.calendar, children: [
               ValueRow(l.firstDay, value: dayName(store.weekStart), onTap: () async {
@@ -250,6 +220,21 @@ class _AccountsState extends State<Accounts> {
                   ),
                   Lbl(store.error == null ? l.active : l.offline, color: store.error == null ? t.success : t.warning),
                 ]),
+              // 05.4 "On this device": calendars kept only on this phone.
+              if (store.cals.any((c) => store.isLocal(c.id)))
+                RowItem(children: [
+                  const Avatar('', icon: Icons.smartphone),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      child: Column(crossAxisAlignment: CrossAxisAlignment.start, spacing: 2, children: [
+                        Text(l.onDevice),
+                        Text(l.onlyThisPhone.toUpperCase(), style: T.caption(t.secondary)),
+                      ]),
+                    ),
+                  ),
+                  Lbl(l.calendarsN(store.cals.where((c) => store.isLocal(c.id)).length)),
+                ]),
               // One Google account at a time: adding is offered only when signed out (owner, 2026-11-01).
               if (!store.signedIn)
                 RowItem(onTap: () => _go(context, Connect(store)), children: [
@@ -299,7 +284,7 @@ class _AccountsState extends State<Accounts> {
                   onTap: () async {
                     if (await confirm(context, l.disconnectGoogle, l.disconnectBody, l.disconnect) && context.mounted) {
                       Navigator.of(context).popUntil((r) => r.isFirst);
-                      await store.forget();
+                      await store.forget(keepLocal: true);
                     }
                   },
                   children: [Expanded(child: Text(l.disconnectGoogle, style: T.body(t.accentText)))],
@@ -334,8 +319,7 @@ class DataPrivacy extends StatelessWidget {
                 await store.set('appLock', v);
               }),
             ]),
-            if (store.signedIn)
-              Section(left: l.importExport, children: [
+            Section(left: l.importExport, children: [
                 ValueRow(l.importFile, value: '.ics', onTap: () => importIcsFile(context, store)),
                 ValueRow(l.exportAll, value: '.ics', onTap: () => exportIcsFile(context, store)),
               ]),

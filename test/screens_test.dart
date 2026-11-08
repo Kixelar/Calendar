@@ -353,6 +353,59 @@ void main() {
     expect(offline.error, isNotNull);
   });
 
+  test('calendars on this phone: first calendar, save, move, import, export, delete, kept when Google is disconnected', () async {
+    SharedPreferences.setMockInitialValues({});
+    final dir = Directory.systemTemp.createTempSync();
+    final store = Store(_OfflineGoogle(), dir);
+    await store.start();
+    await store.finishOnboarding(); // "continue without account"
+    expect(store.cals.map((c) => c.name), ['My calendar']);
+    final mine = store.cals.single;
+    expect(store.isLocal(mine.id), isTrue);
+    expect(store.writable, [mine]);
+
+    final day = DateTime(2026, 11, 9);
+    await store.save(Ev('Dentysta', mine.id, DateTime(2026, 11, 9, 10), DateTime(2026, 11, 9, 11), location: 'Gabinet'));
+    store.on(day);
+    await Future<void>.delayed(const Duration(milliseconds: 50));
+    var e = store.on(day)!.single;
+    expect((e.title, e.location, e.start.hour, e.reminder), ('Dentysta', 'Gabinet', 10, 10)); // global default reminder
+
+    // Kept on disk: a new start reads it back; moving to another phone calendar keeps one copy.
+    await store.createCalendar('Dom', onPhone: true);
+    final again = Store(_OfflineGoogle(), dir);
+    await again.start();
+    final home = again.cals.firstWhere((c) => c.name == 'Dom');
+    expect(home.shape, isNot(mine.shape));
+    again.on(day);
+    await Future<void>.delayed(const Duration(milliseconds: 50));
+    e = again.on(day)!.single;
+    await again.save(Ev('Dentysta 2', home.id, e.start, e.end, id: e.id), fromCal: mine.id);
+    again.on(day);
+    await Future<void>.delayed(const Duration(milliseconds: 50));
+    expect(again.on(day)!.map((e) => (e.title, e.calId)), [('Dentysta 2', home.id)]);
+
+    // .ics in and out; importing the same file again replaces instead of doubling.
+    final ics = await again.readIcs('BEGIN:VCALENDAR\r\nBEGIN:VEVENT\r\nUID:a1\r\nSUMMARY:Imported\r\n'
+        'DTSTART;VALUE=DATE:20261109\r\nDTEND;VALUE=DATE:20261110\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n');
+    expect(await again.importIcs(ics, mine.id, (_) {}), 0);
+    expect(await again.importIcs(ics, mine.id, (_) {}), 0);
+    again.on(day);
+    await Future<void>.delayed(const Duration(milliseconds: 50));
+    expect(again.on(day)!.map((e) => e.title), unorderedEquals(['Imported', 'Dentysta 2']));
+    expect(await again.exportIcs(), allOf(contains('SUMMARY:Imported'), contains('SUMMARY:Dentysta 2')));
+
+    await again.delete(again.on(day)!.firstWhere((e) => e.title == 'Imported'), DeleteScope.one, notify: false);
+    again.on(day);
+    await Future<void>.delayed(const Duration(milliseconds: 50));
+    expect(again.on(day)!.map((e) => e.title), ['Dentysta 2']);
+
+    await again.forget(keepLocal: true); // 05.4 disconnect Google
+    expect(again.cals.map((c) => c.name), ['My calendar', 'Dom']);
+    await again.forget(); // 05.5 clear data
+    expect(again.cals, isEmpty);
+  });
+
   test('address subscription: copies the file, skips it unchanged, drops events that left it', () async {
     SharedPreferences.setMockInitialValues({'onboarded': true, 'google': true});
     String feed(List<String> uids) => [
@@ -615,6 +668,12 @@ void main() {
         }));
     testWidgets('calendars', (t) => shot(t, '04_1_calendars', page: (s) => Calendars(s, backLabel: 'Miesiąc')));
     testWidgets('add calendar', (t) => shot(t, '04_2_add_calendar', page: (s) => AddCalendar(s)));
+    testWidgets('add calendar on the phone', (t) => shot(t, '04_2_add_calendar_phone', page: (s) => AddCalendar(s), tapText: 'NA TELEFONIE'));
+    testWidgets('calendars without Google', (t) => shot(t, '04_1_calendars_phone', onboarded: false, page: (s) => Calendars(s, backLabel: 'Miesiąc'),
+        act: (t) async {
+          await t.runAsync(() => t.element(find.byType(Scaffold).first).findAncestorWidgetOfExactType<App>()!.store.finishOnboarding());
+          await t.pump();
+        }));
     testWidgets('markers', (t) => shot(t, 'markers', page: (s) => Scaffold(
           body: Center(
             child: Wrap(spacing: 36, runSpacing: 36, children: [

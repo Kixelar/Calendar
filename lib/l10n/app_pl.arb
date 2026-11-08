@@ -330,5 +330,10 @@
   "glyphBlink": "Mignięcie",
   "glyphSteady": "Stałe",
   "glyphGlass": "Szklanka",
-  "glyphClock": "Zegar"
+  "glyphClock": "Zegar",
+  "myCalendar": "Mój kalendarz",
+  "onDevice": "Na urządzeniu",
+  "onlyThisPhone": "Tylko ten telefon",
+  "newCalendarLocalHint": "Tylko na tym telefonie",
+  "onPhone": "Na telefonie"
 }

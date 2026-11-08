@@ -1220,4 +1220,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get glyphClock => 'Clock';
+
+  @override
+  String get myCalendar => 'My calendar';
+
+  @override
+  String get onDevice => 'On this device';
+
+  @override
+  String get onlyThisPhone => 'Only this phone';
+
+  @override
+  String get newCalendarLocalHint => 'Only on this phone';
+
+  @override
+  String get onPhone => 'On phone';
 }

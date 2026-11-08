@@ -2083,6 +2083,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Clock'**
   String get glyphClock;
+
+  /// No description provided for @myCalendar.
+  ///
+  /// In en, this message translates to:
+  /// **'My calendar'**
+  String get myCalendar;
+
+  /// No description provided for @onDevice.
+  ///
+  /// In en, this message translates to:
+  /// **'On this device'**
+  String get onDevice;
+
+  /// No description provided for @onlyThisPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Only this phone'**
+  String get onlyThisPhone;
+
+  /// No description provided for @newCalendarLocalHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Only on this phone'**
+  String get newCalendarLocalHint;
+
+  /// No description provided for @onPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'On phone'**
+  String get onPhone;
 }
 
 class _AppLocalizationsDelegate

@@ -190,8 +190,9 @@ void _busy(BuildContext context, Widget child) => showDialog<void>(
       ),
     );
 
-/// 04.2 / 05.5 "Import file": an .ics from the phone into a chosen Google calendar.
-Future<void> importIcsFile(BuildContext context, Store store) async {
+/// 04.2 / 05.5 "Import file": an .ics from the phone into a chosen calendar; [onPhone] limits the choice to calendars
+/// on this phone (true) or in Google (false), as the 04.2 switch says.
+Future<void> importIcsFile(BuildContext context, Store store, {bool? onPhone}) async {
   final l = l10n(context), t = Tok.of(context);
   final file = await FilePicker.pickFile();
   if (file == null || !context.mounted) return;
@@ -207,7 +208,7 @@ Future<void> importIcsFile(BuildContext context, Store store) async {
   final cal = await pick<String?>(context, Pick(
     title: l.importTo(evs.length),
     selected: null,
-    options: [for (final c in store.writable) (c.id, c.name)],
+    options: [for (final c in store.writable) if (onPhone == null || store.isLocal(c.id) == onPhone) (c.id, c.name)],
     leading: (id) => Marker(store.cal(id!)?.shape ?? Shape.dot),
   ));
   if (cal?.$1 == null || !context.mounted) return;
@@ -268,13 +269,15 @@ class Calendars extends StatelessWidget {
         builder: (context, _) {
           final t = Tok.of(context), l = l10n(context);
           final feeds = store.subscriptions;
-          final mine = [for (final c in store.cals) if (!c.shared && !c.holiday && !feeds.containsKey(c.id)) c];
+          final mine = [for (final c in store.cals) if (!c.shared && !c.holiday && !feeds.containsKey(c.id) && !store.isLocal(c.id)) c];
+          final phone = [for (final c in store.cals) if (store.isLocal(c.id)) c];
           final shared = [for (final c in store.cals) if (c.shared) c];
           final subs = [for (final c in store.cals) if (c.holiday || feeds.containsKey(c.id)) c];
           Widget toggle(Cal c) => Toggle(value: c.on, label: c.name, onChanged: (v) => store.toggle(c, v));
           return _page(context, top: BackBar(label: backLabel), body: [
             _head(context, l.visibility, l.calendars),
-            Section(
+            if (store.signedIn)
+              Section(
               left: l.mineGoogle,
               trailing: Text(store.email ?? '', style: T.caption(t.secondary)),
               children: [
@@ -297,6 +300,19 @@ class Calendars extends StatelessWidget {
                   ]),
               ],
             ),
+            if (phone.isNotEmpty)
+              Section(left: l.onDevice, children: [
+                for (final c in phone)
+                  RowItem(children: [
+                    _ShapeBtn(store, c),
+                    Expanded(child: Text(c.name, maxLines: 1, overflow: TextOverflow.ellipsis)),
+                    toggle(c),
+                    IconBtn(Icons.delete_outline, label: l.deleteCalendar, onTap: () async {
+                      if (!await confirm(context, l.deleteCalendar, l.deleteCalendarBody(c.name), l.delete) || !context.mounted) return;
+                      await store.deleteCalendar(c);
+                    }),
+                  ]),
+              ]),
             if (shared.isNotEmpty)
               Section(left: l.sharedWithMe, children: [
                 for (final c in shared)
@@ -345,10 +361,18 @@ class Calendars extends StatelessWidget {
       );
 }
 
-/// 04.2: ways to add a calendar that the Google Calendar API supports.
-class AddCalendar extends StatelessWidget {
+/// 04.2: ways to add a calendar. With a Google account a switch says where new calendars and imports go: Google or
+/// this phone (owner, 2026-11-08). Holidays and address subscriptions need Google for now (TODO stage 3, step 3).
+class AddCalendar extends StatefulWidget {
   const AddCalendar(this.store, {super.key});
   final Store store;
+  @override
+  State<AddCalendar> createState() => _AddCalendarState();
+}
+
+class _AddCalendarState extends State<AddCalendar> {
+  late bool _phone = !widget.store.signedIn;
+  Store get store => widget.store;
 
   /// 04.2 "Subscribe to address": copies the file into a new calendar, refreshed every hour.
   Future<void> _subscribe(BuildContext context) async {
@@ -383,20 +407,23 @@ class AddCalendar extends StatelessWidget {
         ]);
     return _page(context, top: _closeBar(context), body: [
       _head(context, l.calendars, l.addCalendar),
+      if (store.signedIn) seg(context, [(false, 'Google'), (true, l.onPhone)], _phone, (v) => setState(() => _phone = v)),
       Group(children: [
-        option(Icons.add, l.newCalendar, l.newCalendarHint, () async {
+        option(Icons.add, l.newCalendar, _phone ? l.newCalendarLocalHint : l.newCalendarHint, () async {
           final name = await askText(context, l.newCalendar, hint: l.calendarName);
           if (name == null || name.isEmpty || !context.mounted) return;
           try {
-            await store.createCalendar(name);
+            await store.createCalendar(name, onPhone: _phone);
             if (context.mounted) Navigator.pop(context);
           } catch (e) {
             if (context.mounted) _fail(context, e);
           }
         }),
-        option(Icons.wb_sunny_outlined, l.holidaysAndDaysOff, l.holidaysHint, () => _go(context, Holidays(store))),
-        option(Icons.link, l.subscribeUrl, l.subscribeUrlHint, () => _subscribe(context)),
-        option(Icons.file_download_outlined, l.importFile, l.importFileHint, () => importIcsFile(context, store)),
+        if (!_phone) ...[
+          option(Icons.wb_sunny_outlined, l.holidaysAndDaysOff, l.holidaysHint, () => _go(context, Holidays(store))),
+          option(Icons.link, l.subscribeUrl, l.subscribeUrlHint, () => _subscribe(context)),
+        ],
+        option(Icons.file_download_outlined, l.importFile, l.importFileHint, () => importIcsFile(context, store, onPhone: _phone)),
         // One Google account at a time: offered only when signed out.
         if (!store.signedIn) option(Icons.person_outline, l.googleAccount, l.googleAccountHint, () => _go(context, Connect(store))),
       ]),
