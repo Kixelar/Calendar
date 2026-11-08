@@ -74,7 +74,7 @@ class _RuleText extends StatelessWidget {
     final series = e.recurringId;
     if (series == null) return builder(null);
     return FutureBuilder(
-      future: store.g.recurrence(e.calId, series).catchError((_) => const <String>[]),
+      future: store.recurrence(e.calId, series).catchError((_) => const <String>[]),
       builder: (context, snap) {
         final rule = snap.data?.map(Rule.parse).nonNulls.firstOrNull;
         return builder(rule?.describe(l10n(context), loc(context)));
@@ -481,7 +481,7 @@ class _EventEditState extends State<EventEdit> {
     }
     if (_occurrence) {
       _ruleLoaded = false;
-      widget.store.g.recurrence(e!.calId, e.recurringId!).then((lines) {
+      widget.store.recurrence(e!.calId, e.recurringId!).then((lines) {
         if (!mounted) return;
         setState(() {
           _seriesRule = rule = lines.map(Rule.parse).nonNulls.firstOrNull;
@@ -739,10 +739,8 @@ class _EventEditState extends State<EventEdit> {
                 if (!allDay && timeZone.isNotEmpty) ValueRow(l.timeZone, value: timeZone.split('/').last.replaceAll('_', ' ')),
               ]),
               Group(children: [
-                // shortcut: no repeat for calendars on this phone until they can expand rules (TODO stage 3, step 2).
-                if (!local)
-                  ValueRow(l.repeat,
-                      value: !_ruleLoaded ? '…' : rule?.describe(l, loc(context)) ?? l.never, onTap: _ruleLoaded ? _pickRepeat : null),
+                ValueRow(l.repeat,
+                    value: !_ruleLoaded ? '…' : rule?.describe(l, loc(context)) ?? l.never, onTap: _ruleLoaded ? _pickRepeat : null),
                 ValueRow(l.reminder, value: _reminderLabel(l, reminderChoice), onTap: _pickReminder),
                 RowItem(
                   onTap: () async {

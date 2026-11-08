@@ -61,3 +61,6 @@
   without account" makes "My calendar". Add calendar has a Google / On phone switch (only with Google). Their default
   reminder is the global one. No guests, sharing or invitations; no moving events between Google and the phone; losing
   them on uninstall is accepted (.ics export is the backup). "Disconnect Google" keeps them, "Clear data" does not.
+  Repeats (2026-11-08): the series keeps its RRULE; changed or deleted occurrences are separate events with
+  recurringEventId / originalStartTime / status cancelled, like Google, so .ics export writes RECURRENCE-ID / EXDATE.
+  `occurrences()` in rrule.dart expands rules on the phone; occurrence ids are "series id _ original start ms".

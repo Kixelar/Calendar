@@ -2,6 +2,8 @@ import 'package:extension_google_sign_in_as_googleapis_auth/extension_google_sig
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:googleapis/calendar/v3.dart' as gcal;
 
+import 'rrule.dart';
+
 /// Web OAuth client ID from Google Cloud, passed at build time (docs/GOOGLE.md). Not a secret.
 const serverClientId = String.fromEnvironment('GOOGLE_SERVER_CLIENT_ID');
 
@@ -373,12 +375,12 @@ class GoogleCalendar {
     }
     master.recurrence = [for (final r in master.recurrence ?? const <String>[]) endRuleBefore(r, originalStart, allDay: e.allDay)];
     await api.events.update(master, e.calId, series, sendUpdates: send);
-    // The new series repeats as before (without the old end), unless a new rule was chosen.
+    // The new series repeats as before and ends when the old one did (COUNT: what was left), unless a new rule was chosen.
     final next = gcal.Event();
     fillEvent(next, e, e.start, e.end, timeZone);
     next.recurrence = [
       for (final r in rule)
-        e.recurrence != null ? r : 'RRULE:${r.substring(6).split(';').where((p) => !p.startsWith('UNTIL=') && !p.startsWith('COUNT=')).join(';')}',
+        e.recurrence != null ? r : continueRule(r, first, originalStart, allDay: e.allDay),
     ];
     if (next.recurrence!.isEmpty) next.recurrence = null;
     await api.events.insert(next, e.calId, sendUpdates: send);

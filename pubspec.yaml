@@ -2,7 +2,7 @@ name: calendar
 description: "Calendar for Android with Google Calendar sync, Nothing-inspired design."
 publish_to: 'none'
 # Date version (docs/WORKFLOW.md). Part after + is the Android versionCode: 30000000 + minutes since 2026-01-01 UTC.
-version: 2026.11.8-dev+30448791
+version: 2026.11.8-dev+30448830
 
 environment:
   sdk: ^3.13.5

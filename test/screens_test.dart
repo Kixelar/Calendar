@@ -406,6 +406,73 @@ void main() {
     expect(again.cals, isEmpty);
   });
 
+  test('repeat rules expand into occurrences', () {
+    final start = DateTime(2026, 1, 31, 9);
+    List<String> days(List<String> lines, {DateTime? from, DateTime? to, bool allDay = false}) => [
+          for (final t in occurrences(lines, start, from ?? DateTime(2026), to ?? DateTime(2027), allDay: allDay))
+            DateFormat('MM-dd HH').format(t),
+        ];
+    expect(days(['RRULE:FREQ=DAILY;INTERVAL=2;COUNT=3']), ['01-31 09', '02-02 09', '02-04 09']);
+    // Monthly on the 31st skips shorter months; UNTIL counts its own day.
+    expect(days(['RRULE:FREQ=MONTHLY;UNTIL=20260531T235959Z']), ['01-31 09', '03-31 09', '05-31 09']);
+    expect(days(['RRULE:FREQ=WEEKLY;BYDAY=MO,WE;COUNT=4']), ['02-02 09', '02-04 09', '02-09 09', '02-11 09']);
+    expect(days(['RRULE:FREQ=MONTHLY;BYDAY=-1FR;COUNT=2']), ['02-27 09', '03-27 09']);
+    expect(days(['RRULE:FREQ=YEARLY;COUNT=2']), ['01-31 09']); // 2027 is outside [from, to)
+    expect(days(['RRULE:FREQ=DAILY;COUNT=3', 'EXDATE:20260201T090000']), ['01-31 09', '02-02 09']);
+    // COUNT counts from the series start even when the range starts later.
+    expect(days(['RRULE:FREQ=DAILY;COUNT=3'], from: DateTime(2026, 2, 2)), ['02-02 09']);
+    // "This and following" from the 3rd of 5: 3 are left.
+    expect(continueRule('RRULE:FREQ=DAILY;COUNT=5', start, DateTime(2026, 2, 2, 9)), 'RRULE:FREQ=DAILY;COUNT=3');
+    // Daylight saving: the wall-clock hour stays.
+    expect(days(['RRULE:FREQ=WEEKLY;COUNT=10'], from: DateTime(2026, 3, 27), to: DateTime(2026, 4, 5)), ['03-28 09', '04-04 09']);
+  });
+
+  test('repeating events on this phone: change one, this and following, delete one and following', () async {
+    SharedPreferences.setMockInitialValues({});
+    final store = Store(_OfflineGoogle(), Directory.systemTemp.createTempSync());
+    await store.start();
+    await store.finishOnboarding();
+    final cal = store.cals.single.id;
+    Future<List<(String, int)>> week() async {
+      store.on(DateTime(2026, 11, 9));
+      await Future<void>.delayed(const Duration(milliseconds: 30));
+      return [
+        for (var d = 9; d <= 15; d++)
+          for (final e in store.on(DateTime(2026, 11, d))!) (e.title, e.start.day),
+      ];
+    }
+
+    await store.save(Ev('Gym', cal, DateTime(2026, 11, 9, 18), DateTime(2026, 11, 9, 19), recurrence: const ['RRULE:FREQ=DAILY;COUNT=5']));
+    expect(await week(), [for (var d = 9; d <= 13; d++) ('Gym', d)]);
+    final tue = store.on(DateTime(2026, 11, 10))!.single;
+    expect(await store.recurrence(cal, tue.recurringId!), ['RRULE:FREQ=DAILY;COUNT=5']);
+
+    // Only Tuesday: new title, an hour later.
+    await store.save(Ev('Gym late', cal, DateTime(2026, 11, 10, 19), DateTime(2026, 11, 10, 20), id: tue.id, recurringId: tue.recurringId));
+    expect((await week())[1], ('Gym late', 10));
+
+    // Wednesday deleted alone, then Friday and following.
+    await week();
+    await store.delete(store.on(DateTime(2026, 11, 11))!.single, DeleteScope.one, notify: false);
+    await week();
+    await store.delete(store.on(DateTime(2026, 11, 13))!.single, DeleteScope.following, notify: false);
+    expect(await week(), [('Gym', 9), ('Gym late', 10), ('Gym', 12)]);
+
+    // Thursday and following renamed: the old series ends before it, a new one starts there.
+    final thu = store.on(DateTime(2026, 11, 12))!.single;
+    await store.saveSeries(Ev('Swim', cal, thu.start, thu.end, id: thu.id, recurringId: thu.recurringId), DeleteScope.following,
+        originalStart: thu.start);
+    expect(await week(), [('Gym', 9), ('Gym late', 10), ('Swim', 12)]);
+
+    // The whole first series moved by an hour; its changed Tuesday goes back to the series.
+    final mon = store.on(DateTime(2026, 11, 9))!.single;
+    await store.saveSeries(Ev('Gym', cal, mon.start.add(const Duration(hours: 1)), mon.end.add(const Duration(hours: 1)),
+        id: mon.id, recurringId: mon.recurringId), DeleteScope.all, originalStart: mon.start);
+    expect(await week(), [('Gym', 9), ('Gym', 10), ('Gym', 11), ('Swim', 12)]);
+    expect(store.on(DateTime(2026, 11, 9))!.single.start.hour, 19);
+    expect(await store.exportIcs(), allOf(contains('RRULE:FREQ=DAILY;UNTIL='), contains('SUMMARY:Swim')));
+  });
+
   test('address subscription: copies the file, skips it unchanged, drops events that left it', () async {
     SharedPreferences.setMockInitialValues({'onboarded': true, 'google': true});
     String feed(List<String> uids) => [

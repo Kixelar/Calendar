@@ -26,7 +26,7 @@ Screen numbers refer to docs/design/mockup.html; the month, week and day views f
 - [ ] 05.8 update check (later)
 - [ ] 05.4 "On this device": full local calendars (agreed 2026-11-02, started 2026-11-08). Plan, in steps:
       1. [x] local calendars and events (no repeat), views, search, reminders, widgets, .ics import/export (2026-11-08);
-      2. repeating local events with exceptions (this / following / all);
+      2. [x] repeating local events with exceptions (this / following / all) (2026-11-08);
       3. without a Google account: holidays (public Google holiday .ics) and address subscriptions into local calendars.
       Decided: no moving events between Google and local; losing local data on uninstall is an accepted risk.
 

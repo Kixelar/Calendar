@@ -7,9 +7,13 @@
   (the global default), widgets, Glyph, .ics import and export. Calendars → "On this device" lists them (show/hide,
   shape, delete); Accounts shows the "On this device" row. Data stays in one file on the phone (lost on uninstall).
 - Add calendar: with a Google account a Google / On phone switch says where a new calendar or an import goes.
+- Repeating events on this phone, with the same choices as Google: change or delete one occurrence, this and following,
+  or all. Repeats from imported .ics files (RRULE with COUNT / UNTIL / BYDAY / BYMONTHDAY / BYMONTH, EXDATE) show too.
+### Fixed
+- "This and following" on a repeating Google event: the new series now keeps the old end date, and a "N times" series
+  keeps only the occurrences that were left (before: it repeated forever).
 ### Changed
-- An existing event can only move to calendars of the same kind (Google or phone); phone events have no guests and,
-  for now, no repeat.
+- An existing event can only move to calendars of the same kind (Google or phone); phone events have no guests.
 - "Disconnect Google" keeps the calendars on this phone; "Clear data" removes them too.
 
 ## 2026.11.02-dev

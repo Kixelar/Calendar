@@ -737,10 +737,16 @@ class Store extends ChangeNotifier {
   }
 
   Future<void> saveSeries(Ev e, DeleteScope scope, {required DateTime originalStart}) async {
-    await g.saveSeries(e, scope, originalStart: originalStart, timeZone: await timeZone());
+    isLocal(e.calId)
+        ? local.saveSeries(e, scope, originalStart: originalStart, timeZone: await timeZone())
+        : await g.saveSeries(e, scope, originalStart: originalStart, timeZone: await timeZone());
     _days.clear();
     notifyListeners();
   }
+
+  /// Recurrence lines of a series, for the "every 2 weeks" text and the edit screen (03.1 / 03.2).
+  Future<List<String>> recurrence(String calId, String seriesId) async =>
+      isLocal(calId) ? local.recurrence(calId, seriesId) : await g.recurrence(calId, seriesId);
 
   Future<void> respond(Ev e, String status) async {
     await g.respond(e, status);
@@ -764,7 +770,7 @@ class Store extends ChangeNotifier {
   }
 
   Future<void> delete(Ev e, DeleteScope scope, {required bool notify}) async {
-    isLocal(e.calId) ? local.delete(e) : await g.delete(e, scope, notify: notify);
+    isLocal(e.calId) ? local.delete(e, scope) : await g.delete(e, scope, notify: notify);
     _days.clear();
     notifyListeners();
   }

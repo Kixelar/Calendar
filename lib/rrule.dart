@@ -95,3 +95,104 @@ class Rule {
         extra: extra,
       );
 }
+
+/// Starts of a series beginning at [start] (local wall time, so daylight saving keeps the hour) that fall in
+/// [from, to), from its RRULE and EXDATE [lines] (calendars on this phone; Google expands its own).
+/// Reads FREQ, INTERVAL, COUNT, UNTIL, BYDAY (plain or "2MO" / "-1FR"), BYMONTHDAY and BYMONTH.
+/// shortcut: EXDATE with a TZID is read as local wall time; fine while files come from the phone's own zone.
+List<DateTime> occurrences(List<String> lines, DateTime start, DateTime from, DateTime to, {bool allDay = false}) {
+  final rule = lines.where((l) => l.startsWith('RRULE:')).firstOrNull;
+  if (rule == null) return [if (!start.isBefore(from) && start.isBefore(to)) start];
+  final p = {for (final part in rule.substring(6).split(';')) if (part.contains('=')) part.split('=')[0]: part.split('=')[1]};
+  final freq = p['FREQ'], interval = int.tryParse(p['INTERVAL'] ?? '') ?? 1, count = int.tryParse(p['COUNT'] ?? '');
+  final until = _icsTime(p['UNTIL']), untilDay = allDay || p['UNTIL']?.length == 8; // a date-only UNTIL counts its whole day
+  const names = ['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU'];
+  // BYDAY entries as (ordinal or 0, weekday 1..7).
+  final byDay = [
+    for (final d in (p['BYDAY'] ?? '').split(',').where((d) => d.length >= 2))
+      (int.tryParse(d.substring(0, d.length - 2)) ?? 0, names.indexOf(d.substring(d.length - 2)) + 1),
+  ];
+  final byMonthDay = [for (final d in (p['BYMONTHDAY'] ?? '').split(',')) ?int.tryParse(d)];
+  final byMonth = [for (final m in (p['BYMONTH'] ?? '').split(',')) ?int.tryParse(m)];
+  final ex = {
+    for (final l in lines.where((l) => l.startsWith('EXDATE')))
+      for (final v in l.substring(l.indexOf(':') + 1).split(','))
+        if (_icsTime(v.trim()) case final t?) (v.trim().length == 8 ? dayKey(t) : t.millisecondsSinceEpoch),
+  };
+  DateTime at(int y, int m, int d) => DateTime(y, m, d, start.hour, start.minute, start.second);
+
+  /// Days of month [m] in year [y] the rule picks (null when the month has none of them).
+  List<DateTime> inMonth(int y, int m) {
+    final last = DateTime(y, m + 1, 0).day;
+    if (byMonthDay.isNotEmpty) {
+      return [for (final d in byMonthDay) if (d.abs() <= last) at(y, m, d > 0 ? d : last + d + 1)];
+    }
+    if (byDay.isNotEmpty) {
+      final out = <DateTime>[];
+      for (final (n, wd) in byDay) {
+        final all = [for (var d = 1; d <= last; d++) if (DateTime(y, m, d).weekday == wd) at(y, m, d)];
+        if (n == 0) {
+          out.addAll(all);
+        } else if (n.abs() <= all.length) {
+          out.add(all[n > 0 ? n - 1 : all.length + n]);
+        }
+      }
+      return out;
+    }
+    return [if (start.day <= last) at(y, m, start.day)];
+  }
+
+  final out = <DateTime>[];
+  var n = 0;
+  for (var k = 0; k < 5000; k++) {
+    final List<DateTime> period;
+    switch (freq) {
+      case 'DAILY':
+        period = [at(start.year, start.month, start.day + k * interval)];
+      case 'WEEKLY':
+        final monday = start.day - start.weekday + 1 + k * 7 * interval;
+        final days = byDay.isEmpty ? [start.weekday] : [for (final (_, wd) in byDay) wd];
+        period = [for (final wd in days.toSet().toList()..sort()) at(start.year, start.month, monday + wd - 1)];
+      case 'MONTHLY':
+        period = inMonth(start.year, start.month + k * interval);
+      case 'YEARLY':
+        final y = start.year + k * interval;
+        period = [
+          for (final m in byMonth.isEmpty ? [start.month] : byMonth)
+            ...(byMonthDay.isEmpty && byDay.isEmpty ? [if (start.day <= DateTime(y, m + 1, 0).day) at(y, m, start.day)] : inMonth(y, m)),
+        ];
+      default:
+        return [if (!start.isBefore(from) && start.isBefore(to)) start];
+    }
+    period.sort();
+    for (final t in period) {
+      if (t.isBefore(start)) continue;
+      if (until != null && (untilDay ? dayKey(t) > dayKey(until) : t.isAfter(until))) return out;
+      if (count != null && n >= count) return out;
+      n++;
+      if (!t.isBefore(to)) return out;
+      if (!t.isBefore(from) && !ex.contains(t.millisecondsSinceEpoch) && !ex.contains(dayKey(t))) out.add(t);
+    }
+  }
+  return out;
+}
+
+/// 20261109 for that day, to compare dates.
+int dayKey(DateTime t) => t.year * 10000 + t.month * 100 + t.day;
+
+/// "20261109", "20261109T100000" (local) or "20261109T090000Z" (UTC) as a local time.
+DateTime? _icsTime(String? v) {
+  if (v == null || v.length < 8) return null;
+  final d = DateTime.tryParse('${v.substring(0, 8)}${v.length > 8 ? v.substring(8) : ''}');
+  return d?.toLocal();
+}
+
+/// The RRULE [line] of a series that started at [first], for a new series starting at [from] ("this and following"):
+/// a COUNT becomes the occurrences still left; UNTIL and everything else stay.
+String continueRule(String line, DateTime first, DateTime from, {bool allDay = false}) {
+  final parts = line.substring(6).split(';');
+  final count = parts.where((p) => p.startsWith('COUNT=')).map((p) => int.tryParse(p.substring(6))).firstOrNull;
+  if (count == null) return line;
+  final left = count - occurrences([line], first, first, from, allDay: allDay).length;
+  return 'RRULE:${[for (final p in parts) p.startsWith('COUNT=') ? 'COUNT=${left < 1 ? 1 : left}' : p].join(';')}';
+}
