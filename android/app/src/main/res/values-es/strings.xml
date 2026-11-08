@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Calendario</string>
+    <string name="widget_month">Mes</string>
+    <string name="widget_today">Hoy</string>
+    <string name="widget_week">Semana</string>
+    <string name="widget_date">Fecha</string>
+    <string name="widget_next">Siguiente</string>
+    <string name="widget_next_small">Siguiente · pequeño</string>
+    <string name="widget_day_small">Fecha · pequeño</string>
+    <string name="widget_clock">Reloj del día</string>
+    <string name="glyph_toy">Cuenta atrás del calendario</string>
+    <string name="glyph_toy_summary">Tiempo hasta el próximo evento</string>
+</resources>

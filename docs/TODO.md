@@ -39,11 +39,9 @@ Screen numbers refer to docs/design/mockup.html; the month, week and day views f
         applications"), strip order top/bottom, the matrix toy and its preview image
 
 ## Stage 5: languages and onboarding (owner, 2026-11-02)
-- [ ] Translate the app into more languages (now Polish and English); the owner picks which. Covers lib/l10n/*.arb,
-      Android strings (launcher name, widget names, Glyph toy) and the widget/notification texts sent from Dart
-- [ ] Onboarding rework with an extra panel to choose the app language (the owner designs the look)
-- [ ] One step indicator on every onboarding panel: the welcome screen (01.1) marks the step with dots, the others
-      say "Step 1 of 3"; the owner decides which style stays
+- [x] 8 languages: Polish, English, German, Spanish, French, Italian, Portuguese, Dutch (2026-11-08, not checked by
+      native speakers); later maybe Czech, Slovak, Swedish, Danish, Finnish, Turkish (owner to decide)
+- [x] Onboarding: language panel first, step bars on every panel instead of "Step 1 of 3", no "Skip" (2026-11-08)
 
 ## At the end
 - [ ] Terms and privacy policy texts, support address; then 05.6 contact rows, 05.8 terms rows, welcome screen caption

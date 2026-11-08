@@ -6,7 +6,6 @@
   "connectGoogle": "Połącz z Google",
   "continueWithout": "Kontynuuj bez konta",
   "back": "Wstecz",
-  "step": "Krok {n} z 3",
   "connectTitle": "Połącz kalendarz Google",
   "weAskFor": "Poprosimy o dostęp do",
   "accessEvents": "Wydarzeń — odczyt i edycja",
@@ -334,5 +333,9 @@
   "onDevice": "Na urządzeniu",
   "onlyThisPhone": "Tylko ten telefon",
   "newCalendarLocalHint": "Tylko na tym telefonie",
-  "onPhone": "Na telefonie"
+  "onPhone": "Na telefonie",
+  "chooseLanguage": "Wybierz język",
+  "phoneLanguage": "Język telefonu",
+  "continueBtn": "Dalej",
+  "language": "Język"
 }

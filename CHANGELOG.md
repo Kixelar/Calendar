@@ -19,6 +19,11 @@
 - "Disconnect Google" keeps the calendars on this phone; "Clear data" removes them too.
 - Settings pages (Appearance, Notifications, Accounts, Data and privacy, Help) no longer repeat "Settings" above their
   title; the back button says it (owner).
+- Onboarding starts with a language panel, and every panel shows the welcome screen's step bars (language, welcome,
+  Google, calendars) instead of "Step 1 of 3".
+- The app is in 8 languages: Polish, English, German, Spanish, French, Italian, Portuguese and Dutch (help articles,
+  notifications and widgets too). Appearance → Language picks one or follows the phone; the launcher and widget names
+  follow the phone's language.
 ### Removed
 - "Skip" on the welcome screen (owner); "Continue without account" stays.
 

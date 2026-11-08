@@ -3,7 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'dart:ui' show Locale, PlatformDispatcher;
+import 'dart:ui' show Locale;
 import 'package:googleapis/calendar/v3.dart' as gcal;
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -46,6 +46,7 @@ class Store extends ChangeNotifier {
 
   // 05.2 / 05.4 settings, kept in SharedPreferences.
   String get theme => _p.getString('theme') ?? 'system'; // dark, light, system
+  String get language => _p.getString('language') ?? 'system'; // a language code, or the phone's language
   int get weekStart => _p.getInt('weekStart') ?? DateTime.monday;
   bool get use24h => _p.getBool('use24h') ?? true;
   bool get weekNumbers => _p.getBool('weekNumbers') ?? false;
@@ -88,7 +89,7 @@ class Store extends ChangeNotifier {
       }();
 
   // Notifications are built outside any widget, so they take the phone's language directly.
-  String get _lang => PlatformDispatcher.instance.locale.languageCode == 'pl' ? 'pl' : 'en';
+  String get _lang => appLang(language);
   AppLocalizations get _l => lookupAppLocalizations(Locale(_lang));
 
   /// Events of the next 8 days from what is loaded, for scheduling reminders.

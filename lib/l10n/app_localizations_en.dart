@@ -29,11 +29,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get back => 'Back';
 
   @override
-  String step(int n) {
-    return 'Step $n of 3';
-  }
-
-  @override
   String get connectTitle => 'Connect Google Calendar';
 
   @override
@@ -1232,4 +1227,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onPhone => 'On phone';
+
+  @override
+  String get chooseLanguage => 'Choose a language';
+
+  @override
+  String get phoneLanguage => 'Phone language';
+
+  @override
+  String get continueBtn => 'Continue';
+
+  @override
+  String get language => 'Language';
 }

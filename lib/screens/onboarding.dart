@@ -6,9 +6,36 @@ import '../store.dart';
 import '../theme.dart';
 import '../ui.dart';
 
-/// Mockup screens 01.1 (welcome), 01.2 (connect Google) and 01.3 (choose calendars).
+/// Mockup screens 01.1 (welcome), 01.2 (connect Google) and 01.3 (choose calendars), after a language panel (owner,
+/// 2026-11-08). Every panel shows the welcome screen's step bars: language, welcome, Google, calendars.
 
-Widget _screen(BuildContext c, {required Widget top, required List<Widget> body, required List<Widget> foot}) => Scaffold(
+/// The app's languages, in their own names; "system" follows the phone.
+const languages = [
+  ('pl', 'Polski'), ('en', 'English'), ('de', 'Deutsch'), ('es', 'Español'),
+  ('fr', 'Français'), ('it', 'Italiano'), ('pt', 'Português'), ('nl', 'Nederlands'),
+];
+
+/// Onboarding step bars (01.1): [step] of 4 lit.
+Widget _bars(BuildContext c, int step) {
+  final t = Tok.of(c);
+  return Align(
+    alignment: Alignment.centerLeft,
+    child: SizedBox(
+      width: 96,
+      child: Row(spacing: 4, children: [
+        for (var i = 0; i < 4; i++)
+          Expanded(
+            child: Container(
+              height: 8,
+              decoration: BoxDecoration(color: i <= step ? t.display : t.dotOff, borderRadius: BorderRadius.circular(2)),
+            ),
+          ),
+      ]),
+    ),
+  );
+}
+
+Widget _screen(BuildContext c, {required Widget top, required List<Widget> body, required List<Widget> foot, int? step}) => Scaffold(
       body: SafeArea(
         child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
           top,
@@ -17,11 +44,41 @@ Widget _screen(BuildContext c, {required Widget top, required List<Widget> body,
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
-            child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, spacing: 8, children: foot),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, spacing: 8, children: [
+              if (step != null) Padding(padding: const EdgeInsets.only(bottom: 16), child: _bars(c, step)),
+              ...foot,
+            ]),
           ),
         ]),
       ),
     );
+
+/// First panel: the app's language. A choice applies at once.
+class Language extends StatelessWidget {
+  const Language(this.store, {super.key});
+  final Store store;
+
+  @override
+  Widget build(BuildContext context) => ListenableBuilder(
+        listenable: store,
+        builder: (context, _) {
+          final t = Tok.of(context), l = l10n(context);
+          Widget row(String code, String name) => RowItem(onTap: () => store.set('language', code), children: [
+                Expanded(child: Text(name)),
+                if (store.language == code) Icon(Icons.check, size: 20, color: t.display),
+              ]);
+          return _screen(context, top: const SizedBox(height: 56), step: 0, body: [
+            _head(context, l.appTitle, l.chooseLanguage),
+            Group(children: [
+              row('system', l.phoneLanguage),
+              for (final (code, name) in languages) row(code, name),
+            ]),
+          ], foot: [
+            Btn(l.continueBtn, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => Welcome(store)))),
+          ]);
+        },
+      );
+}
 
 Widget _head(BuildContext c, String? over, String title) => Padding(
       padding: const EdgeInsets.only(top: 24),
@@ -59,18 +116,7 @@ class Welcome extends StatelessWidget {
                     Text(l.welcomeBody, style: T.body(t.secondary)),
                   ]),
                 ),
-                SizedBox(
-                  width: 96,
-                  child: Row(spacing: 4, children: [
-                    for (var i = 0; i < 3; i++)
-                      Expanded(
-                        child: Container(
-                          height: 8,
-                          decoration: BoxDecoration(color: i == 0 ? t.display : t.dotOff, borderRadius: BorderRadius.circular(2)),
-                        ),
-                      ),
-                  ]),
-                ),
+                _bars(context, 1),
               ]),
             ),
           ),
@@ -78,7 +124,10 @@ class Welcome extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
             child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, spacing: 8, children: [
               Btn(l.connectGoogle, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => Connect(store)))),
-              Btn(l.continueWithout, kind: BtnKind.text, onTap: store.finishOnboarding),
+              Btn(l.continueWithout, kind: BtnKind.text, onTap: () {
+                Navigator.of(context).popUntil((r) => r.isFirst); // the language panel is under this one
+                store.finishOnboarding();
+              }),
             ]),
           ),
         ]),
@@ -120,8 +169,8 @@ class _ConnectState extends State<Connect> {
           Icon(i, size: 20, color: ok ? t.display : t.secondary),
           Expanded(child: Text(s, style: T.body(ok ? t.primary : t.secondary))),
         ]);
-    return _screen(context, top: const BackBar(), body: [
-      _head(context, l.step(1), l.connectTitle),
+    return _screen(context, top: const BackBar(), step: 2, body: [
+      _head(context, null, l.connectTitle),
       Section(left: l.weAskFor, children: [
         item(Icons.check, l.accessEvents, true),
         item(Icons.check, l.accessCalendars, true),
@@ -155,12 +204,12 @@ class Choose extends StatelessWidget {
               Expanded(child: Text(c.name, maxLines: 1, overflow: TextOverflow.ellipsis)),
               Toggle(value: c.on, label: c.name, onChanged: (v) => store.toggle(c, v)),
             ]);
-        final own = store.cals.where((c) => !c.shared && !c.holiday);
+        final own = store.cals.where((c) => !c.shared && !c.holiday && !store.isLocal(c.id));
         final shared = store.cals.where((c) => c.shared);
         final holidays = store.cals.where((c) => c.holiday);
         final n = store.cals.where((c) => c.on).length;
-        return _screen(context, top: const BackBar(), body: [
-          _head(context, onboarding ? l.step(2) : null, onboarding ? l.chooseTitle : l.calendars),
+        return _screen(context, top: const BackBar(), step: onboarding ? 3 : null, body: [
+          _head(context, null, onboarding ? l.chooseTitle : l.calendars),
           Section(
             left: 'Google',
             trailing: Text(store.email ?? '', style: T.caption(Tok.of(context).secondary)),
@@ -194,7 +243,7 @@ class _SyncingState extends State<Syncing> {
   final _count = <String, int>{}; // calendar id -> events fetched
   final _failed = <String>{};
   final _watch = Stopwatch();
-  late final _list = [for (final c in widget.store.cals) if (c.on) c];
+  late final _list = [for (final c in widget.store.cals) if (c.on && !widget.store.isLocal(c.id)) c]; // phone ones need no fetch
   int _current = 0;
   bool _finished = false;
 
@@ -248,7 +297,7 @@ class _SyncingState extends State<Syncing> {
                 ? t.display
                 : t.secondary;
     return _screen(context, top: const SizedBox(height: 56), body: [
-      _head(context, l.step(3), l.syncing),
+      _head(context, null, l.syncing),
       const SizedBox(height: 40),
       Row(crossAxisAlignment: CrossAxisAlignment.end, spacing: 16, children: [
         Text('$events', style: T.displayXl(t.display)),

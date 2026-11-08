@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Agenda</string>
+    <string name="widget_month">Maand</string>
+    <string name="widget_today">Vandaag</string>
+    <string name="widget_week">Week</string>
+    <string name="widget_date">Datum</string>
+    <string name="widget_next">Hierna</string>
+    <string name="widget_next_small">Hierna · klein</string>
+    <string name="widget_day_small">Datum · klein</string>
+    <string name="widget_clock">Dagklok</string>
+    <string name="glyph_toy">Agenda-aftellen</string>
+    <string name="glyph_toy_summary">Tijd tot de volgende afspraak</string>
+</resources>

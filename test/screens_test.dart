@@ -721,7 +721,8 @@ void main() {
       await t.pumpWidget(const SizedBox());
     }
 
-    testWidgets('welcome', (t) => shot(t, '01_1_welcome', onboarded: false));
+    testWidgets('language', (t) => shot(t, '01_0_language', onboarded: false));
+    testWidgets('welcome', (t) => shot(t, '01_1_welcome', onboarded: false, page: (s) => Welcome(s)));
     testWidgets('syncing', (t) async {
       final store = Store(_FakeGoogle(), Directory.systemTemp.createTempSync());
       await t.runAsync(store.start);
@@ -792,6 +793,14 @@ void main() {
     testWidgets('shared with you', (t) => shot(t, '04_5_shared_with_you', page: (s) => SharedWithYou(s, s.cal('ola.zielinska@gmail.com')!)));
     testWidgets('settings', (t) => shot(t, '05_1_settings', page: (s) => Settings(s, backLabel: 'Miesiąc')));
     testWidgets('appearance', (t) => shot(t, '05_2_appearance', page: (s) => Appearance(s)));
+    // Every language: the screens with the longest labels, to catch text that does not fit.
+    for (final lang in ['de', 'es', 'fr', 'it', 'pt', 'nl']) {
+      testWidgets('home $lang', (t) => shot(t, 'lang_${lang}_home', prefs: {'language': lang}));
+      testWidgets('new event $lang', (t) => shot(t, 'lang_${lang}_event', prefs: {'language': lang}, page: (s) => EventEdit(s)));
+      testWidgets('settings $lang', (t) => shot(t, 'lang_${lang}_settings', prefs: {'language': lang}, page: (s) => Settings(s, backLabel: 'x')));
+      testWidgets('notifications $lang', (t) => shot(t, 'lang_${lang}_notify', prefs: {'language': lang}, page: (s) => Notifications(s)));
+      testWidgets('language $lang', (t) => shot(t, 'lang_${lang}_onboarding', onboarded: false, prefs: {'language': lang}));
+    }
     testWidgets('notifications', (t) => shot(t, '05_3_notifications', page: (s) => Notifications(s)));
     testWidgets('notifications on a phone with Glyph lights', (t) async {
       const channel = MethodChannel('calendar/device');

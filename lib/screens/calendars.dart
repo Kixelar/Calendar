@@ -470,7 +470,7 @@ class Holidays extends StatelessWidget {
   Widget build(BuildContext context) => ListenableBuilder(
         listenable: store,
         builder: (context, _) {
-          final t = Tok.of(context), l = l10n(context), lang = loc(context).startsWith('pl') ? 'pl' : 'en';
+          final t = Tok.of(context), l = l10n(context), lang = Localizations.localeOf(context).languageCode;
           final now = DateTime.now(), today = dayOf(now);
           final mine = [for (final c in store.cals) if (c.holiday) c];
           int count(Cal c) {

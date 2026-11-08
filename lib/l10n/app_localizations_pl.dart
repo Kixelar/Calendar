@@ -29,11 +29,6 @@ class AppLocalizationsPl extends AppLocalizations {
   String get back => 'Wstecz';
 
   @override
-  String step(int n) {
-    return 'Krok $n z 3';
-  }
-
-  @override
   String get connectTitle => 'Połącz kalendarz Google';
 
   @override
@@ -1245,4 +1240,16 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get onPhone => 'Na telefonie';
+
+  @override
+  String get chooseLanguage => 'Wybierz język';
+
+  @override
+  String get phoneLanguage => 'Język telefonu';
+
+  @override
+  String get continueBtn => 'Dalej';
+
+  @override
+  String get language => 'Język';
 }

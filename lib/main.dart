@@ -65,6 +65,7 @@ class App extends StatelessWidget {
         onGenerateTitle: (c) => AppLocalizations.of(c)!.appTitle,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
+        locale: store.ready && store.language != 'system' ? Locale(store.language) : null,
         theme: buildTheme(Brightness.light),
         darkTheme: buildTheme(Brightness.dark),
         builder: (context, child) => Lock(store, child: child!),
@@ -73,7 +74,7 @@ class App extends StatelessWidget {
             ? const Scaffold()
             : store.onboarded
                 ? Home(store)
-                : Welcome(store),
+                : Language(store),
       );
       });
 }

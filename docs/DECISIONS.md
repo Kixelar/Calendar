@@ -68,3 +68,9 @@
   id is "local:" + Google's holiday id (so `holidayCode` still works); address subscriptions into a phone calendar
   listed in `subs`. Both are copied whole on each change (`LocalCalendar.replaceEvents`) and refreshed hourly when the
   app opens (no background job without an account).
+- **Languages** (owner, 2026-11-08): pl, en, de, es, fr, it, pt, nl (Latin script, simple to translate without a check;
+  other scripts would need fonts). Setting `language` ("system" or a code) drives `MaterialApp.locale`, notifications,
+  widgets and Google holiday names (`appLang` in notify.dart). Android resources (launcher, widget and Glyph toy names)
+  follow the phone's language only. Holiday calendars keep the language they were added in.
+- **Onboarding** (owner, 2026-11-08): language panel → welcome → connect Google → choose calendars, with the welcome
+  screen's 4 step bars on each; the sync screen has none. "Skip" removed.

@@ -3,6 +3,7 @@ import 'dart:ui';
 
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest.dart' as tzdata;
 import 'package:timezone/timezone.dart' as tz;
 
@@ -180,12 +181,18 @@ class Notifier {
   }
 }
 
+/// The app's language code: the one chosen in Appearance, or the phone's when the app has it, else English.
+String appLang(String? setting) {
+  final want = setting == null || setting == 'system' ? PlatformDispatcher.instance.locale.languageCode : setting;
+  return AppLocalizations.supportedLocales.any((l) => l.languageCode == want) ? want : 'en';
+}
+
 /// "Snooze 5 min" works without opening the app: shows the same reminder again in five minutes.
 @pragma('vm:entry-point')
 Future<void> notificationTapBackground(NotificationResponse r) async {
   if (r.actionId != _snooze || r.payload == null || r.payload!.isEmpty) return;
   final j = jsonDecode(r.payload!) as Map;
-  final l = lookupAppLocalizations(PlatformDispatcher.instance.locale.languageCode == 'pl' ? const Locale('pl') : const Locale('en'));
+  final l = lookupAppLocalizations(Locale(appLang((await SharedPreferences.getInstance()).getString('language'))));
   tzdata.initializeTimeZones();
   final p = FlutterLocalNotificationsPlugin();
   await p.initialize(settings: const InitializationSettings(android: AndroidInitializationSettings('ic_notification')));

@@ -10,7 +10,8 @@
 - 05 settings: hub, appearance, notifications, accounts and sync, data and privacy, help + articles, about.
 - 06 states: empty day, delete (one / following / all), edit conflict.
 - 07 widgets (7 sizes, dark/light) and notifications (reminders, all-day, daily summary, invitations, shared changes).
-- Offline cache, own signing key, mockup fonts, Polish and English, launcher name per device language.
+- Offline cache, own signing key, mockup fonts, 8 languages (pl, en, de, es, fr, it, pt, nl; chosen in onboarding or Appearance), launcher
+  and widget names per device language.
 - Confirmed on the owner's phone: sign-in, silent restore, event create/edit/delete incl. repeating (2026-10-30/31).
 - Tests: `flutter test` (logic: day index, ISO weeks, RRULE, delete-following, cache, notification plan, marquee) and
   PNG renders of every screen (`CAL_SHOTS`).
@@ -50,7 +51,7 @@
 - Gradle/Java does not run in Claude's sandbox: build APKs in the owner's terminal (docs/WORKFLOW.md), and run
   `flutter pub get` there after adding packages (different pub cache).
 - Build numbers must keep growing: 30000000 + minutes since 2026-01-01 UTC, and never below the last one sent
-  (30448838 on 2026-11-08).
+  (30448862 on 2026-11-08).
 - `google_sign_in` 7.x gives no refresh token: always get the token through `GoogleCalendar._authorize` before an API call.
 - Builds are signed with the app's own key in `<keystore folder>/` (docs/WORKFLOW.md); its SHA-1 is in the Android OAuth client.
 - ARB files: append keys as text; re-dumping them with a JSON tool reformats the whole file.

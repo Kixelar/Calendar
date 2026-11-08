@@ -123,6 +123,16 @@ class Appearance extends StatelessWidget {
             Section(left: l.theme, children: [
               seg(context, [('dark', l.themeDark), ('light', l.themeLight), ('system', l.themeSystem)], store.theme, (v) => store.set('theme', v)),
             ]),
+            Group(children: [
+              ValueRow(l.language, value: languages.where((x) => x.$1 == store.language).firstOrNull?.$2 ?? l.phoneLanguage, onTap: () async {
+                final p = await pick<String>(context, Pick(
+                  title: l.language,
+                  selected: store.language,
+                  options: [('system', l.phoneLanguage), ...languages],
+                ));
+                if (p != null) await store.set('language', p.$1);
+              }),
+            ]),
             Section(left: l.calendar, children: [
               ValueRow(l.firstDay, value: dayName(store.weekStart), onTap: () async {
                 final p = await pick<int>(context, Pick(

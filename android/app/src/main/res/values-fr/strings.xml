@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Agenda</string>
+    <string name="widget_month">Mois</string>
+    <string name="widget_today">Aujourd’hui</string>
+    <string name="widget_week">Semaine</string>
+    <string name="widget_date">Date</string>
+    <string name="widget_next">À venir</string>
+    <string name="widget_next_small">À venir · petit</string>
+    <string name="widget_day_small">Date · petit</string>
+    <string name="widget_clock">Horloge du jour</string>
+    <string name="glyph_toy">Compte à rebours</string>
+    <string name="glyph_toy_summary">Temps avant le prochain événement</string>
+</resources>
