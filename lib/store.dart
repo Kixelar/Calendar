@@ -169,9 +169,10 @@ class Store extends ChangeNotifier {
     await _p.setString('bgResult', result);
   }
 
-  /// Fetches the current year now and waits for it (background sync job).
+  /// Brings the cached events up to date and waits for it (background sync job).
   Future<void> syncNow() async {
     await refreshSubscriptions();
+    await _sync();
     await _load(DateTime.now().year);
   }
 
@@ -335,8 +336,7 @@ class Store extends ChangeNotifier {
         return await _lostAccess();
       }
       await loadCalendars();
-      _days.clear(); // refetch the years already shown from the cache
-      notifyListeners();
+      await _sync(); // only calendars that changed since the last run are fetched again
     } catch (e) {
       error = '$e'; // offline: keep showing the cache
       notifyListeners();
@@ -409,6 +409,13 @@ class Store extends ChangeNotifier {
 
   Future<void> toggle(Cal c, bool on) async {
     c.on = on;
+    // A calendar switched back on missed changes while it was off: fetch it whole again.
+    if (on && !isLocal(c.id)) {
+      await _setTokens({..._tokens}..remove(c.id));
+      for (final y in _cachedYears) {
+        if (_yearOf(_read('events_$y')) case final y0?) _writeYear(y, y0.evs, y0.cals.difference({c.id}));
+      }
+    }
     await _p.setStringList('calendars', [for (final c in cals) if (c.on) c.id]);
     _write('calendars', [for (final c in cals) if (!isLocal(c.id)) c.toJson()]);
     _days.clear();
@@ -437,10 +444,85 @@ class Store extends ChangeNotifier {
     return [for (final e in evs) if (on.contains(e.calId) && (showDeclined || e.me?.status != 'declined')) e];
   }
 
-  /// Stores a freshly fetched year in memory and on disk (also used by the 01.4 sync screen).
-  void putYear(int year, List<Ev> evs) {
+  /// Stores a freshly fetched year of Google events in memory and on disk (also used by the 01.4 sync screen), with
+  /// the ids of the calendars it holds ([fetched], default: the shown ones).
+  void putYear(int year, List<Ev> evs, {Set<String>? fetched}) {
     _days[year] = indexByDay(_visible([...evs, ..._localYear(year)]), year);
-    _write('events_$year', [for (final e in evs) e.toJson()]);
+    _writeYear(year, evs, fetched ?? {for (final c in _toFetch) c.id});
+    notifyListeners();
+  }
+
+  // Incremental sync: per Google calendar a sync token (Google's "what changed since"), and per cached year the
+  // calendars it was fetched for. A year is fetched again only for calendars that changed or it does not have yet.
+  Map<String, String> get _tokens => {...?(jsonDecode(_p.getString('syncTokens') ?? '{}') as Map?)?.cast<String, String>()};
+  Future<void> _setTokens(Map<String, String> t) => _p.setString('syncTokens', jsonEncode(t));
+
+  /// Google events of a cached year and the calendars they were fetched for (none known: a cache from before).
+  ({List<Ev> evs, Set<String> cals})? _yearOf(Object? json) => switch (json) {
+        {'cals': final List c, 'events': final List e} =>
+          (evs: [for (final x in e) Ev.fromJson((x as Map).cast())], cals: {for (final x in c) x as String}),
+        final List e => (evs: [for (final x in e) Ev.fromJson((x as Map).cast())], cals: <String>{}),
+        _ => null,
+      };
+
+  void _writeYear(int year, List<Ev> evs, Set<String> cals) =>
+      _write('events_$year', {'cals': cals.toList(), 'events': [for (final e in evs) e.toJson()]});
+
+  /// Years with a cache file.
+  List<int> get _cachedYears => [
+        for (final f in _dir?.listSync().whereType<File>() ?? const <File>[])
+          if (RegExp(r'events_(\d+)\.json$').firstMatch(f.path) case final m?) int.parse(m[1]!),
+      ];
+
+  /// Gets tokens for [cs] that have none yet, before their events are fetched (so later changes are not missed).
+  Future<void> track(List<Cal> cs) async {
+    final t = _tokens;
+    for (final c in cs.where((c) => !t.containsKey(c.id))) {
+      if ((await g.changes(c.id, null)).$2 case final tok?) t[c.id] = tok;
+    }
+    await _setTokens(t);
+  }
+
+  /// Asks Google which shown calendars ([only]: just these) changed and fetches only those again, for the years in
+  /// memory and the current one; other cached years forget them, so they are fetched when opened. Then reminders,
+  /// invitations and widgets follow the current year (also when nothing changed: time moves on).
+  Future<void> _sync({Set<String>? only}) async {
+    if (!signedIn) return;
+    final t = _tokens, changed = <Cal>[];
+    for (final c in _toFetch.where((c) => only == null || only.contains(c.id))) {
+      final (did, tok) = await g.changes(c.id, t[c.id]);
+      if (tok != null) t[c.id] = tok;
+      if (did) changed.add(c);
+    }
+    await _setTokens(t);
+    final now = DateTime.now().year, ids = {for (final c in changed) c.id};
+    if (changed.isNotEmpty) {
+      for (final y in {..._cachedYears, ..._days.keys, now}) {
+        final c = _yearOf(await _readAsync('events_$y'));
+        if (_days.containsKey(y) || y == now) {
+          final evs = await g.events(changed, DateTime(y), DateTime(y + 1));
+          putYear(y, [...?c?.evs.where((e) => !ids.contains(e.calId)), ...evs], fetched: {...?c?.cals, ...ids});
+        } else if (c != null) {
+          _writeYear(y, c.evs, c.cals.difference(ids));
+        }
+      }
+    }
+    error = null; // Google answered
+    await _p.reload();
+    final previous = lastSync;
+    await _p.setInt('lastSync', DateTime.now().millisecondsSinceEpoch);
+    await _afterSync(_yearOf(await _readAsync('events_$now'))?.evs ?? const [], previous);
+    notifyListeners();
+  }
+
+  /// After a write to Google: fetch what changed in those calendars (usually just the edited event's calendar).
+  Future<void> _afterWrite(Set<String> calIds) async {
+    try {
+      await _sync(only: calIds);
+    } catch (e) {
+      error = '$e';
+      _days.clear(); // the next view reads the cache and fetches what it lacks
+    }
     notifyListeners();
   }
 
@@ -454,23 +536,34 @@ class Store extends ChangeNotifier {
     return y[dayOf(day)] ?? const [];
   }
 
+  /// Shows a year from its cache and fetches from Google only the calendars the cache lacks or that are not tracked
+  /// yet (a year never opened: all of them). Keeping cached years current is [_sync]'s job.
   Future<void> _load(int year) async {
     if (!_loading.add(year)) return;
     // Read asynchronously: on() runs during build, so nothing here may notify before the first await.
-    if (await _readAsync('events_$year') case final List cached when signedIn) {
-      _days[year] = indexByDay(_visible([for (final e in cached) Ev.fromJson((e as Map).cast()), ..._localYear(year)]), year);
+    final cached = signedIn ? _yearOf(await _readAsync('events_$year')) : null;
+    if (cached != null) {
+      _days[year] = indexByDay(_visible([...cached.evs, ..._localYear(year)]), year);
       notifyListeners();
     }
     if (signedIn) {
       try {
-        final evs = await g.events(_toFetch, DateTime(year), DateTime(year + 1));
-        putYear(year, evs);
-        error = null;
-        if (year == DateTime.now().year) {
-          await _p.reload();
-          final previous = lastSync;
-          await _p.setInt('lastSync', DateTime.now().millisecondsSinceEpoch);
-          await _afterSync(evs, previous);
+        final tokens = _tokens;
+        final need = [for (final c in _toFetch) if (cached == null || !cached.cals.contains(c.id) || !tokens.containsKey(c.id)) c];
+        if (need.isNotEmpty) {
+          await track(need);
+          final ids = {for (final c in need) c.id};
+          final evs = await g.events(need, DateTime(year), DateTime(year + 1));
+          putYear(year, [...?cached?.evs.where((e) => !ids.contains(e.calId)), ...evs], fetched: {...?cached?.cals, ...ids});
+          error = null;
+          if (year == DateTime.now().year) {
+            await _p.reload();
+            final previous = lastSync;
+            await _p.setInt('lastSync', DateTime.now().millisecondsSinceEpoch);
+            await _afterSync(_yearOf(await _readAsync('events_$year'))!.evs, previous);
+          }
+        } else if (year == DateTime.now().year) {
+          await reschedule();
         }
       } catch (e) {
         error = '$e';
@@ -481,6 +574,7 @@ class Store extends ChangeNotifier {
       _days[year] = indexByDay(_visible(_localYear(year)), year);
       if (year == DateTime.now().year) await reschedule();
     }
+    _days[year] ??= indexByDay(_visible(_localYear(year)), year); // nothing cached and nothing to fetch (all hidden)
     _loading.remove(year);
     notifyListeners();
   }
@@ -494,8 +588,8 @@ class Store extends ChangeNotifier {
     for (var y = now.year - 2; y <= now.year + 2; y++) {
       final Iterable<Ev> evs = _days[y] != null
           ? {for (final d in _days[y]!.values) ...d}
-          : switch (await _readAsync('events_$y')) {
-              final List cached when signedIn => _visible([for (final e in cached) Ev.fromJson((e as Map).cast()), ..._localYear(y)]),
+          : switch (signedIn ? _yearOf(await _readAsync('events_$y')) : null) {
+              final cached? => _visible([...cached.evs, ..._localYear(y)]),
               _ => _visible(_localYear(y)),
             };
       for (final e in evs) {
@@ -567,7 +661,7 @@ class Store extends ChangeNotifier {
       }
       progress(i + 1);
     }
-    _days.clear();
+    isLocal(calId) ? _days.clear() : await _afterWrite({calId});
     notifyListeners();
     return failed;
   }
@@ -587,7 +681,7 @@ class Store extends ChangeNotifier {
     isLocal(e.calId)
         ? local.save(e, fromCal: fromCal, timeZone: await timeZone())
         : await g.save(e, fromCal: fromCal, timeZone: await timeZone(), force: force);
-    _days.clear();
+    isLocal(e.calId) ? _days.clear() : await _afterWrite({e.calId, ?fromCal});
     notifyListeners();
   }
 
@@ -780,7 +874,7 @@ class Store extends ChangeNotifier {
     isLocal(e.calId)
         ? local.saveSeries(e, scope, originalStart: originalStart, timeZone: await timeZone())
         : await g.saveSeries(e, scope, originalStart: originalStart, timeZone: await timeZone());
-    _days.clear();
+    isLocal(e.calId) ? _days.clear() : await _afterWrite({e.calId});
     notifyListeners();
   }
 
@@ -790,8 +884,7 @@ class Store extends ChangeNotifier {
 
   Future<void> respond(Ev e, String status) async {
     await g.respond(e, status);
-    _days.clear();
-    notifyListeners();
+    await _afterWrite({e.calId});
   }
 
   /// Everyone who appeared as a guest in loaded events, for invite suggestions (03.4).
@@ -811,15 +904,19 @@ class Store extends ChangeNotifier {
 
   Future<void> delete(Ev e, DeleteScope scope, {required bool notify}) async {
     isLocal(e.calId) ? local.delete(e, scope) : await g.delete(e, scope, notify: notify);
-    _days.clear();
+    isLocal(e.calId) ? _days.clear() : await _afterWrite({e.calId});
     notifyListeners();
   }
 
+  /// Pull to refresh, automatic and "Sync now": fetches only what changed in Google (and subscriptions when due).
   Future<void> refresh() async {
-    _days.clear();
     try {
-      if (signedIn) await loadCalendars();
       await refreshSubscriptions();
+      if (signedIn) {
+        await loadCalendars();
+        await _sync();
+      }
+      if (!signedIn) _days.clear(); // phone only: rebuild from the phone's calendars
     } catch (e) {
       error = '$e'; // offline pull-to-refresh: the cache stays on screen
     }

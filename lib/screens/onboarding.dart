@@ -259,6 +259,7 @@ class _SyncingState extends State<Syncing> {
     for (final (i, c) in _list.indexed) {
       if (mounted) setState(() => _current = i);
       try {
+        await store.track([c]); // from here on later syncs ask Google only for changes
         final evs = await store.g.events([c], DateTime(year), DateTime(year + 1));
         all.addAll(evs);
         _count[c.id] = evs.length;

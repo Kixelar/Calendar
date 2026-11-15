@@ -59,7 +59,7 @@
 - adb over Wi-Fi (wireless debugging) finds the phone only when adb runs outside Claude's sandbox; inside it the mDNS
   list stays empty.
 - Build numbers must keep growing: 30000000 + minutes since 2026-01-01 UTC, and never below the last one sent
-  (30458561 on 2026-11-15).
+  (30458588 on 2026-11-15).
 - `google_sign_in` 7.x gives no refresh token: always get the token through `GoogleCalendar._authorize` before an API call.
 - Builds are signed with the app's own key in `<keystore folder>/` (docs/WORKFLOW.md); its SHA-1 is in the Android OAuth client.
 - ARB files: append keys as text; re-dumping them with a JSON tool reformats the whole file.

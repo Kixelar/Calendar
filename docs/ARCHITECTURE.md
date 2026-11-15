@@ -44,10 +44,19 @@ test/screens_test.dart   Logic tests + PNG renders of screens with a fake Google
    (`indexByDay`; multi-day events appear on every day they touch). Until then `on()` returns `null` (spinner).
 3. Pull-to-refresh or toggling a calendar clears the in-memory index.
 
-## Offline cache
-`Store` keeps `calendars.json` and `events_<year>.json` in the app support folder (`path_provider`). On start the
-saved calendars are shown at once; each year is first read from its file (asynchronously: `on()` runs during build)
-and then refetched from Google, which rewrites the file. Without internet the files stay on screen and `error` is set.
+## Offline cache and incremental sync
+`Store` keeps `calendars.json` and `events_<year>.json` (`{cals: [...], events: [...]}`: the Google events of that year
+and the calendars they were fetched for) in the app support folder (`path_provider`). On start the saved calendars are
+shown at once and each year is read from its file (asynchronously: `on()` runs during build).
+
+Keeping it current (`Store._sync`): per Google calendar the app keeps a sync token (`syncTokens` preference) and asks
+`GoogleCalendar.changes` whether anything changed since (events.list with `syncToken`, ids only; 410 → a new token and
+a full fetch). Only changed calendars are fetched again (`events.list` with `singleEvents`, so Google still expands
+repeats), for the years in memory and the current one; other cached years drop them from `cals`, so `_load` fetches
+them when opened. `_load` fetches only calendars a year's cache lacks or that have no token yet (getting the token
+first, `track`). Runs on start, pull to refresh, automatic and background sync, and after every write to Google (only
+that calendar). Switching a calendar on drops its token and its place in cached years. Without internet the files stay
+on screen and `error` is set.
 If Google says access is gone (`restore()` returns false) the app goes back to the welcome screen.
 The `google` preference marks a signed-in install (older installs: a saved calendar list).
 

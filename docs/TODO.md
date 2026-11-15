@@ -45,6 +45,12 @@ Screen numbers refer to docs/design/mockup.html; the month, week and day views f
       native speakers); later maybe Czech, Slovak, Swedish, Danish, Finnish, Turkish (owner to decide)
 - [x] Onboarding: language panel first, step bars on every panel instead of "Step 1 of 3", no "Skip" (2026-11-08)
 
+## Lighter on the API (owner, 2026-11-15)
+- [x] Incremental sync with sync tokens: fetch only calendars that changed (2026-11-15)
+- [ ] After a save, put Google's returned event in place instead of fetching that calendar's year
+- [ ] `fields` on event lists (smaller answers); calendar list less often
+- [ ] Measure start time and scrolling on the phone (profile build)
+
 ## At the end
 - [ ] Terms and privacy policy texts, support address; then 05.6 contact rows, 05.8 terms rows, welcome screen caption
 - [ ] First release: merge `dev` into `main`, tag, GitHub Release (only when the owner says so)

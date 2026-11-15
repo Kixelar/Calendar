@@ -313,6 +313,28 @@ class GoogleCalendar {
     }
   }
 
+  /// Whether [calId] changed since [token] (Google's incremental sync), and the token for next time. Without a token
+  /// (or when Google expired it, 410) it only fetches a new one and reports a change, so the caller fetches everything.
+  /// Asks for ids only: an unchanged calendar costs one tiny request.
+  Future<(bool, String?)> changes(String calId, String? token) async {
+    await _authorize(interactive: false);
+    var changed = token == null;
+    String? page, next;
+    try {
+      do {
+        final r = await _api!.events.list(calId,
+            syncToken: token, pageToken: page, maxResults: 2500, $fields: 'nextPageToken,nextSyncToken,items(id)');
+        if (token != null && (r.items?.isNotEmpty ?? false)) changed = true;
+        page = r.nextPageToken;
+        next = r.nextSyncToken;
+      } while (page != null);
+    } on gcal.DetailedApiRequestError catch (e) {
+      if (e.status != 410 || token == null) rethrow;
+      return changes(calId, null);
+    }
+    return (changed, next);
+  }
+
   /// Events of [cals] that overlap [from, to), recurring events expanded.
   Future<List<Ev>> events(List<Cal> cals, DateTime from, DateTime to) => _list(cals, from, to);
 

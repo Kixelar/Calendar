@@ -90,6 +90,7 @@ class _FakeGoogle extends GoogleCalendar {
       ];
   @override
   Future<List<Ev>> events(List<Cal> cals, DateTime from, DateTime to) async {
+    fetched.addAll([for (final c in cals) '${c.id}@${from.year}']);
     final d = dayOf(DateTime.now());
     DateTime at(int day, double h) => DateTime(d.year, d.month, d.day + day, h.floor(), ((h % 1) * 60).round());
     final evs = [
@@ -106,6 +107,19 @@ class _FakeGoogle extends GoogleCalendar {
       for (var i = -40; i < 60; i += 3) Ev(_s('Spotkanie', 'Meeting'), 'w', at(i, 9), at(i, 10 + i % 4)),
     ];
     return evs.where((e) => e.start.isBefore(to) && e.end.isAfter(from)).toList()..sort((a, b) => a.start.compareTo(b.start));
+  }
+
+  @override
+  Future<void> respond(Ev e, String status) async {}
+
+  /// Google's incremental sync, faked: a calendar has changed when its [version] moved past the token.
+  final version = <String, int>{};
+  final changeCalls = <String>[], fetched = <String>[];
+  @override
+  Future<(bool, String?)> changes(String calId, String? token) async {
+    changeCalls.add(calId);
+    final v = '${version[calId] ?? 0}';
+    return (token != v, v);
   }
 
   @override
@@ -176,6 +190,8 @@ class _LimitedSubGoogle extends _SubGoogle {
 class _OfflineGoogle extends GoogleCalendar {
   @override
   Future<bool> restore({bool silentOnly = false}) async => throw const SocketException('offline');
+  @override
+  Future<(bool, String?)> changes(String calId, String? token) async => throw const SocketException('offline');
   @override
   Future<List<Ev>> events(List<Cal> cals, DateTime from, DateTime to) async => throw const SocketException('offline');
 }
@@ -420,6 +436,59 @@ void main() {
     expect(again.cals.map((c) => c.name), ['My calendar', 'Dom']);
     await again.forget(); // 05.5 clear data
     expect(again.cals, isEmpty);
+  });
+
+  test('incremental sync: Google is asked what changed, and only changed calendars are fetched again', () async {
+    SharedPreferences.setMockInitialValues({'onboarded': true, 'google': true});
+    final dir = Directory.systemTemp.createTempSync();
+    final now = DateTime.now().year;
+    // An old cache (plain list, before sync tokens) must be fetched again in full.
+    File('${dir.path}/events_${now - 1}.json').writeAsStringSync('[]');
+    final g = _FakeGoogle();
+    final store = Store(g, dir);
+    await store.start();
+    final shown = {for (final c in store.cals) if (c.on) c.id}; // p, w, f, ola, h (design is hidden)
+    expect({for (final f in g.fetched) f.substring(0, f.lastIndexOf('@'))}, shown); // first start: everything once
+    expect(g.fetched.every((f) => f.endsWith('@$now')), isTrue);
+
+    g.fetched.clear();
+    await store.refresh(); // nothing changed in Google
+    expect(g.fetched, isEmpty);
+    expect(g.changeCalls.toSet(), shown);
+
+    store.on(DateTime(now - 1, 6)); // last year: its old cache knows no calendars, so all are fetched
+    await Future<void>.delayed(const Duration(milliseconds: 50));
+    expect(g.fetched.toSet(), {for (final id in shown) '$id@${now - 1}'});
+
+    g.fetched.clear();
+    g.version['w'] = 1; // someone edits the Work calendar
+    await store.refresh();
+    expect(g.fetched.toSet(), {'w@$now', 'w@${now - 1}'}); // both years in memory, Work only
+
+    // After a write only that calendar is asked, and fetched only if Google reports a change.
+    g.fetched.clear();
+    g.changeCalls.clear();
+    await store.respond(_invitation(), 'accepted');
+    expect(g.changeCalls, ['p']);
+    expect(g.fetched, isEmpty);
+
+    // A new run (nothing in memory): a changed calendar is dropped from other cached years and fetched when opened.
+    final again = Store(g, dir);
+    await again.start();
+    g.fetched.clear();
+    g.version['f'] = 1;
+    await again.refresh();
+    expect(g.fetched, ['f@$now']); // current year at once
+    again.on(DateTime(now - 1, 6));
+    await Future<void>.delayed(const Duration(milliseconds: 50));
+    expect(g.fetched, ['f@$now', 'f@${now - 1}']); // last year when opened, only Family
+
+    // A calendar switched on is fetched (it missed its changes while hidden).
+    g.fetched.clear();
+    await again.toggle(again.cal('design')!, true);
+    again.on(DateTime(now, 6));
+    await Future<void>.delayed(const Duration(milliseconds: 50));
+    expect(g.fetched, ['design@$now']);
   });
 
   test('repeat rules expand into occurrences', () {
