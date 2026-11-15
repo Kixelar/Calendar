@@ -6,6 +6,7 @@
   <img src="https://img.shields.io/badge/version-2026.11.08--dev-000000?style=flat-square" alt="Version 2026.11.08-dev">
   <img src="https://img.shields.io/badge/languages-8-000000?style=flat-square" alt="8 languages">
   <img src="https://img.shields.io/badge/server-none-D71921?style=flat-square" alt="No server">
+  <img src="https://img.shields.io/badge/license-GPL--3.0-000000?style=flat-square" alt="GPL-3.0">
 </p>
 
 **Calendar** is a quiet Android calendar in the spirit of Nothing's design: black and white, dot-matrix numbers and
@@ -104,15 +105,24 @@ in Appearance, or let the app follow the phone.
 
 Requirements: Flutter 3.47 (Dart 3.13), the Android SDK and JDK 17.
 
-1. Create a Google Cloud project with the Calendar API and two OAuth clients, Android and web, as described in
-   [docs/GOOGLE.md](docs/GOOGLE.md). You can skip this and use calendars on the device only.
-2. Put the web client ID in `config.json` at the repo root (git-ignored):
+1. **Typefaces.** The design's three typefaces are not part of this repo, as their licences do not clearly allow
+   sharing them. Download them into `assets/fonts/` (the build stops with a clear message while one is missing):
+   [Ndot57-Regular.otf](https://github.com/xeji01/nothingfont/raw/main/fonts/Ndot57-Regular.otf) ·
+   [NType82-Regular.otf](https://github.com/xeji01/nothingfont/raw/main/fonts/NType82-Regular.otf) ·
+   [LetteraMonoLL-Regular.otf](https://github.com/xeji01/nothingfont/raw/main/fonts/LetteraMonoLL-Regular.otf)
+2. **Glyph lights (optional, Nothing phones).** Put `glyph-matrix-sdk-2.0.aar` from Nothing's
+   [Glyph Developer Kit](https://github.com/Nothing-Developer-Programme/Glyph-Developer-Kit) (folder `sdk/`) into
+   `android/app/libs/`. Without it the app builds the same, only without Glyph lights.
+3. **Google (optional).** Create a Google Cloud project with the Calendar API and two OAuth clients, Android and web,
+   as described in [docs/GOOGLE.md](docs/GOOGLE.md), and put the web client ID in `config.json` at the repo root
+   (git-ignored):
    ```json
    { "GOOGLE_SERVER_CLIENT_ID": "1234567890-abc.apps.googleusercontent.com" }
    ```
-3. Sign with your own key in `android/key.properties` (git-ignored, see [docs/WORKFLOW.md](docs/WORKFLOW.md)); its
-   SHA-1 must match the Android OAuth client.
-4. Build:
+   Without it the app works with calendars on the device only (leave out `--dart-define-from-file` below).
+4. **Signing.** Use your own key in `android/key.properties` (git-ignored, see [docs/WORKFLOW.md](docs/WORKFLOW.md));
+   its SHA-1 must match the Android OAuth client.
+5. **Build:**
    ```bash
    flutter build apk --release --split-per-abi --dart-define-from-file=config.json
    ```
@@ -129,7 +139,17 @@ Requirements: Flutter 3.47 (Dart 3.13), the Android SDK and JDK 17.
 Versions are dates (`2026.11.08`). Work happens on `dev`; releases go to `main`. The screenshots above are rendered by
 the app's own tests and laid out by [tool/readme_images.py](tool/readme_images.py).
 
+## License
+
+[GPL-3.0](LICENSE). You may use, study, change and share the code; if you share a changed version, its source has to
+be open under the same licence.
+
+The typefaces (Ndot 57, NType82, Lettera Mono) and Nothing's Glyph Developer Kit are not part of this repo and not
+covered by this licence; Space Mono and Space Grotesk, which fill in the letters the design's typefaces lack, are under
+the SIL Open Font License.
+
 ## Credits
 
-Typefaces from the design: Ndot 57, NType82 and Lettera Mono, with Space Mono and Space Grotesk for the letters they
-lack. Glyph lights through Nothing's Glyph Developer Kit. Not affiliated with Google or Nothing.
+Typefaces from the design: Ndot 57 and NType82 (Nothing) and Lettera Mono (Lineto), with Space Mono and Space Grotesk
+(Colophon, for Google Fonts). Glyph lights through Nothing's Glyph Developer Kit. Not affiliated with Google or
+Nothing.
