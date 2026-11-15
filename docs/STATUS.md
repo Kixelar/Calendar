@@ -27,10 +27,11 @@
 - Owner asked what happens when an invitation notification is dismissed: nothing is sent; the invitation stays
   unanswered in Google, the app does not notify about it again (`seenInvites`), and it can still be answered from the
   event (03.5 screen).
-- Confirmed by the owner (2026-11-02): .ics import/export, address subscriptions, day clock widget, deleting own calendars, holiday countries, double tap for today. Wi-Fi only: the "Check" test ignored it (fixed 2026-11-02), waiting for a re-check.
-- Owner's list of 2026-11-01 (no birthdays, account row, one account, all holiday countries, no "more" button, double tap = today): built, waiting for the owner's check.
 
 ## Resolved
+- Confirmed by the owner (2026-11-15): Wi-Fi only (after the 2026-11-02 fix) and the list of 2026-11-01 (no
+  birthdays, account row, one account, all holiday countries, no "more" button, double tap = today); earlier
+  (2026-11-02): .ics import/export, address subscriptions, day clock widget, deleting own calendars.
 - Crash at start (2026-10-31) was caused by WorkManager (it initialises before app code); removed in 30436952,
   background sync moved to JobScheduler. Confirmed working on the owner's phone.
 - Background sync never ran: scheduling threw `SecurityException: ACCESS_NETWORK_STATE required for jobs with a
