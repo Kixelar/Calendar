@@ -11,7 +11,7 @@
 - **Scope** `https://www.googleapis.com/auth/calendar`: covers reading/editing events, the calendar list and replying to invitations, which the 01.2 screen promises.
 - **Events cached per year in memory**: one request per calendar per year feeds all four views (year view needs the whole year anyway).
 - **Fonts**: the mockup's Ndot 57, NType82 and Lettera Mono, files supplied by the owner; Space Mono / Space Grotesk fill in missing Polish glyphs (docs/DESIGN.md). (owner)
-- **Signing**: the app's own keystore in `<keystore folder>/`, used for debug and release, so one SHA-1 is registered with Google.
+- **Signing**: the app's own keystore outside the repo, used for debug and release, so one SHA-1 is registered with Google.
 - **Google OAuth**: project set up by the owner; web client ID in `config.json` (public by design, git-ignored since).
 - **03.2 first version** has no time zone, repeat, reminder or guests rows (each needs its own screen, 03.3/03.4, or a picker the mockup does not show); new events get the calendar's default reminders from Google.
 - **Place and notes** in 03.2 are edited in a small dialog styled like the mockup's `.dlg` (the mockup shows only the rows).

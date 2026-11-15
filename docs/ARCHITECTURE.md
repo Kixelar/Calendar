@@ -30,8 +30,9 @@ android/app/src/main/res/values*/strings.xml   Launcher name and widget names pe
 android/app/src/main/kotlin/.../Device.kt         Channel `calendar/device` (app and background engines): time zone, version info, widget data, Glyph
 lib/screens/update.dart           05.8 new version: home card, full screen, About row (fed by Store.update)
 tool/readme_images.py             README images from the test screenshots (CAL_LANG=en CAL_SHOTS=...)
-android/app/src/main/kotlin/.../Lights.kt        05.3 Glyph Interface: strip lights, countdown, matrix Glyph Toy (CountdownToy)
-android/app/libs/glyph-matrix-sdk-2.0.aar         Nothing's Glyph Developer Kit (strips and matrix in one file)
+android/app/src/glyph/kotlin/.../Lights.kt       05.3 Glyph Interface: strip lights, countdown, matrix Glyph Toy (CountdownToy)
+android/app/src/noglyph/kotlin/.../Lights.kt     stand-in used when the kit below is missing (no Glyph lights)
+android/app/libs/glyph-matrix-sdk-2.0.aar         Nothing's Glyph Developer Kit; not in the repo (licence), optional
 android/app/src/main/kotlin/.../Widgets.kt       07.1/07.2 home screen widgets (8), res/xml/widget_*.xml
 test/screens_test.dart   Logic tests + PNG renders of screens with a fake Google account
 ```

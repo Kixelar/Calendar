@@ -11,7 +11,11 @@ val keyProps = Properties().apply {
     if (f.exists()) f.inputStream().use { load(it) }
 }
 
+val glyphKit = file("libs/glyph-matrix-sdk-2.0.aar")
+
 android {
+    // Glyph Interface with the kit, a stand-in without it (src/glyph or src/noglyph).
+    sourceSets.getByName("main").java.srcDir(if (glyphKit.exists()) "src/glyph/kotlin" else "src/noglyph/kotlin")
     namespace = "com.kixelar.calendar"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
@@ -73,5 +77,6 @@ dependencies {
     // local_auth (app lock) needs an AppCompat theme, or the fingerprint dialog crashes on Android 8 and older.
     implementation("androidx.appcompat:appcompat:1.7.1")
     // Glyph Developer Kit from Nothing (github.com/Nothing-Developer-Programme/Glyph-Developer-Kit, sdk/), Lights.kt.
-    implementation(files("libs/glyph-matrix-sdk-2.0.aar"))
+    // Optional: its licence does not allow sharing it, so it is not in the repo; without it the app has no Glyph lights.
+    if (glyphKit.exists()) implementation(files(glyphKit))
 }

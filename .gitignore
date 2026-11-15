@@ -53,3 +53,11 @@ app.*.map.json
 android/key.properties
 google-services.json
 client_secret*.json
+
+# Not ours to share (README → Build it yourself): the mockup's typefaces and Nothing's Glyph Developer Kit.
+assets/fonts/Ndot57-Regular.otf
+assets/fonts/NType82-Regular.otf
+assets/fonts/LetteraMonoLL-Regular.otf
+android/app/libs/*.aar
+# The owner's local notes (signing key details, paths).
+docs/LOCAL.md

@@ -30,7 +30,9 @@ Copied 1:1 from the mockup's CSS into `lib/theme.dart` (`Tok` colours for dark a
   waits 1.5 s at its start, runs left at 30 px/s followed by a copy until the copy sits where the text began, waits.
 
 ## Fonts
-Files supplied by the owner, bundled in `assets/fonts/` and declared in `pubspec.yaml`, as the mockup's CSS asks:
+Files supplied by the owner, declared in `pubspec.yaml`, as the mockup's CSS asks. Ndot, NType82 and Lettera Mono are
+not in the repo (their licences are unclear); they go into `assets/fonts/` before building (README → Build it yourself).
+The mockups load them from there too (views.html no longer embeds them):
 - **Ndot** (`Ndot57-Regular.otf`): dot-matrix numerals (display styles).
 - **NType82** (`NType82-Regular.otf`): headlines and body text.
 - **Lettera Mono** (`LetteraMonoLL-Regular.otf`): labels, buttons, times, captions (uppercase + tracking at call sites).
