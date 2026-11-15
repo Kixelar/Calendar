@@ -38,6 +38,7 @@ APKs land in `build/app/outputs/flutter-apk/` (`app-arm64-v8a-release.apk` for m
 flutter analyze
 flutter test
 $env:CAL_SHOTS='<folder>'; flutter test test/screens_test.dart   # optional: PNG renders to compare with the mockup
+$env:CAL_LANG='en'                                                # optional: the renders in English (README images)
 ```
 
 ## End of a working session
@@ -45,4 +46,5 @@ Update `docs/STATUS.md` (state, next steps, traps), tick `docs/TODO.md`, add to 
 
 ## Secrets
 Keystores, `key.properties`, `google-services.json`, OAuth client secrets: never in the repo (`.gitignore`).
-The web OAuth client ID in `config.json` is public by design and may be committed.
+The web OAuth client ID in `config.json` is public by design, but the file is git-ignored (it was committed once, in
+the early history).

@@ -3,13 +3,17 @@
 **Version:** `2026.11.15-dev` (branch `dev`). Nothing released on `main` yet.
 
 ## Done (all mockup screens that the Google Calendar API supports)
-- 01 onboarding: welcome, connect Google, choose calendars, sync progress.
+- 01 onboarding: language, welcome, connect Google, choose calendars, sync progress (step bars on each panel).
 - 02 views: year, month, week, day, search.
 - 03 events: details, new/edit (repeat, reminder, time zone, guests, calendar, place, notes), custom repeat, invite guests, received invitation.
-- 04 calendars: list, add (new Google calendar, holidays, Google account), holidays by country, sharing (ACL, link), shared with you.
+- 04 calendars: list, add (new calendar in Google or on the phone, holidays, subscriptions, .ics import, Google account),
+  holidays by country, sharing (ACL, link), shared with you.
+- Calendars on this device (with or without Google), including repeats, holidays and subscriptions without an account.
 - 05 settings: hub, appearance, notifications, accounts and sync, data and privacy, help + articles, about.
 - 06 states: empty day, delete (one / following / all), edit conflict.
-- 07 widgets (7 sizes, dark/light) and notifications (reminders, all-day, daily summary, invitations, shared changes).
+- 07 widgets (8: month, today, week, next, next small, date, date small, day clock; dark/light) and notifications
+  (reminders, all-day, daily summary, invitations, shared changes). Glyph Interface (not run on a Glyph phone).
+- Update screens (home card, full screen, About row); the update check that feeds them is still to do.
 - Offline cache, own signing key, mockup fonts, 8 languages (pl, en, de, es, fr, it, pt, nl; chosen in onboarding or Appearance), launcher
   and widget names per device language.
 - Confirmed on the owner's phone: sign-in, silent restore, event create/edit/delete incl. repeating (2026-10-30/31).
@@ -41,15 +45,19 @@
 - **Glyph Interface** (05.3): built 2026-11-02 to the owner's choices, but never run on a phone with Glyph lights (the
   owner's has none). Needs someone with a Nothing phone (lights or matrix) to check; see DECISIONS.
 - **Terms and privacy policy** texts and a **support address**: at the very end, together.
-- **Update check**: later. More languages (cs, sk, sv, da, fi, tr): maybe later.
+- **Update check**: screens done; where releases live is the owner's call (proposed a public releases-only
+  repo, since the app cannot read a private repo's releases). More languages (cs, sk, sv, da, fi, tr): maybe later.
 - Dropped (owner, 2026-11-02): ask for edit rights, daily backup. (2026-11-08): launcher icon showing today's date.
 - **CalDAV / Outlook / iCloud**, **holiday filters / name days**: dropped for now (owner).
 
 ## Traps
 - Diagnose on the phone over USB: `adb shell dumpsys jobscheduler` (job history, constraints), `adb logcat`,
   `adb shell cmd jobscheduler run -f com.kixelar.calendar 31` (force a background run). Use MSYS_NO_PATHCONV=1 in Git Bash.
-- Gradle/Java does not run in Claude's sandbox: build APKs in the owner's terminal (docs/WORKFLOW.md), and run
-  `flutter pub get` there after adding packages (different pub cache).
+- Gradle/Java does not run in Claude's sandbox ("Unable to establish loopback connection", even with the sandbox
+  off): build APKs in the owner's terminal (docs/WORKFLOW.md), and run `flutter pub get` there after adding packages
+  (different pub cache).
+- adb over Wi-Fi (wireless debugging) finds the phone only when adb runs outside Claude's sandbox; inside it the mDNS
+  list stays empty.
 - Build numbers must keep growing: 30000000 + minutes since 2026-01-01 UTC, and never below the last one sent
   (30458561 on 2026-11-15).
 - `google_sign_in` 7.x gives no refresh token: always get the token through `GoogleCalendar._authorize` before an API call.

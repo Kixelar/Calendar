@@ -17,16 +17,17 @@ which replaces 02.2–02.4 of the first one:
 
 ## Tokens
 Copied 1:1 from the mockup's CSS into `lib/theme.dart` (`Tok` colours for dark and light, `T` text styles).
-- True black background (OLED) in dark, `#F4F4F4` in light; theme follows the system.
+- True black background (OLED) in dark, `#F4F4F4` in light; Appearance picks dark, light or the system's.
 - One signal red (`accent`) per screen at most: "in 12 min", the now line, today in the year grid.
 - Depth from 1px borders, never shadows. Pills for buttons, chips and switches.
-- Calendars are told apart by **marker shape**, not colour: dot, square, half, diamond (own calendars in order),
-  ring (holidays), dashed ring (shared with you). See `Shape` in `lib/google.dart` and `Marker` in `lib/ui.dart`.
+- Calendars are told apart by **marker shape**, not colour: 24 shapes, own calendars get unused ones first (dot,
+  square, half, diamond...), ring for holidays, dashed ring for shared calendars; the user can pick another. See `Shape` in `lib/google.dart` and `Marker` in `lib/ui.dart`.
 
 ## Additions beyond the mockup (owner's requests)
 - All-day events: sun icon (`Icons.wb_sunny_outlined`, secondary colour) in the 48px time column instead of a blank.
-- Right-hand label in event rows (location or calendar name, max 110px): if it does not fit it scrolls like a
-  ticker at 30 px/s, 1.5 s pause at both ends, then jumps back (`Marquee` in `lib/ui.dart`).
+- Right-hand label in event rows of the views (location or calendar name, max 110px) ends with "…" when too long.
+- In event details and invitations a long value runs like a ticker (`Marquee` in `lib/ui.dart`, owner 2026-11-15):
+  waits 1.5 s at its start, runs left at 30 px/s followed by a copy until the copy sits where the text began, waits.
 
 ## Fonts
 Files supplied by the owner, bundled in `assets/fonts/` and declared in `pubspec.yaml`, as the mockup's CSS asks:
@@ -45,4 +46,5 @@ check the licence before a public release.
 
 ## How to compare with the mockup
 `$env:CAL_SHOTS='<folder>'; flutter test test/screens_test.dart` renders the implemented screens to PNG
-with fake Google data, in Polish, dark (and one light) theme.
+with fake Google data, in Polish, dark (and one light) theme. `CAL_LANG=en` renders them in English with English
+sample data (used for the README, `tool/readme_images.py`).

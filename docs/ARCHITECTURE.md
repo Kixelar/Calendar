@@ -4,15 +4,15 @@ Flutter app, Android only. No backend: the phone talks to the Google Calendar AP
 
 ```
 lib/
-  main.dart              App: theme (system light/dark), localisation, picks Welcome or Home
+  main.dart              App: theme (dark / light / system setting), app language, picks the language panel or Home
   theme.dart             Design tokens from the mockup (colours Tok, text styles T)
   google.dart            Google sign-in + Calendar API (GoogleCalendar), models Cal / Ev, marker Shape
   local.dart             Calendars on this phone (LocalCalendar): one JSON file, events as Google event resources
   store.dart             App state (ChangeNotifier): account, chosen calendars, events cached per year
   ui.dart                Shared widgets mirroring the mockup's CSS classes (Lbl, Section, RowItem, Toggle, Btn, Hero2, EventRow, Marker, Marquee)
   l10n/app_en.arb        English strings (template)
-  l10n/app_pl.arb        Polish strings
-  screens/onboarding.dart  01.1 Welcome, 01.2 Connect, 01.3 Choose (also used as the calendar picker later)
+  l10n/app_*.arb         pl, de, es, fr, it, pt, nl
+  screens/onboarding.dart  language panel, 01.1 Welcome, 01.2 Connect, 01.3 Choose (also the calendar picker), 01.4 Syncing
   screens/home.dart        02.1 year, 02.2 month, 02.3 week, 02.4 day views + bottom view tabs and + button
   screens/views.dart       parts of those views (docs/design/views.html): Slot/slotsOf (clash flags), month strip, day rows, week grid, day timeline
   screens/repeat.dart      03.3 custom repeat; rules live in lib/rrule.dart (parse, format, Polish/English sentence; tested)
@@ -20,19 +20,19 @@ lib/
   screens/search.dart      02.5 search in the events on the phone (`Store.search`: substrings, Polish letters folded, two years back and ahead)
   screens/calendars.dart   .ics import/export flows (file_picker), 04.1 calendars, 04.2 add, 04.3 holidays (Google holiday calendars by country), 04.4 share (ACL), 04.5 shared with you
   screens/settings.dart    05.1 settings, 05.2 appearance, 05.4 accounts, 05.5 data, 05.6/05.7 help (texts in lib/help.dart), 05.8 about
-  screens/notifications.dart  05.3 notification settings
+  screens/notifications.dart  05.3 notification settings and the Glyph section (only on phones with Glyph lights)
   notify.dart              07.3 notifications: plan() (pure, tested) + Notifier (flutter_local_notifications)
   ics.dart                 .ics import (parseIcs → Google events) and export (writeIcs, TZID times, folded lines); tested
   screens/lock.dart        05.5 app lock: Lock wraps the whole app (MaterialApp.builder), askDeviceAuth (local_auth)
   view.dart                `Look`: 05.2 view settings as globals for widgets without a Store (time format, fonts, week layout)
   screens/event.dart       03.1 event details, 03.2 new/edit event, 06.2 delete dialog, calendar picker
 android/app/src/main/res/values*/strings.xml   Launcher name and widget names per device language
-android/app/src/main/kotlin/.../MainActivity.kt  Channel `calendar/device`: time zone, version info, widget data
+android/app/src/main/kotlin/.../Device.kt         Channel `calendar/device` (app and background engines): time zone, version info, widget data, Glyph
 lib/screens/update.dart           05.8 new version: home card, full screen, About row (fed by Store.update)
 tool/readme_images.py             README images from the test screenshots (CAL_LANG=en CAL_SHOTS=...)
 android/app/src/main/kotlin/.../Lights.kt        05.3 Glyph Interface: strip lights, countdown, matrix Glyph Toy (CountdownToy)
 android/app/libs/glyph-matrix-sdk-2.0.aar         Nothing's Glyph Developer Kit (strips and matrix in one file)
-android/app/src/main/kotlin/.../Widgets.kt       07.1/07.2 home screen widgets (7 sizes), res/xml/widget_*.xml
+android/app/src/main/kotlin/.../Widgets.kt       07.1/07.2 home screen widgets (8), res/xml/widget_*.xml
 test/screens_test.dart   Logic tests + PNG renders of screens with a fake Google account
 ```
 
@@ -52,14 +52,15 @@ If Google says access is gone (`restore()` returns false) the app goes back to t
 The `google` preference marks a signed-in install (older installs: a saved calendar list).
 
 ## Birthdays
-Not shown (owner, 2026-11-01): `GoogleCalendar._ev` drops events with `eventType: birthday` (Google keeps contacts'
+Not shown (owner, 2026-11-01): `evOf` (google.dart) drops events with `eventType: birthday` (Google keeps contacts'
 birthdays in the primary calendar) and `calendars()` leaves out the old `#contacts@` calendar.
 
 ## Address subscriptions (04.2)
 `Store.subscribe` downloads the .ics (dart:io HttpClient, webcal:// read as https://), creates a Google calendar and
 copies the events (`_copyFeed`: events.import, then deletes events whose UID left the file). `refreshSubscriptions`
 repeats it at most hourly from `refresh()` and the background job (`syncNow`). Calendar id → address is the `subs`
-preference; such calendars are read-only in the app (`writable`, event details).
+preference; such calendars are read-only in the app (`writable`, event details). Without a Google account the copy goes to
+a calendar on this phone instead and is replaced whole on every change (`LocalCalendar.replaceEvents`).
 
 ## Day clock widget
 `ClockWidget` (Widgets.kt) draws the dial from the events the app sends (`Store.updateWidgets`, strings "free" and
@@ -68,9 +69,13 @@ which Dart reads once via Device "takeOpen" (`Home._widgetOpen`). Preview: `tool
 
 ## Holidays
 `holidayCodes` (calendars.dart) lists ISO countries with a Google holiday calendar; `holidayId(code, lang)` builds the
-calendar id, `holidayCode(id)` reads it back. Country names come from Android (`Device.kt` "countries").
+calendar id (language prefix = the app language), `holidayCode(id)` reads it back. Country names come from Android
+(`Device.kt` "countries"). Without a Google account the holidays come from Google's public file (`holidayUrl`) into a
+phone calendar with id "local:" + the Google id, refreshed like a subscription.
 
 ## Writing events
+Calendars on this phone (`local:` ids) go to `LocalCalendar` with the same choices; the rest below is Google.
+
 - `GoogleCalendar.save`: new events are inserted; existing ones are fetched (`events.get`), changed and sent back
   with `events.update`, so fields the app does not edit (guests, reminders, conference links) survive. Changing the
   calendar first calls `events.move`. Editing an occurrence of a repeating event changes only that occurrence.
@@ -100,14 +105,15 @@ notifications (exact alarms, `USE_EXACT_ALARM`): event reminders (Google's remin
 has none; nothing when "none" was chosen), all-day events the day before, a daily summary. New invitations and others'
 changes in shared calendars are shown at once (the first sync only remembers what exists). "Snooze 5 min" runs in a
 background isolate (`notificationTapBackground`); other actions open the app and Home handles them (`_fromNotification`).
-Notifications are only refreshed while the app runs (no background sync yet).
+The background sync job (below) reschedules them too, so they stay current while the app is closed.
 
 ## Home screen widgets (07.1 / 07.2)
 Each widget is an `AppWidgetProvider` that draws one bitmap with Canvas, using the app's font files from
-`flutter_assets` (NType82 falls back to Space Grotesk for Polish letters on Android 10+). Colours follow the system's
-dark/light mode. Dates are computed natively (updated every 30 min by Android, so the date flips within 30 min after
-midnight); events and strings come from `Store.updateWidgets` (next 14 days, sent after every sync and setting change).
-Tapping a widget opens the app. Every update sends a light and a dark bitmap; `layout/widget_image.xml` shows the light
+`flutter_assets` (NType82 falls back to Space Grotesk for Polish letters on Android 10+). Colours follow the app's theme
+setting (or the system in "System"). Dates are computed natively; one alarm (`Widgets.schedule` → `WidgetTick`) redraws
+all widgets every quarter hour, at the 60/45/30/15 min countdown steps and when events start or end. Events and strings
+come from `Store.updateWidgets` (next 14 days, sent after every sync and setting change). Tapping a widget opens the
+app (the day clock opens today's day view). Every update sends a light and a dark bitmap; `layout/widget_image.xml` shows the light
 one and `layout-night/` the dark one, so the launcher follows the system theme. Picker previews are PNGs made by
 `tool/widget_previews.py` (same layout, sample day from the mockup) in `drawable{,-pl}{,-night}-nodpi`.
 
@@ -139,5 +145,7 @@ that shows an account bottom sheet whenever One Tap auto-select is unavailable (
 sign-in is only the fallback. The account email is saved in `SharedPreferences` at sign-in for display.
 
 ## Localisation
-Flutter `gen-l10n` (`l10n.yaml`, ARB files). Dates use `intl` with the device locale. Weekday short names
+Flutter `gen-l10n` (`l10n.yaml`, ARB files), 8 languages. The `language` setting ("system" or a code) sets
+`MaterialApp.locale`; notifications and widgets use the same choice (`appLang` in notify.dart). Dates use `intl` in that
+language. Android resources (launcher, widget and Glyph toy names) follow the phone's language only. Weekday short names
 (PN, WT... / MO, TU...) are in the ARB files because `intl` abbreviations differ from the mockup.
