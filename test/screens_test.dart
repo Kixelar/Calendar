@@ -524,6 +524,16 @@ void main() {
     g.pending['w'] = [gcal.Event(id: 's1', summary: 'Yoga', recurrence: ['RRULE:FREQ=WEEKLY'], start: at(7), end: at(8))];
     await store.refresh();
     expect(g.fetched, ['w@${d.year}']); // a series: Google expands it, so the calendar is fetched
+
+    // A series deleted elsewhere: Google reports only its id, cancelled. Its occurrences (here the sprint demo,
+    // an occurrence of series "demo") disappear without a fetch.
+    expect(await titles(), contains(_s('Demo sprintu', 'Sprint demo')));
+    g.fetched.clear();
+    g.version['w'] = 4;
+    g.pending['w'] = [gcal.Event(id: 'demo', status: 'cancelled')];
+    await store.refresh();
+    expect(g.fetched, isEmpty);
+    expect(await titles(), isNot(contains(_s('Demo sprintu', 'Sprint demo'))));
   });
 
   test('automatic refreshes reload the calendar list at most every 6 hours; a pull always does', () async {

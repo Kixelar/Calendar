@@ -530,7 +530,8 @@ class Store extends ChangeNotifier {
       for (final (cal, items) in patches.where((p) => c.cals.contains(p.$1.id))) {
         final ids = {for (final i in items) i.id};
         evs = [
-          for (final e in evs) if (e.calId != cal.id || !ids.contains(e.id)) e,
+          // A deleted series comes as just its id with status "cancelled": its occurrences go with it.
+          for (final e in evs) if (e.calId != cal.id || !(ids.contains(e.id) || ids.contains(e.recurringId))) e,
           for (final i in items)
             if (evOf(i, cal) case final e? when e.start.isBefore(DateTime(y + 1)) && !e.end.isBefore(DateTime(y))) e,
         ];

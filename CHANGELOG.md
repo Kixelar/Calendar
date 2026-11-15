@@ -9,6 +9,8 @@
   repeating series makes the app fetch that calendar's year again. Google sends only the event fields the app uses.
 - Automatic refreshes reload the list of calendars at most every 6 hours (pulling down still reloads it every time).
 ### Fixed
+- A repeating event deleted elsewhere (e.g. on the computer) stayed in the app: Google reports only the series' id,
+  and its occurrences were not matched to it.
 - Pull to refresh did nothing in the month view on tall screens (the grid stays put there, and a short list never
   scrolled); it now works on the grid and on the list, and in the other views when they are short too.
 ### Changed
