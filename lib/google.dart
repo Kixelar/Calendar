@@ -10,6 +10,11 @@ const serverClientId = String.fromEnvironment('GOOGLE_SERVER_CLIENT_ID');
 /// Read/write events, calendar list and invitation replies; the mockup's "connect Google" screen lists exactly this.
 const _scopes = [gcal.CalendarApi.calendarScope];
 
+/// The parts of an event the app reads ([evOf]) plus what sync needs (recurrence); Google sends nothing else.
+const _evFields = 'id,status,summary,location,description,start,end,recurringEventId,recurrence,eventType,updated,'
+    'organizer(email,displayName,self),attendees(email,displayName,responseStatus,self,resource),reminders,'
+    'guestsCanInviteOthers,guestsCanModify,guestsCanSeeOtherGuests';
+
 /// Calendars are told apart by marker shape, not colour (mockup design).
 /// Order in which own calendars get shapes: filled ones first. Ring and dash are kept for holidays and shared calendars.
 final ownShapes = [
@@ -313,18 +318,23 @@ class GoogleCalendar {
     }
   }
 
-  /// Whether [calId] changed since [token] (Google's incremental sync), and the token for next time. Without a token
-  /// (or when Google expired it, 410) it only fetches a new one and reports a change, so the caller fetches everything.
-  /// Asks for ids only: an unchanged calendar costs one tiny request.
-  Future<(bool, String?)> changes(String calId, String? token) async {
+  /// What changed in [calId] since [token] (Google's incremental sync): whether anything did, the token for next time
+  /// and the changed events (deleted ones with status "cancelled"). Without a token, or when Google expired it (410), it
+  /// only gets a new token and returns no events, so the caller fetches everything. An unchanged calendar costs one
+  /// tiny request.
+  Future<(bool, String?, List<gcal.Event>?)> changes(String calId, String? token) async {
     await _authorize(interactive: false);
-    var changed = token == null;
+    final items = <gcal.Event>[];
     String? page, next;
     try {
       do {
         final r = await _api!.events.list(calId,
-            syncToken: token, pageToken: page, maxResults: 2500, $fields: 'nextPageToken,nextSyncToken,items(id)');
-        if (token != null && (r.items?.isNotEmpty ?? false)) changed = true;
+            syncToken: token,
+            pageToken: page,
+            maxResults: 2500,
+            // The first listing only needs the token at its end; later ones bring the changed events.
+            $fields: token == null ? 'nextPageToken,nextSyncToken' : 'nextPageToken,nextSyncToken,items($_evFields)');
+        items.addAll(r.items ?? const []);
         page = r.nextPageToken;
         next = r.nextSyncToken;
       } while (page != null);
@@ -332,7 +342,7 @@ class GoogleCalendar {
       if (e.status != 410 || token == null) rethrow;
       return changes(calId, null);
     }
-    return (changed, next);
+    return token == null ? (true, next, null) : (items.isNotEmpty, next, items);
   }
 
   /// Events of [cals] that overlap [from, to), recurring events expanded.
@@ -345,7 +355,12 @@ class GoogleCalendar {
       String? page;
       do {
         final r = await _api!.events.list(cal.id,
-            timeMin: from.toUtc(), timeMax: to.toUtc(), singleEvents: true, maxResults: 2500, pageToken: page);
+            timeMin: from.toUtc(),
+            timeMax: to.toUtc(),
+            singleEvents: true,
+            maxResults: 2500,
+            pageToken: page,
+            $fields: 'nextPageToken,items($_evFields)');
         for (final e in r.items ?? const <gcal.Event>[]) {
           if (evOf(e, cal) case final ev?) out.add(ev);
         }

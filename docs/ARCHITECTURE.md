@@ -50,8 +50,11 @@ and the calendars they were fetched for) in the app support folder (`path_provid
 shown at once and each year is read from its file (asynchronously: `on()` runs during build).
 
 Keeping it current (`Store._sync`): per Google calendar the app keeps a sync token (`syncTokens` preference) and asks
-`GoogleCalendar.changes` whether anything changed since (events.list with `syncToken`, ids only; 410 → a new token and
-a full fetch). Only changed calendars are fetched again (`events.list` with `singleEvents`, so Google still expands
+`GoogleCalendar.changes` what changed since (events.list with `syncToken`; 410 → a new token and a full fetch). When
+all changes are single events (no `recurrence`, no `recurringEventId`) they are put in place or removed in every cached
+year that holds the calendar (`_patch`), with no further request; a changed series makes the calendar be fetched again
+(Google expands its repeats). Event requests ask only for the fields the app reads (`_evFields`). Otherwise changed
+calendars are fetched again (`events.list` with `singleEvents`, so Google still expands
 repeats), for the years in memory and the current one; other cached years drop them from `cals`, so `_load` fetches
 them when opened. `_load` fetches only calendars a year's cache lacks or that have no token yet (getting the token
 first, `track`). Runs on start, pull to refresh, automatic and background sync, and after every write to Google (only

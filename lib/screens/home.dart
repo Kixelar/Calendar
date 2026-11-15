@@ -115,7 +115,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
     if (!store.autoSync) return;
     if (last != null && DateTime.now().difference(last).inMinutes < store.syncMinutes) return;
     if (store.wifiOnly && await store.metered()) return; // pull to refresh still syncs
-    await store.refresh();
+    await store.refresh(auto: true);
   }
 
   /// A tapped notification (07.3): open the event, or send the invitation reply chosen on it.
@@ -190,7 +190,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
               child: Stack(children: [
                 Positioned.fill(
                   child: RefreshIndicator(
-                    onRefresh: store.refresh,
+                    onRefresh: () => store.refresh(),
                     color: t.display,
                     backgroundColor: t.surfaceRaised,
                     // The month's list scrolls inside a frame that holds the grid (depth 1); both may pull to refresh.

@@ -47,9 +47,9 @@ Screen numbers refer to docs/design/mockup.html; the month, week and day views f
 
 ## Lighter on the API (owner, 2026-11-15)
 - [x] Incremental sync with sync tokens: fetch only calendars that changed (2026-11-15)
-- [ ] After a save, put Google's returned event in place instead of fetching that calendar's year
-- [ ] `fields` on event lists (smaller answers); calendar list less often
-- [ ] Measure start time and scrolling on the phone (profile build)
+- [x] Changed single events applied from the sync's change list, no year fetch (covers the app's own saves too)
+- [x] `fields` on event lists (smaller answers); calendar list at most every 6 h on automatic refreshes
+- [ ] Measure start time and scrolling on the phone (profile build in the owner's terminal; Gradle fails from Claude)
 
 ## At the end
 - [ ] Terms and privacy policy texts, support address; then 05.6 contact rows, 05.8 terms rows, welcome screen caption

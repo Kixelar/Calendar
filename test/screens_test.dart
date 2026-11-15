@@ -112,14 +112,17 @@ class _FakeGoogle extends GoogleCalendar {
   @override
   Future<void> respond(Ev e, String status) async {}
 
-  /// Google's incremental sync, faked: a calendar has changed when its [version] moved past the token.
+  /// Google's incremental sync, faked: a calendar has changed when its [version] moved past the token; [pending]
+  /// are the changed events Google reports (none set: a change the app cannot apply itself, so it fetches again).
   final version = <String, int>{};
+  final pending = <String, List<gcal.Event>>{};
   final changeCalls = <String>[], fetched = <String>[];
   @override
-  Future<(bool, String?)> changes(String calId, String? token) async {
+  Future<(bool, String?, List<gcal.Event>?)> changes(String calId, String? token) async {
     changeCalls.add(calId);
     final v = '${version[calId] ?? 0}';
-    return (token != v, v);
+    if (token == null) return (true, v, null);
+    return (token != v, v, token == v ? <gcal.Event>[] : pending.remove(calId));
   }
 
   @override
@@ -191,7 +194,7 @@ class _OfflineGoogle extends GoogleCalendar {
   @override
   Future<bool> restore({bool silentOnly = false}) async => throw const SocketException('offline');
   @override
-  Future<(bool, String?)> changes(String calId, String? token) async => throw const SocketException('offline');
+  Future<(bool, String?, List<gcal.Event>?)> changes(String calId, String? token) async => throw const SocketException('offline');
   @override
   Future<List<Ev>> events(List<Cal> cals, DateTime from, DateTime to) async => throw const SocketException('offline');
 }
@@ -489,6 +492,51 @@ void main() {
     again.on(DateTime(now, 6));
     await Future<void>.delayed(const Duration(milliseconds: 50));
     expect(g.fetched, ['design@$now']);
+  });
+
+  test('incremental sync puts changed single events in place without fetching; a changed series is fetched', () async {
+    SharedPreferences.setMockInitialValues({'onboarded': true, 'google': true});
+    final g = _FakeGoogle();
+    final store = Store(g, Directory.systemTemp.createTempSync());
+    await store.start();
+    final d = dayOf(DateTime.now());
+    Future<List<String>> titles() async {
+      store.on(d);
+      await Future<void>.delayed(const Duration(milliseconds: 30));
+      return [for (final e in store.on(d)!) e.title];
+    }
+
+    g.fetched.clear();
+    gcal.EventDateTime at(int h) => gcal.EventDateTime(dateTime: DateTime(d.year, d.month, d.day, h).toUtc());
+    g.version['w'] = 1;
+    g.pending['w'] = [gcal.Event(id: 'n1', summary: 'Lunch', start: at(13), end: at(14))];
+    await store.refresh();
+    expect(g.fetched, isEmpty); // applied from the change itself
+    expect(await titles(), contains('Lunch'));
+
+    g.version['w'] = 2;
+    g.pending['w'] = [gcal.Event(id: 'n1', status: 'cancelled')];
+    await store.refresh();
+    expect(g.fetched, isEmpty);
+    expect(await titles(), isNot(contains('Lunch')));
+
+    g.version['w'] = 3;
+    g.pending['w'] = [gcal.Event(id: 's1', summary: 'Yoga', recurrence: ['RRULE:FREQ=WEEKLY'], start: at(7), end: at(8))];
+    await store.refresh();
+    expect(g.fetched, ['w@${d.year}']); // a series: Google expands it, so the calendar is fetched
+  });
+
+  test('automatic refreshes reload the calendar list at most every 6 hours; a pull always does', () async {
+    SharedPreferences.setMockInitialValues({'onboarded': true, 'google': true});
+    final g = _CountingGoogle();
+    final store = Store(g, Directory.systemTemp.createTempSync());
+    await store.start();
+    await store.refresh(auto: true);
+    final n = g.calendarCalls;
+    await store.refresh(auto: true);
+    expect(g.calendarCalls, n);
+    await store.refresh();
+    expect(g.calendarCalls, n + 1);
   });
 
   test('repeat rules expand into occurrences', () {

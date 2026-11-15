@@ -488,13 +488,17 @@ class Store extends ChangeNotifier {
   /// invitations and widgets follow the current year (also when nothing changed: time moves on).
   Future<void> _sync({Set<String>? only}) async {
     if (!signedIn) return;
-    final t = _tokens, changed = <Cal>[];
+    final t = _tokens, changed = <Cal>[], patches = <(Cal, List<gcal.Event>)>[];
     for (final c in _toFetch.where((c) => only == null || only.contains(c.id))) {
-      final (did, tok) = await g.changes(c.id, t[c.id]);
+      final (did, tok, items) = await g.changes(c.id, t[c.id]);
       if (tok != null) t[c.id] = tok;
-      if (did) changed.add(c);
+      if (!did) continue;
+      // Single events are put in place from the change itself; a changed series means fetching its expanded repeats.
+      final single = items != null && items.every((e) => (e.recurrence?.isEmpty ?? true) && e.recurringEventId == null);
+      single ? patches.add((c, items)) : changed.add(c);
     }
     await _setTokens(t);
+    await _patch(patches);
     final now = DateTime.now().year, ids = {for (final c in changed) c.id};
     if (changed.isNotEmpty) {
       for (final y in {..._cachedYears, ..._days.keys, now}) {
@@ -513,6 +517,29 @@ class Store extends ChangeNotifier {
     await _p.setInt('lastSync', DateTime.now().millisecondsSinceEpoch);
     await _afterSync(_yearOf(await _readAsync('events_$now'))?.evs ?? const [], previous);
     notifyListeners();
+  }
+
+  /// Puts changed single events (or removes cancelled ones) in every cached year that holds their calendar and that
+  /// they touch, without asking Google for more.
+  Future<void> _patch(List<(Cal, List<gcal.Event>)> patches) async {
+    if (patches.isEmpty) return;
+    for (final y in {..._cachedYears, ..._days.keys}) {
+      final c = _yearOf(await _readAsync('events_$y'));
+      if (c == null) continue;
+      var evs = c.evs, touched = false;
+      for (final (cal, items) in patches.where((p) => c.cals.contains(p.$1.id))) {
+        final ids = {for (final i in items) i.id};
+        evs = [
+          for (final e in evs) if (e.calId != cal.id || !ids.contains(e.id)) e,
+          for (final i in items)
+            if (evOf(i, cal) case final e? when e.start.isBefore(DateTime(y + 1)) && !e.end.isBefore(DateTime(y))) e,
+        ];
+        touched = true;
+      }
+      if (!touched) continue;
+      evs.sort((a, b) => a.start.compareTo(b.start));
+      _days.containsKey(y) ? putYear(y, evs, fetched: c.cals) : _writeYear(y, evs, c.cals);
+    }
   }
 
   /// After a write to Google: fetch what changed in those calendars (usually just the edited event's calendar).
@@ -908,12 +935,17 @@ class Store extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Pull to refresh, automatic and "Sync now": fetches only what changed in Google (and subscriptions when due).
-  Future<void> refresh() async {
+  /// Pull to refresh, automatic ([auto]) and "Sync now": fetches only what changed in Google (and subscriptions when
+  /// due). The calendar list rarely changes, so automatic refreshes reload it at most every 6 hours.
+  Future<void> refresh({bool auto = false}) async {
     try {
       await refreshSubscriptions();
       if (signedIn) {
-        await loadCalendars();
+        final at = _p.getInt('calListAt') ?? 0, now = DateTime.now().millisecondsSinceEpoch;
+        if (!auto || now - at > 6 * 3600000) {
+          await loadCalendars();
+          await _p.setInt('calListAt', now);
+        }
         await _sync();
       }
       if (!signedIn) _days.clear(); // phone only: rebuild from the phone's calendars

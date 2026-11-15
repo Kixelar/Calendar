@@ -5,6 +5,9 @@
 - Much lighter syncing with Google: the app asks Google what changed since last time (sync tokens) and fetches again
   only the calendars that changed, instead of the whole year of every calendar on every start, refresh, background run
   and edit. An unchanged calendar now costs one tiny request.
+- Changed single events (yours or made elsewhere) are put in place straight from Google's change list; only a changed
+  repeating series makes the app fetch that calendar's year again. Google sends only the event fields the app uses.
+- Automatic refreshes reload the list of calendars at most every 6 hours (pulling down still reloads it every time).
 ### Fixed
 - Pull to refresh did nothing in the month view on tall screens (the grid stays put there, and a short list never
   scrolled); it now works on the grid and on the list, and in the other views when they are short too.
