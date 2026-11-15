@@ -600,7 +600,7 @@ void main() {
     expect(plan(evs, now, const NotifyPrefs(summary: false, allDayAt: -1, defaultReminder: -1), pl, 'pl').map((n) => n.title), ['Demo sprintu']);
   });
 
-  testWidgets('marquee waits, scrolls to the end, then starts over', (t) async {
+  testWidgets('marquee waits, runs until its copy is back at the start, then waits again', (t) async {
     await t.pumpWidget(const Directionality(
       textDirection: TextDirection.ltr,
       child: Center(child: SizedBox(width: 60, child: Marquee('A VERY LONG CALENDAR NAME', style: TextStyle(fontSize: 11)))),
@@ -611,11 +611,12 @@ void main() {
     expect(x(), 0); // still in the first pause
     await t.pump(const Duration(milliseconds: 1000));
     expect(x(), lessThan(0)); // scrolling
-    final end = -(25 * 11 - 60.0); // Ahem test font: every glyph is fontSize wide
-    await t.pump(Duration(milliseconds: ((-end) / 30 * 1000).round()));
-    expect(x(), closeTo(end, 0.5)); // reached the end and holds
-    await t.pump(const Duration(milliseconds: 1600));
-    expect(x(), greaterThan(end)); // started over
+    const turn = 25 * 11 + 32.0; // Ahem test font: every glyph is fontSize wide; plus the gap before the copy
+    await t.pump(Duration(milliseconds: (turn / 30 * 1000).round() - 510)); // 0.5 s of the run is behind us
+    expect(x(), closeTo(-turn, 1)); // the copy is where the text began
+    await t.pump(const Duration(milliseconds: 1000));
+    expect(x(), 0); // waiting at the start again, which looks the same
+    expect(find.text('A VERY LONG CALENDAR NAME'), findsNWidgets(2)); // text and its copy
     await t.pumpWidget(const SizedBox()); // dispose the repeating controller
   });
 

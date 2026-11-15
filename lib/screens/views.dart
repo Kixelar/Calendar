@@ -192,7 +192,7 @@ class DayRow extends StatelessWidget {
           if (soon != null)
             Lbl(soon!, color: t.accentText)
           else if (place != null && place.isNotEmpty)
-            ConstrainedBox(constraints: const BoxConstraints(maxWidth: 110), child: Marquee(place.toUpperCase(), style: T.labelSm(t.secondary))),
+            ConstrainedBox(constraints: const BoxConstraints(maxWidth: 110), child: Lbl(place)),
         ]),
       ),
     );

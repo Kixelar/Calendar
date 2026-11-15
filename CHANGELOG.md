@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026.11.15-dev
+### Changed
+- Places and calendar names in the month, week and day lists end with "…" when too long, instead of scrolling.
+- In event details (and invitations) a long value no longer ends in "…": it waits at its start, runs left until the
+  start comes round again and waits, like a news ticker (owner).
+
 ## 2026.11.08-dev
 ### Added
 - Calendars on this phone ("On this device", 05.4), with or without a Google account: "Continue without account"

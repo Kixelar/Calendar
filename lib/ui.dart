@@ -349,16 +349,23 @@ class Group extends StatelessWidget {
 
 /// Settings-style row: label on the left, value and optional chevron on the right.
 class ValueRow extends StatelessWidget {
-  const ValueRow(this.label, {super.key, this.value, this.valueColor, this.trailing, this.onTap});
+  const ValueRow(this.label, {super.key, this.value, this.valueColor, this.trailing, this.onTap, this.scroll = false});
   final String label;
   final String? value;
   final Color? valueColor;
   final Widget? trailing;
   final VoidCallback? onTap;
+  final bool scroll; // a long value runs like a ticker (event details) instead of ending in dots
   @override
   Widget build(BuildContext context) => RowItem(onTap: onTap, children: [
         Expanded(child: Text(label)),
-        if (value != null) ConstrainedBox(constraints: const BoxConstraints(maxWidth: 170), child: Lbl(value!, color: valueColor)),
+        if (value != null)
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 170),
+            child: scroll
+                ? Marquee(value!.toUpperCase(), style: T.labelSm(valueColor ?? Tok.of(context).secondary))
+                : Lbl(value!, color: valueColor),
+          ),
         ?trailing,
         if (onTap != null) Icon(Icons.chevron_right, size: 20, color: Tok.of(context).secondary),
       ]);
@@ -431,10 +438,7 @@ class EventRow extends StatelessWidget {
       if (!e.allDay && e.start.isAfter(n) && soon <= 60)
         Lbl(l10n(context).inMin(soon), color: red ? t.accentText : t.primary)
       else if ((cal?.holiday ?? false ? l10n(context).holiday : e.location ?? cal?.name) case final s? when s.isNotEmpty)
-        ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 110),
-          child: Marquee(s.toUpperCase(), style: T.labelSm(t.secondary)),
-        ),
+        ConstrainedBox(constraints: const BoxConstraints(maxWidth: 110), child: Lbl(s)),
     ]);
   }
 }
@@ -449,8 +453,10 @@ class Marquee extends StatefulWidget {
   State<Marquee> createState() => _MarqueeState();
 }
 
+/// Text too long for its space waits at its start, runs left followed by a copy until the copy sits where the text
+/// began, and waits again, like a news ticker (owner, 2026-11-15). Text that fits stands still.
 class _MarqueeState extends State<Marquee> with SingleTickerProviderStateMixin {
-  static const _pause = 1.5, _speed = 30.0; // seconds at each end, pixels per second
+  static const _pause = 1.5, _speed = 30.0, _gap = 32.0; // seconds at the start, pixels per second, pixels between copies
   late final _c = AnimationController(vsync: this);
   double _over = 0;
 
@@ -470,7 +476,7 @@ class _MarqueeState extends State<Marquee> with SingleTickerProviderStateMixin {
         _c.stop();
         return;
       }
-      _c.duration = Duration(milliseconds: ((2 * _pause + over / _speed) * 1000).round());
+      _c.duration = Duration(milliseconds: ((_pause + over / _speed) * 1000).round());
       _c.repeat();
     });
   }
@@ -483,11 +489,12 @@ class _MarqueeState extends State<Marquee> with SingleTickerProviderStateMixin {
           textScaler: MediaQuery.textScalerOf(context),
           maxLines: 1,
         )..layout();
-        final over = tp.width - box.maxWidth;
-        final still = over <= 0 || MediaQuery.disableAnimationsOf(context);
-        _run(still ? 0 : over);
+        final fits = tp.width <= box.maxWidth;
+        final still = fits || MediaQuery.disableAnimationsOf(context);
+        final run = tp.width + _gap; // one full turn: the copy reaches the start
+        _run(still ? 0 : run);
         if (still) return Text(widget.text, style: widget.style, maxLines: 1, overflow: TextOverflow.ellipsis);
-        final scroll = over / _speed, total = 2 * _pause + scroll;
+        final scroll = run / _speed, total = _pause + scroll;
         return SizedBox(
           width: box.maxWidth,
           height: tp.height,
@@ -496,12 +503,16 @@ class _MarqueeState extends State<Marquee> with SingleTickerProviderStateMixin {
               animation: _c,
               builder: (_, child) {
                 final s = (_c.value * total - _pause).clamp(0, scroll);
-                return Transform.translate(offset: Offset(-over * s / scroll, 0), child: child);
+                return Transform.translate(offset: Offset(-run * s / scroll, 0), child: child);
               },
               child: OverflowBox(
                 maxWidth: double.infinity,
                 alignment: Alignment.centerLeft,
-                child: Text(widget.text, style: widget.style, maxLines: 1, softWrap: false),
+                child: Row(mainAxisSize: MainAxisSize.min, children: [
+                  Text(widget.text, style: widget.style, maxLines: 1, softWrap: false),
+                  const SizedBox(width: _gap),
+                  Text(widget.text, style: widget.style, maxLines: 1, softWrap: false),
+                ]),
               ),
             ),
           ),

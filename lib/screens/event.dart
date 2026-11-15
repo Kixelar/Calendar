@@ -145,11 +145,14 @@ class EventDetails extends StatelessWidget {
               const SizedBox(height: 8),
               _RuleText(e, store, builder: (rule) {
                 final meta = [?cal?.name, ?rule?.replaceAll(RegExp(r'\.$'), ''), if (!e.allDay && e.start.isAfter(now) && soon <= 60) l.inMin(soon)];
-                return Row(spacing: 8, children: [Marker(cal?.shape ?? Shape.dot), Expanded(child: Lbl(meta.join(' · ')))]);
+                return Row(spacing: 8, children: [
+                  Marker(cal?.shape ?? Shape.dot),
+                  Expanded(child: Marquee(meta.join(' · ').toUpperCase(), style: T.labelSm(t.secondary))),
+                ]);
               }),
               Group(children: [
-                if (e.location?.isNotEmpty ?? false) ValueRow(l.place, value: e.location),
-                ValueRow(l.reminder, value: reminderText(l, e.reminder)),
+                if (e.location?.isNotEmpty ?? false) ValueRow(l.place, value: e.location, scroll: true),
+                ValueRow(l.reminder, value: reminderText(l, e.reminder), scroll: true),
               ]),
               if (e.notes?.isNotEmpty ?? false)
                 Section(left: l.notes, children: [
@@ -250,14 +253,18 @@ class _InvitationState extends State<_Invitation> {
               const SizedBox(height: 8),
               Lbl(DateFormat('EEEE · d MMMM', loc(context)).format(e.start)),
               Group(children: [
-                if (e.location?.isNotEmpty ?? false) ValueRow(l.place, value: e.location),
-                if (e.organizerName != null) ValueRow(l.organizerLabel, value: e.organizerName),
-                if (others.isNotEmpty) ValueRow(l.guests, value: others.join(', ')),
-                if (clash != null) ValueRow(l.conflict, value: '${clash.title} ${hm(context, clash.start)}', valueColor: t.accentText),
+                if (e.location?.isNotEmpty ?? false) ValueRow(l.place, value: e.location, scroll: true),
+                if (e.organizerName != null) ValueRow(l.organizerLabel, value: e.organizerName, scroll: true),
+                if (others.isNotEmpty) ValueRow(l.guests, value: others.join(', '), scroll: true),
+                if (clash != null)
+                  ValueRow(l.conflict, value: '${clash.title} ${hm(context, clash.start)}', valueColor: t.accentText, scroll: true),
                 RowItem(children: [
                   Expanded(child: Text(l.calendar)),
                   Marker(cal?.shape ?? Shape.dot),
-                  ConstrainedBox(constraints: const BoxConstraints(maxWidth: 150), child: Lbl(cal?.name ?? '')),
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 150),
+                    child: Marquee((cal?.name ?? '').toUpperCase(), style: T.labelSm(t.secondary)),
+                  ),
                 ]),
               ]),
             ]),
