@@ -193,9 +193,11 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
                     onRefresh: store.refresh,
                     color: t.display,
                     backgroundColor: t.surfaceRaised,
+                    // The month's list scrolls inside a frame that holds the grid (depth 1); both may pull to refresh.
+                    notificationPredicate: (n) => n.depth <= 1 && n.metrics.axis == Axis.vertical,
                     child: tab == 1
                         ? _month(context)
-                        : CustomScrollView(slivers: [
+                        : CustomScrollView(physics: const AlwaysScrollableScrollPhysics(), slivers: [
                             ...switch (tab) { 0 => _year(context), 2 => _week(context), _ => _day(context) },
                             const SliverToBoxAdapter(child: SizedBox(height: 54)),
                           ]),
@@ -338,10 +340,18 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
     ];
     return LayoutBuilder(builder: (c, box) {
       // The grid stays put and only the list scrolls; on short screens everything scrolls together.
-      if (box.maxHeight < 360 + 59.0 * weeks.length) return ListView(children: [...fixed, ...rows, const SizedBox(height: 54)]);
-      return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        ...fixed,
-        Expanded(child: ListView(padding: const EdgeInsets.only(bottom: 54), children: rows)),
+      // Always scrollable, so pulling down refreshes even when nothing would scroll (a short list, or on the grid).
+      const pull = AlwaysScrollableScrollPhysics();
+      if (box.maxHeight < 360 + 59.0 * weeks.length) {
+        return ListView(physics: pull, children: [...fixed, ...rows, const SizedBox(height: 54)]);
+      }
+      return CustomScrollView(physics: pull, slivers: [
+        SliverFillRemaining(
+          child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+            ...fixed,
+            Expanded(child: ListView(physics: pull, padding: const EdgeInsets.only(bottom: 54), children: rows)),
+          ]),
+        ),
       ]);
     });
   }

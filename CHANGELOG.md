@@ -1,6 +1,9 @@
 # Changelog
 
 ## 2026.11.15-dev
+### Fixed
+- Pull to refresh did nothing in the month view on tall screens (the grid stays put there, and a short list never
+  scrolled); it now works on the grid and on the list, and in the other views when they are short too.
 ### Changed
 - Places and calendar names in the month, week and day lists end with "…" when too long, instead of scrolling.
 - In event details (and invitations) a long value no longer ends in "…": it waits at its start, runs left until the

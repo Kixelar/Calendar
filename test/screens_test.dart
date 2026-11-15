@@ -127,6 +127,16 @@ class _FakeGoogle extends GoogleCalendar {
       ];
 }
 
+/// Counts calendar list requests, to see a refresh happen.
+class _CountingGoogle extends _FakeGoogle {
+  var calendarCalls = 0;
+  @override
+  Future<List<Cal>> calendars(Set<String>? enabled, {Map<String, Shape> shapes = const {}, String? primaryName}) {
+    calendarCalls++;
+    return super.calendars(enabled, shapes: shapes, primaryName: primaryName);
+  }
+}
+
 /// Records what an address subscription sends to Google.
 class _SubGoogle extends _FakeGoogle {
   final imported = <String>[], deleted = <String>[];
@@ -641,6 +651,29 @@ void main() {
     await t.pump();
     await t.pump();
     expect(find.text('Kalendarz jest zablokowany'), findsOneWidget);
+    await t.pumpWidget(const SizedBox()); // stops the minute ticker
+  });
+
+  testWidgets('pulling down on the month grid refreshes', (t) async {
+    await _fonts();
+    await initializeDateFormatting();
+    SharedPreferences.setMockInitialValues({'onboarded': true, 'google': true});
+    t.view.physicalSize = const Size(390, 1000); // tall enough for the fixed grid (a phone like the owner's)
+    t.view.devicePixelRatio = 1;
+    t.platformDispatcher.localesTestValue = const [Locale('pl')];
+    addTearDown(t.view.reset);
+    addTearDown(t.platformDispatcher.clearAllTestValues);
+    final g = _CountingGoogle();
+    final store = Store(g, Directory.systemTemp.createTempSync());
+    await t.runAsync(store.start);
+    await t.pumpWidget(App(store));
+    await t.pump();
+    final before = g.calendarCalls;
+    await t.fling(find.text('15').first, const Offset(0, 300), 1000); // on the grid, not the list
+    for (var i = 0; i < 5; i++) {
+      await t.pump(const Duration(milliseconds: 300));
+    }
+    expect(g.calendarCalls, greaterThan(before)); // Store.refresh reloaded the calendars
     await t.pumpWidget(const SizedBox()); // stops the minute ticker
   });
 
