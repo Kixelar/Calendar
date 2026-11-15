@@ -77,3 +77,8 @@
   follow the phone's language only. Holiday calendars keep the language they were added in.
 - **Onboarding** (owner, 2026-11-08): language panel → welcome → connect Google → choose calendars, with the welcome
   screen's 4 step bars on each; the sync screen has none. "Skip" removed.
+- **Getting ready for a public repo** (owner, 2026-11-15): licence GPL-3.0. The mockup's typefaces and Nothing's Glyph
+  kit are not in git (README links where to get them; Glyph is optional at build time). The history was rewritten
+  with git-filter-repo: those files, `config.json`, the signing key's fingerprints and paths are gone from every
+  commit, and the author e-mail is GitHub's noreply address (also set as this repo's `user.email`). A bundle of the
+  old history is kept outside the repo. The repo stays private until the owner switches it.
