@@ -1,6 +1,6 @@
 # Changelog
 
-## 2026.11.15-dev
+## 2026.11.15 (first release)
 ### Changed
 - Much lighter syncing with Google: the app asks Google what changed since last time (sync tokens) and fetches again
   only the calendars that changed, instead of the whole year of every calendar on every start, refresh, background run

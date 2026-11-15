@@ -1,6 +1,6 @@
 # Status
 
-**Version:** `2026.11.15-dev` (branch `dev`). Nothing released on `main` yet.
+**Version:** `2026.11.15`, first release on `main` (tag `2026.11.15`, source code only, no APK). Work continues on `dev`.
 
 ## Done (all mockup screens that the Google Calendar API supports)
 - 01 onboarding: language, welcome, connect Google, choose calendars, sync progress (step bars on each panel).
